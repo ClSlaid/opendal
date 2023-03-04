@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ pub fn test_list_dir(op: Operator) -> Result<()> {
     let mut found = false;
     for de in obs {
         let de = de?;
-        let meta = de.blocking_metadata()?;
+        let meta = de.blocking_stat()?;
         if de.path() == path {
             assert_eq!(meta.mode(), ObjectMode::FILE);
             assert_eq!(meta.content_length(), size as u64);

@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -101,11 +101,7 @@ pub async fn test_presign_write(op: Operator) -> Result<()> {
         resp.text().await.expect("read response must succeed")
     );
 
-    let meta = op
-        .object(&path)
-        .metadata()
-        .await
-        .expect("stat must succeed");
+    let meta = op.object(&path).stat().await.expect("stat must succeed");
     assert_eq!(meta.content_length(), size as u64);
 
     op.object(&path)

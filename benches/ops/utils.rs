@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,11 +45,11 @@ pub fn services() -> Vec<(&'static str, Option<Operator>)> {
     ]
 }
 
-pub fn gen_bytes(rng: &mut ThreadRng, size: usize) -> Vec<u8> {
+pub fn gen_bytes(rng: &mut ThreadRng, size: usize) -> Bytes {
     let mut content = vec![0; size];
     rng.fill_bytes(&mut content);
 
-    content
+    content.into()
 }
 
 pub struct TempData {
@@ -65,10 +65,10 @@ impl TempData {
         }
     }
 
-    pub fn generate(op: Operator, path: &str, content: Vec<u8>) -> Self {
+    pub fn generate(op: Operator, path: &str, content: Bytes) -> Self {
         TOKIO.block_on(async {
             op.object(path)
-                .write(Bytes::from(content))
+                .write(content)
                 .await
                 .expect("create test data")
         });

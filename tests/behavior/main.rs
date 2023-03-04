@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,10 +24,6 @@ mod blocking_write;
 mod list;
 #[macro_use]
 mod list_only;
-#[macro_use]
-mod multipart;
-#[macro_use]
-mod multipart_presign;
 #[macro_use]
 mod presign;
 #[macro_use]
@@ -57,10 +53,6 @@ macro_rules! behavior_tests {
             behavior_presign_tests!($service);
             // can_read && can_write && can_blocking && can_list
             behavior_blocking_list_tests!($service);
-            // can_read && can_write && can_multipart
-            behavior_multipart_tests!($service);
-            // can_read && can_write && can_multipart && can_presign
-            behavior_multipart_presign_tests!($service);
             // can_list && !can_write
             behavior_list_only_tests!($service);
         )*
@@ -69,6 +61,7 @@ macro_rules! behavior_tests {
 
 behavior_tests!(Azblob);
 behavior_tests!(Azdfs);
+cfg_if::cfg_if! { if #[cfg(feature = "services-dashmap")] { behavior_tests!(Dashmap); }}
 behavior_tests!(Fs);
 cfg_if::cfg_if! { if #[cfg(feature = "services-ftp")] { behavior_tests!(Ftp); }}
 cfg_if::cfg_if! { if #[cfg(feature = "services-memcached")] { behavior_tests!(Memcached); }}

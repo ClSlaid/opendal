@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ use http::Response;
 use http::StatusCode;
 use serde::Deserialize;
 
-use super::dir_stream::DirStream;
 use super::error::parse_error;
-use super::error::parse_json_deserialize_error;
+use super::pager::IpmfsPager;
+use super::writer::IpmfsWriter;
 use crate::ops::*;
 use crate::raw::*;
 use crate::*;
@@ -61,7 +61,9 @@ impl IpmfsBackend {
 impl Accessor for IpmfsBackend {
     type Reader = IncomingAsyncBody;
     type BlockingReader = ();
-    type Pager = DirStream;
+    type Writer = IpmfsWriter;
+    type BlockingWriter = ();
+    type Pager = IpmfsPager;
     type BlockingPager = ();
 
     fn metadata(&self) -> AccessorMetadata {
@@ -108,20 +110,18 @@ impl Accessor for IpmfsBackend {
         }
     }
 
-    async fn write(&self, path: &str, args: OpWrite, r: input::Reader) -> Result<RpWrite> {
-        let resp = self
-            .ipmfs_write(path, AsyncBody::Multipart("data".to_string(), r))
-            .await?;
-
-        let status = resp.status();
-
-        match status {
-            StatusCode::CREATED | StatusCode::OK => {
-                resp.into_body().consume().await?;
-                Ok(RpWrite::new(args.size()))
-            }
-            _ => Err(parse_error(resp).await?),
+    async fn write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::Writer)> {
+        if args.append() {
+            return Err(Error::new(
+                ErrorKind::Unsupported,
+                "append write is not supported",
+            ));
         }
+
+        Ok((
+            RpWrite::default(),
+            IpmfsWriter::new(self.clone(), path.to_string()),
+        ))
     }
 
     async fn stat(&self, path: &str, _: OpStat) -> Result<RpStat> {
@@ -139,7 +139,7 @@ impl Accessor for IpmfsBackend {
                 let bs = resp.into_body().bytes().await?;
 
                 let res: IpfsStatResponse =
-                    serde_json::from_slice(&bs).map_err(parse_json_deserialize_error)?;
+                    serde_json::from_slice(&bs).map_err(new_json_deserialize_error)?;
 
                 let mode = match res.file_type.as_str() {
                     "file" => ObjectMode::FILE,
@@ -173,7 +173,7 @@ impl Accessor for IpmfsBackend {
     async fn list(&self, path: &str, _: OpList) -> Result<(RpList, Self::Pager)> {
         Ok((
             RpList::default(),
-            DirStream::new(Arc::new(self.clone()), &self.root, path),
+            IpmfsPager::new(Arc::new(self.clone()), &self.root, path),
         ))
     }
 }
@@ -276,7 +276,7 @@ impl IpmfsBackend {
     }
 
     /// Support write from reader.
-    async fn ipmfs_write(
+    pub async fn ipmfs_write(
         &self,
         path: &str,
         body: AsyncBody,

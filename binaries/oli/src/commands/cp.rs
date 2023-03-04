@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,11 +31,11 @@ pub async fn main(args: Option<ArgMatches>) -> Result<()> {
         .get_one::<String>("destination")
         .ok_or_else(|| anyhow!("missing target"))?;
     let (dst_op, dst_path) = parse_location(dst)?;
-    let dst_o = dst_op.object(dst_path);
+    let mut dst_w = dst_op.object(dst_path).writer().await?;
 
-    let size = src_o.metadata().await?.content_length();
     let reader = src_o.reader().await?;
-    dst_o.write_from(size, reader).await?;
+    let buf_reader = futures::io::BufReader::with_capacity(8 * 1024 * 1024, reader);
+    futures::io::copy_buf(buf_reader, &mut dst_w).await?;
     Ok(())
 }
 

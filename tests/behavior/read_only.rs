@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -73,12 +73,6 @@ macro_rules! behavior_read_tests {
                 test_reader_tail,
                 test_read_not_exist,
                 test_read_with_dir_path,
-                #[cfg(feature = "compress")]
-                test_read_decompress_gzip,
-                #[cfg(feature = "compress")]
-                test_read_decompress_zstd,
-                #[cfg(feature = "compress")]
-                test_read_decompress_bz2,
             );
         )*
     };
@@ -86,11 +80,11 @@ macro_rules! behavior_read_tests {
 
 /// Stat normal file and dir should return metadata
 pub async fn test_stat(op: Operator) -> Result<()> {
-    let meta = op.object("normal_file").metadata().await?;
+    let meta = op.object("normal_file").stat().await?;
     assert_eq!(meta.mode(), ObjectMode::FILE);
     assert_eq!(meta.content_length(), 262144);
 
-    let meta = op.object("normal_dir/").metadata().await?;
+    let meta = op.object("normal_dir/").stat().await?;
     assert_eq!(meta.mode(), ObjectMode::DIR);
 
     Ok(())
@@ -98,17 +92,11 @@ pub async fn test_stat(op: Operator) -> Result<()> {
 
 /// Stat special file and dir should return metadata
 pub async fn test_stat_special_chars(op: Operator) -> Result<()> {
-    let meta = op
-        .object("special_file  !@#$%^&()_+-=;',")
-        .metadata()
-        .await?;
+    let meta = op.object("special_file  !@#$%^&()_+-=;',").stat().await?;
     assert_eq!(meta.mode(), ObjectMode::FILE);
     assert_eq!(meta.content_length(), 262144);
 
-    let meta = op
-        .object("special_dir  !@#$%^&()_+-=;',/")
-        .metadata()
-        .await?;
+    let meta = op.object("special_dir  !@#$%^&()_+-=;',/").stat().await?;
     assert_eq!(meta.mode(), ObjectMode::DIR);
 
     Ok(())
@@ -116,7 +104,7 @@ pub async fn test_stat_special_chars(op: Operator) -> Result<()> {
 
 /// Stat not cleaned path should also succeed.
 pub async fn test_stat_not_cleaned_path(op: Operator) -> Result<()> {
-    let meta = op.object("//normal_file").metadata().await?;
+    let meta = op.object("//normal_file").stat().await?;
     assert_eq!(meta.mode(), ObjectMode::FILE);
     assert_eq!(meta.content_length(), 262144);
 
@@ -127,7 +115,7 @@ pub async fn test_stat_not_cleaned_path(op: Operator) -> Result<()> {
 pub async fn test_stat_not_exist(op: Operator) -> Result<()> {
     let path = uuid::Uuid::new_v4().to_string();
 
-    let meta = op.object(&path).metadata().await;
+    let meta = op.object(&path).stat().await;
     assert!(meta.is_err());
     assert_eq!(meta.unwrap_err().kind(), ErrorKind::ObjectNotFound);
 
@@ -136,10 +124,10 @@ pub async fn test_stat_not_exist(op: Operator) -> Result<()> {
 
 /// Root should be able to stat and returns DIR.
 pub async fn test_stat_root(op: Operator) -> Result<()> {
-    let meta = op.object("").metadata().await?;
+    let meta = op.object("").stat().await?;
     assert_eq!(meta.mode(), ObjectMode::DIR);
 
-    let meta = op.object("/").metadata().await?;
+    let meta = op.object("/").stat().await?;
     assert_eq!(meta.mode(), ObjectMode::DIR);
 
     Ok(())
@@ -253,66 +241,6 @@ pub async fn test_read_with_dir_path(op: Operator) -> Result<()> {
     let result = op.object(&path).read().await;
     assert!(result.is_err());
     assert_eq!(result.unwrap_err().kind(), ErrorKind::ObjectIsADirectory);
-
-    Ok(())
-}
-
-// Read a compressed gzip file.
-#[cfg(feature = "compress")]
-pub async fn test_read_decompress_gzip(op: Operator) -> Result<()> {
-    let bs = op
-        .object("ontime.csv.gz")
-        .decompress_read()
-        .await?
-        .expect("decompress read must succeed");
-    assert_eq!(bs.len(), 91007, "read size");
-
-    let raw_bs = op.object("ontime.csv").read().await?;
-    assert_eq!(
-        format!("{:x}", Sha256::digest(&bs)),
-        format!("{:x}", Sha256::digest(raw_bs)),
-        "read content"
-    );
-
-    Ok(())
-}
-
-// Read a compressed gzip file.
-#[cfg(feature = "compress")]
-pub async fn test_read_decompress_zstd(op: Operator) -> Result<()> {
-    let bs = op
-        .object("ontime.csv.zst")
-        .decompress_read()
-        .await?
-        .expect("decompress read must succeed");
-    assert_eq!(bs.len(), 91007, "read size");
-
-    let raw_bs = op.object("ontime.csv").read().await?;
-    assert_eq!(
-        format!("{:x}", Sha256::digest(&bs)),
-        format!("{:x}", Sha256::digest(raw_bs)),
-        "read content"
-    );
-
-    Ok(())
-}
-
-// Read a compressed gzip file.
-#[cfg(feature = "compress")]
-pub async fn test_read_decompress_bz2(op: Operator) -> Result<()> {
-    let bs = op
-        .object("ontime.csv.bz2")
-        .decompress_read()
-        .await?
-        .expect("decompress read must succeed");
-    assert_eq!(bs.len(), 91007, "read size");
-
-    let raw_bs = op.object("ontime.csv").read().await?;
-    assert_eq!(
-        format!("{:x}", Sha256::digest(&bs)),
-        format!("{:x}", Sha256::digest(raw_bs)),
-        "read content"
-    );
 
     Ok(())
 }

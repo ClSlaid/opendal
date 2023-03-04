@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ use crate::Result;
 ///
 /// BytesContentRange implements `len()` but not `is_empty()` because it's useless.
 /// - When BytesContentRange's range is known, it must be non-empty.
-/// - When BytesContentRange's range is no known, we don't know whethre it's empty.
+/// - When BytesContentRange's range is no known, we don't know whether it's empty.
 #[allow(clippy::len_without_is_empty)]
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct BytesContentRange(

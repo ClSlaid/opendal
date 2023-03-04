@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ use base64::Engine;
 use bytes::Buf;
 use bytes::Bytes;
 use http::header::HeaderName;
+use http::header::CONTENT_DISPOSITION;
 use http::header::CONTENT_LENGTH;
 use http::header::CONTENT_TYPE;
 use http::HeaderValue;
@@ -43,9 +44,9 @@ use reqsign::AwsV4Signer;
 use serde::Deserialize;
 use serde::Serialize;
 
-use super::dir_stream::DirStream;
 use super::error::parse_error;
-use super::error::parse_xml_deserialize_error;
+use super::pager::S3Pager;
+use super::writer::S3Writer;
 use crate::ops::*;
 use crate::raw::*;
 use crate::*;
@@ -85,7 +86,6 @@ mod constants {
 /// - [x] list
 /// - [x] scan
 /// - [x] presign
-/// - [x] multipart
 /// - [ ] blocking
 ///
 /// # Configuration
@@ -1029,8 +1029,8 @@ impl Builder for S3Builder {
 pub struct S3Backend {
     bucket: String,
     endpoint: String,
-    signer: Arc<AwsV4Signer>,
-    client: HttpClient,
+    pub signer: Arc<AwsV4Signer>,
+    pub client: HttpClient,
     // root will be "/" or "/abc/"
     root: String,
 
@@ -1108,7 +1108,9 @@ impl S3Backend {
 impl Accessor for S3Backend {
     type Reader = IncomingAsyncBody;
     type BlockingReader = ();
-    type Pager = DirStream;
+    type Writer = S3Writer;
+    type BlockingWriter = ();
+    type Pager = S3Pager;
     type BlockingPager = ();
 
     fn metadata(&self) -> AccessorMetadata {
@@ -1119,14 +1121,14 @@ impl Accessor for S3Backend {
         am.set_scheme(Scheme::S3)
             .set_root(&self.root)
             .set_name(&self.bucket)
-            .set_capabilities(Read | Write | List | Scan | Presign | Multipart)
+            .set_capabilities(Read | Write | List | Scan | Presign | Batch)
             .set_hints(ReadStreamable);
 
         am
     }
 
     async fn create(&self, path: &str, _: OpCreate) -> Result<RpCreate> {
-        let mut req = self.s3_put_object_request(path, Some(0), None, AsyncBody::Empty)?;
+        let mut req = self.s3_put_object_request(path, Some(0), None, None, AsyncBody::Empty)?;
 
         self.signer.sign(&mut req).map_err(new_request_sign_error)?;
 
@@ -1157,27 +1159,32 @@ impl Accessor for S3Backend {
         }
     }
 
-    async fn write(&self, path: &str, args: OpWrite, r: input::Reader) -> Result<RpWrite> {
-        let mut req = self.s3_put_object_request(
-            path,
-            Some(args.size()),
-            args.content_type(),
-            AsyncBody::Reader(r),
-        )?;
+    async fn write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::Writer)> {
+        let upload_id = if args.append() {
+            let resp = self.s3_initiate_multipart_upload(path).await?;
 
-        self.signer.sign(&mut req).map_err(new_request_sign_error)?;
+            let status = resp.status();
 
-        let resp = self.client.send_async(req).await?;
+            match status {
+                StatusCode::OK => {
+                    let bs = resp.into_body().bytes().await?;
 
-        let status = resp.status();
+                    let result: InitiateMultipartUploadResult =
+                        quick_xml::de::from_reader(bs.reader())
+                            .map_err(new_xml_deserialize_error)?;
 
-        match status {
-            StatusCode::CREATED | StatusCode::OK => {
-                resp.into_body().consume().await?;
-                Ok(RpWrite::new(args.size()))
+                    Some(result.upload_id)
+                }
+                _ => return Err(parse_error(resp).await?),
             }
-            _ => Err(parse_error(resp).await?),
-        }
+        } else {
+            None
+        };
+
+        Ok((
+            RpWrite::default(),
+            S3Writer::new(self.clone(), args, path.to_string(), upload_id),
+        ))
     }
 
     async fn stat(&self, path: &str, _: OpStat) -> Result<RpStat> {
@@ -1213,14 +1220,14 @@ impl Accessor for S3Backend {
     async fn list(&self, path: &str, args: OpList) -> Result<(RpList, Self::Pager)> {
         Ok((
             RpList::default(),
-            DirStream::new(Arc::new(self.clone()), &self.root, path, "/", args.limit()),
+            S3Pager::new(Arc::new(self.clone()), &self.root, path, "/", args.limit()),
         ))
     }
 
     async fn scan(&self, path: &str, args: OpScan) -> Result<(RpScan, Self::Pager)> {
         Ok((
             RpScan::default(),
-            DirStream::new(Arc::new(self.clone()), &self.root, path, "", args.limit()),
+            S3Pager::new(Arc::new(self.clone()), &self.root, path, "", args.limit()),
         ))
     }
 
@@ -1230,15 +1237,8 @@ impl Accessor for S3Backend {
             PresignOperation::Stat(_) => self.s3_head_object_request(path)?,
             PresignOperation::Read(v) => self.s3_get_object_request(path, v.range())?,
             PresignOperation::Write(_) => {
-                self.s3_put_object_request(path, None, None, AsyncBody::Empty)?
+                self.s3_put_object_request(path, None, None, None, AsyncBody::Empty)?
             }
-            PresignOperation::WriteMultipart(v) => self.s3_upload_part_request(
-                path,
-                v.upload_id(),
-                v.part_number(),
-                None,
-                AsyncBody::Empty,
-            )?,
         };
 
         self.signer
@@ -1255,106 +1255,51 @@ impl Accessor for S3Backend {
         )))
     }
 
-    async fn create_multipart(
-        &self,
-        path: &str,
-        _: OpCreateMultipart,
-    ) -> Result<RpCreateMultipart> {
-        let resp = self.s3_initiate_multipart_upload(path).await?;
+    async fn batch(&self, args: OpBatch) -> Result<RpBatch> {
+        let ops = args.into_operation();
+        match ops {
+            BatchOperations::Delete(ops) => {
+                if ops.len() > 1000 {
+                    return Err(Error::new(
+                        ErrorKind::Unsupported,
+                        "s3 services only allow delete up to 1000 keys at once",
+                    )
+                    .with_context("length", ops.len().to_string()));
+                }
 
-        let status = resp.status();
+                let paths = ops.into_iter().map(|(p, _)| p).collect();
 
-        match status {
-            StatusCode::OK => {
-                let bs = resp.into_body().bytes().await?;
+                let resp = self.s3_delete_objects(paths).await?;
 
-                let result: InitiateMultipartUploadResult =
-                    quick_xml::de::from_reader(bs.reader()).map_err(parse_xml_deserialize_error)?;
+                let status = resp.status();
 
-                Ok(RpCreateMultipart::new(&result.upload_id))
+                if let StatusCode::OK = status {
+                    let bs = resp.into_body().bytes().await?;
+
+                    let result: DeleteObjectsResult = quick_xml::de::from_reader(bs.reader())
+                        .map_err(new_xml_deserialize_error)?;
+
+                    let mut batched_result =
+                        Vec::with_capacity(result.deleted.len() + result.error.len());
+                    for i in result.deleted {
+                        let path = build_rel_path(&self.root, &i.key);
+                        batched_result.push((path, Ok(RpDelete::default())));
+                    }
+                    // TODO: we should handle those errors with code.
+                    for i in result.error {
+                        let path = build_rel_path(&self.root, &i.key);
+
+                        batched_result.push((
+                            path,
+                            Err(Error::new(ErrorKind::Unexpected, &format!("{i:?}"))),
+                        ));
+                    }
+
+                    Ok(RpBatch::new(BatchedResults::Delete(batched_result)))
+                } else {
+                    Err(parse_error(resp).await?)
+                }
             }
-            _ => Err(parse_error(resp).await?),
-        }
-    }
-
-    async fn write_multipart(
-        &self,
-        path: &str,
-        args: OpWriteMultipart,
-        r: input::Reader,
-    ) -> Result<RpWriteMultipart> {
-        let mut req = self.s3_upload_part_request(
-            path,
-            args.upload_id(),
-            args.part_number(),
-            Some(args.size()),
-            AsyncBody::Reader(r),
-        )?;
-
-        self.signer.sign(&mut req).map_err(new_request_sign_error)?;
-
-        let resp = self.client.send_async(req).await?;
-
-        let status = resp.status();
-
-        match status {
-            StatusCode::OK => {
-                let etag = parse_etag(resp.headers())?
-                    .ok_or_else(|| {
-                        Error::new(
-                            ErrorKind::Unexpected,
-                            "ETag not present in returning response",
-                        )
-                    })?
-                    .to_string();
-
-                resp.into_body().consume().await?;
-
-                Ok(RpWriteMultipart::new(args.part_number(), &etag))
-            }
-            _ => Err(parse_error(resp).await?),
-        }
-    }
-
-    async fn complete_multipart(
-        &self,
-        path: &str,
-        args: OpCompleteMultipart,
-    ) -> Result<RpCompleteMultipart> {
-        let resp = self
-            .s3_complete_multipart_upload(path, args.upload_id(), args.parts())
-            .await?;
-
-        let status = resp.status();
-
-        match status {
-            StatusCode::OK => {
-                resp.into_body().consume().await?;
-
-                Ok(RpCompleteMultipart::default())
-            }
-            _ => Err(parse_error(resp).await?),
-        }
-    }
-
-    async fn abort_multipart(
-        &self,
-        path: &str,
-        args: OpAbortMultipart,
-    ) -> Result<RpAbortMultipart> {
-        let resp = self
-            .s3_abort_multipart_upload(path, args.upload_id())
-            .await?;
-
-        let status = resp.status();
-
-        match status {
-            StatusCode::NO_CONTENT => {
-                resp.into_body().consume().await?;
-
-                Ok(RpAbortMultipart::default())
-            }
-            _ => Err(parse_error(resp).await?),
         }
     }
 }
@@ -1410,11 +1355,12 @@ impl S3Backend {
         self.client.send_async(req).await
     }
 
-    fn s3_put_object_request(
+    pub fn s3_put_object_request(
         &self,
         path: &str,
-        size: Option<u64>,
+        size: Option<usize>,
         content_type: Option<&str>,
+        content_disposition: Option<&str>,
         body: AsyncBody,
     ) -> Result<Request<AsyncBody>> {
         let p = build_abs_path(&self.root, path);
@@ -1429,6 +1375,10 @@ impl S3Backend {
 
         if let Some(mime) = content_type {
             req = req.header(CONTENT_TYPE, mime)
+        }
+
+        if let Some(pos) = content_disposition {
+            req = req.header(CONTENT_DISPOSITION, pos)
         }
 
         // Set SSE headers.
@@ -1536,7 +1486,7 @@ impl S3Backend {
         self.client.send_async(req).await
     }
 
-    fn s3_upload_part_request(
+    pub fn s3_upload_part_request(
         &self,
         path: &str,
         upload_id: &str,
@@ -1569,11 +1519,11 @@ impl S3Backend {
         Ok(req)
     }
 
-    async fn s3_complete_multipart_upload(
+    pub async fn s3_complete_multipart_upload(
         &self,
         path: &str,
         upload_id: &str,
-        parts: &[ObjectPart],
+        parts: &[CompleteMultipartUploadRequestPart],
     ) -> Result<Response<IncomingAsyncBody>> {
         let p = build_abs_path(&self.root, path);
 
@@ -1590,15 +1540,9 @@ impl S3Backend {
         let req = self.insert_sse_headers(req, true);
 
         let content = quick_xml::se::to_string(&CompleteMultipartUploadRequest {
-            part: parts
-                .iter()
-                .map(|v| CompleteMultipartUploadRequestPart {
-                    part_number: v.part_number(),
-                    etag: v.etag().to_string(),
-                })
-                .collect(),
+            part: parts.to_vec(),
         })
-        .map_err(parse_xml_deserialize_error)?;
+        .map_err(new_xml_deserialize_error)?;
         // Make sure content length has been set to avoid post with chunked encoding.
         let req = req.header(CONTENT_LENGTH, content.len());
         // Set content-type to `application/xml` to avoid mixed with form post.
@@ -1613,22 +1557,30 @@ impl S3Backend {
         self.client.send_async(req).await
     }
 
-    async fn s3_abort_multipart_upload(
-        &self,
-        path: &str,
-        upload_id: &str,
-    ) -> Result<Response<IncomingAsyncBody>> {
-        let p = build_abs_path(&self.root, path);
+    async fn s3_delete_objects(&self, paths: Vec<String>) -> Result<Response<IncomingAsyncBody>> {
+        let url = format!("{}/?delete", self.endpoint);
 
-        let url = format!(
-            "{}/{}?uploadId={}",
-            self.endpoint,
-            percent_encode_path(&p),
-            upload_id,
-        );
+        let req = Request::post(&url);
 
-        let mut req = Request::delete(&url)
-            .body(AsyncBody::Empty)
+        let content = quick_xml::se::to_string(&DeleteObjectsRequest {
+            object: paths
+                .into_iter()
+                .map(|path| DeleteObjectsRequestObject {
+                    key: build_abs_path(&self.root, &path),
+                })
+                .collect(),
+        })
+        .map_err(new_xml_deserialize_error)?;
+
+        // Make sure content length has been set to avoid post with chunked encoding.
+        let req = req.header(CONTENT_LENGTH, content.len());
+        // Set content-type to `application/xml` to avoid mixed with form post.
+        let req = req.header(CONTENT_TYPE, "application/xml");
+        // Set content-md5 as required by API.
+        let req = req.header("CONTENT-MD5", format_content_md5(content.as_bytes()));
+
+        let mut req = req
+            .body(AsyncBody::Bytes(Bytes::from(content)))
             .map_err(new_request_build_error)?;
 
         self.signer.sign(&mut req).map_err(new_request_sign_error)?;
@@ -1651,11 +1603,11 @@ struct CompleteMultipartUploadRequest {
     part: Vec<CompleteMultipartUploadRequestPart>,
 }
 
-#[derive(Default, Debug, Serialize)]
+#[derive(Clone, Default, Debug, Serialize)]
 #[serde(default, rename_all = "PascalCase")]
-struct CompleteMultipartUploadRequestPart {
+pub struct CompleteMultipartUploadRequestPart {
     #[serde(rename = "PartNumber")]
-    part_number: usize,
+    pub part_number: usize,
     /// # TODO
     ///
     /// quick-xml will do escape on `"` which leads to our serialized output is
@@ -1685,7 +1637,42 @@ struct CompleteMultipartUploadRequestPart {
     ///
     /// ref: <https://github.com/tafia/quick-xml/issues/362>
     #[serde(rename = "ETag")]
-    etag: String,
+    pub etag: String,
+}
+
+/// Request of DeleteObjects.
+#[derive(Default, Debug, Serialize)]
+#[serde(default, rename = "Delete", rename_all = "PascalCase")]
+struct DeleteObjectsRequest {
+    object: Vec<DeleteObjectsRequestObject>,
+}
+
+#[derive(Default, Debug, Serialize)]
+#[serde(rename_all = "PascalCase")]
+struct DeleteObjectsRequestObject {
+    key: String,
+}
+
+/// Result of DeleteObjects.
+#[derive(Default, Debug, Deserialize)]
+#[serde(default, rename = "DeleteResult", rename_all = "PascalCase")]
+struct DeleteObjectsResult {
+    deleted: Vec<DeleteObjectsResultDeleted>,
+    error: Vec<DeleteObjectsResultError>,
+}
+
+#[derive(Default, Debug, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+struct DeleteObjectsResultDeleted {
+    key: String,
+}
+
+#[derive(Default, Debug, Deserialize)]
+#[serde(default, rename_all = "PascalCase")]
+struct DeleteObjectsResultError {
+    code: String,
+    key: String,
+    message: String,
 }
 
 #[cfg(test)]
@@ -1824,5 +1811,64 @@ mod tests {
                 // Escape `"` by hand to address <https://github.com/tafia/quick-xml/issues/362>
                 .replace('"', "&quot;")
         )
+    }
+
+    /// This example is from https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html#API_DeleteObjects_Examples
+    #[test]
+    fn test_serialize_delete_objects_request() {
+        let req = DeleteObjectsRequest {
+            object: vec![
+                DeleteObjectsRequestObject {
+                    key: "sample1.txt".to_string(),
+                },
+                DeleteObjectsRequestObject {
+                    key: "sample2.txt".to_string(),
+                },
+            ],
+        };
+
+        let actual = quick_xml::se::to_string(&req).expect("must succeed");
+
+        pretty_assertions::assert_eq!(
+            actual,
+            r#"<Delete>
+             <Object>
+             <Key>sample1.txt</Key>
+             </Object>
+             <Object>
+               <Key>sample2.txt</Key>
+             </Object>
+             </Delete>"#
+                // Cleanup space and new line
+                .replace([' ', '\n'], "")
+        )
+    }
+
+    /// This example is from https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html#API_DeleteObjects_Examples
+    #[test]
+    fn test_deserialize_delete_objects_result() {
+        let bs = Bytes::from(
+            r#"<?xml version="1.0" encoding="UTF-8"?>
+            <DeleteResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+             <Deleted>
+               <Key>sample1.txt</Key>
+             </Deleted>
+             <Error>
+              <Key>sample2.txt</Key>
+              <Code>AccessDenied</Code>
+              <Message>Access Denied</Message>
+             </Error>
+            </DeleteResult>"#,
+        );
+
+        let out: DeleteObjectsResult =
+            quick_xml::de::from_reader(bs.reader()).expect("must success");
+
+        assert_eq!(out.deleted.len(), 1);
+        assert_eq!(out.deleted[0].key, "sample1.txt");
+        assert_eq!(out.error.len(), 1);
+        assert_eq!(out.error[0].key, "sample2.txt");
+        assert_eq!(out.error[0].code, "AccessDenied");
+        assert_eq!(out.error[0].message, "Access Denied");
     }
 }

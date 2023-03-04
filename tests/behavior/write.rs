@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -91,15 +91,13 @@ macro_rules! behavior_write_tests {
                 test_fuzz_offset_reader,
                 test_fuzz_part_reader,
                 test_read_with_dir_path,
-                #[cfg(feature = "compress")]
-                test_read_decompress_gzip,
-                #[cfg(feature = "compress")]
-                test_read_decompress_zstd,
                 test_read_with_special_chars,
                 test_delete,
                 test_delete_empty_dir,
                 test_delete_with_special_chars,
                 test_delete_not_existing,
+                test_delete_stream,
+                test_append,
             );
         )*
     };
@@ -113,7 +111,7 @@ pub async fn test_create_file(op: Operator) -> Result<()> {
 
     o.create().await?;
 
-    let meta = o.metadata().await?;
+    let meta = o.stat().await?;
     assert_eq!(meta.mode(), ObjectMode::FILE);
     assert_eq!(meta.content_length(), 0);
 
@@ -134,7 +132,7 @@ pub async fn test_create_file_existing(op: Operator) -> Result<()> {
 
     o.create().await?;
 
-    let meta = o.metadata().await?;
+    let meta = o.stat().await?;
     assert_eq!(meta.mode(), ObjectMode::FILE);
     assert_eq!(meta.content_length(), 0);
 
@@ -153,7 +151,7 @@ pub async fn test_create_file_with_special_chars(op: Operator) -> Result<()> {
 
     o.create().await?;
 
-    let meta = o.metadata().await?;
+    let meta = o.stat().await?;
     assert_eq!(meta.mode(), ObjectMode::FILE);
     assert_eq!(meta.content_length(), 0);
 
@@ -172,7 +170,7 @@ pub async fn test_create_dir(op: Operator) -> Result<()> {
 
     o.create().await?;
 
-    let meta = o.metadata().await?;
+    let meta = o.stat().await?;
     assert_eq!(meta.mode(), ObjectMode::DIR);
 
     op.object(&path)
@@ -192,7 +190,7 @@ pub async fn test_create_dir_existing(op: Operator) -> Result<()> {
 
     o.create().await?;
 
-    let meta = o.metadata().await?;
+    let meta = o.stat().await?;
     assert_eq!(meta.mode(), ObjectMode::DIR);
 
     op.object(&path)
@@ -209,11 +207,7 @@ pub async fn test_write(op: Operator) -> Result<()> {
 
     op.object(&path).write(content).await?;
 
-    let meta = op
-        .object(&path)
-        .metadata()
-        .await
-        .expect("stat must succeed");
+    let meta = op.object(&path).stat().await.expect("stat must succeed");
     assert_eq!(meta.content_length(), size as u64);
 
     op.object(&path)
@@ -242,11 +236,7 @@ pub async fn test_write_with_special_chars(op: Operator) -> Result<()> {
 
     op.object(&path).write(content).await?;
 
-    let meta = op
-        .object(&path)
-        .metadata()
-        .await
-        .expect("stat must succeed");
+    let meta = op.object(&path).stat().await.expect("stat must succeed");
     assert_eq!(meta.content_length(), size as u64);
 
     op.object(&path)
@@ -266,7 +256,7 @@ pub async fn test_stat(op: Operator) -> Result<()> {
         .await
         .expect("write must succeed");
 
-    let meta = op.object(&path).metadata().await?;
+    let meta = op.object(&path).stat().await?;
     assert_eq!(meta.mode(), ObjectMode::FILE);
     assert_eq!(meta.content_length(), size as u64);
 
@@ -283,7 +273,7 @@ pub async fn test_stat_dir(op: Operator) -> Result<()> {
 
     op.object(&path).create().await.expect("write must succeed");
 
-    let meta = op.object(&path).metadata().await?;
+    let meta = op.object(&path).stat().await?;
     assert_eq!(meta.mode(), ObjectMode::DIR);
 
     op.object(&path)
@@ -303,7 +293,7 @@ pub async fn test_stat_with_special_chars(op: Operator) -> Result<()> {
         .await
         .expect("write must succeed");
 
-    let meta = op.object(&path).metadata().await?;
+    let meta = op.object(&path).stat().await?;
     assert_eq!(meta.mode(), ObjectMode::FILE);
     assert_eq!(meta.content_length(), size as u64);
 
@@ -325,7 +315,7 @@ pub async fn test_stat_not_cleaned_path(op: Operator) -> Result<()> {
         .await
         .expect("write must succeed");
 
-    let meta = op.object(&format!("//{}", &path)).metadata().await?;
+    let meta = op.object(&format!("//{}", &path)).stat().await?;
     assert_eq!(meta.mode(), ObjectMode::FILE);
     assert_eq!(meta.content_length(), size as u64);
 
@@ -340,7 +330,7 @@ pub async fn test_stat_not_cleaned_path(op: Operator) -> Result<()> {
 pub async fn test_stat_not_exist(op: Operator) -> Result<()> {
     let path = uuid::Uuid::new_v4().to_string();
 
-    let meta = op.object(&path).metadata().await;
+    let meta = op.object(&path).stat().await;
     assert!(meta.is_err());
     assert_eq!(meta.unwrap_err().kind(), ErrorKind::ObjectNotFound);
 
@@ -349,10 +339,10 @@ pub async fn test_stat_not_exist(op: Operator) -> Result<()> {
 
 /// Root should be able to stat and returns DIR.
 pub async fn test_stat_root(op: Operator) -> Result<()> {
-    let meta = op.object("").metadata().await?;
+    let meta = op.object("").stat().await?;
     assert_eq!(meta.mode(), ObjectMode::DIR);
 
-    let meta = op.object("/").metadata().await?;
+    let meta = op.object("/").stat().await?;
     assert_eq!(meta.mode(), ObjectMode::DIR);
 
     Ok(())
@@ -710,78 +700,6 @@ pub async fn test_read_with_dir_path(op: Operator) -> Result<()> {
     Ok(())
 }
 
-// Read a compressed gzip file.
-#[cfg(feature = "compress")]
-pub async fn test_read_decompress_gzip(op: Operator) -> Result<()> {
-    use async_compression::futures::write::GzipEncoder;
-    use futures::AsyncWriteExt;
-
-    let path = format!("{}.gz", uuid::Uuid::new_v4());
-    debug!("Generate a random file: {}", &path);
-    let (content, size) = gen_bytes();
-
-    let mut encoder = GzipEncoder::new(vec![]);
-    encoder.write_all(&content).await?;
-    encoder.close().await?;
-    let compressed_content = encoder.into_inner();
-
-    op.object(&path).write(compressed_content).await?;
-
-    let bs = op
-        .object(&path)
-        .decompress_read()
-        .await?
-        .expect("decompress read must succeed");
-    assert_eq!(bs.len(), size, "read size");
-    assert_eq!(
-        format!("{:x}", Sha256::digest(&bs)),
-        format!("{:x}", Sha256::digest(&content)),
-        "read content"
-    );
-
-    op.object(&path)
-        .delete()
-        .await
-        .expect("delete must succeed");
-    Ok(())
-}
-
-// Read a compressed zstd file.
-#[cfg(feature = "compress")]
-pub async fn test_read_decompress_zstd(op: Operator) -> Result<()> {
-    use async_compression::futures::write::ZstdEncoder;
-    use futures::AsyncWriteExt;
-
-    let path = format!("{}.zst", uuid::Uuid::new_v4());
-    debug!("Generate a random file: {}", &path);
-    let (content, size) = gen_bytes();
-
-    let mut encoder = ZstdEncoder::new(vec![]);
-    encoder.write_all(&content).await?;
-    encoder.close().await?;
-    let compressed_content = encoder.into_inner();
-
-    op.object(&path).write(compressed_content).await?;
-
-    let bs = op
-        .object(&path)
-        .decompress_read()
-        .await?
-        .expect("decompress read must succeed");
-    assert_eq!(bs.len(), size, "read size");
-    assert_eq!(
-        format!("{:x}", Sha256::digest(&bs)),
-        format!("{:x}", Sha256::digest(&content)),
-        "read content"
-    );
-
-    op.object(&path)
-        .delete()
-        .await
-        .expect("delete must succeed");
-    Ok(())
-}
-
 /// Read file with special chars should succeed.
 pub async fn test_read_with_special_chars(op: Operator) -> Result<()> {
     let path = format!("{} !@#$%^&()_+-=;',.txt", uuid::Uuid::new_v4());
@@ -865,5 +783,76 @@ pub async fn test_delete_not_existing(op: Operator) -> Result<()> {
 
     op.object(&path).delete().await?;
 
+    Ok(())
+}
+
+// Delete via stream.
+pub async fn test_delete_stream(op: Operator) -> Result<()> {
+    let dir = uuid::Uuid::new_v4().to_string();
+    op.object(&format!("{dir}/"))
+        .create()
+        .await
+        .expect("creat must succeed");
+
+    let expected: Vec<_> = (0..100).collect();
+    for path in expected.iter() {
+        op.object(&format!("{dir}/{path}")).create().await?;
+    }
+
+    op.batch()
+        .with_limit(30)
+        .remove_via(futures::stream::iter(expected.clone()).map(|v| format!("{dir}/{v}")))
+        .await?;
+
+    // Stat it again to check.
+    for path in expected.iter() {
+        assert!(
+            !op.object(&format!("{dir}/{path}")).is_exist().await?,
+            "{path} should be removed"
+        )
+    }
+
+    Ok(())
+}
+
+// Append write
+pub async fn test_append(op: Operator) -> Result<()> {
+    let path = uuid::Uuid::new_v4().to_string();
+    let size = 5 * 1024 * 1024; // write file with 5 MiB
+    let content_a = gen_fixed_bytes(size);
+    let content_b = gen_fixed_bytes(size);
+
+    let mut w = match op.object(&path).writer().await {
+        Ok(w) => w,
+        Err(err) if err.kind() == ErrorKind::Unsupported => {
+            warn!("service doesn't support write with append");
+            return Ok(());
+        }
+        Err(err) => return Err(err.into()),
+    };
+    w.append(content_a.clone()).await?;
+    w.append(content_b.clone()).await?;
+    w.close().await?;
+
+    let meta = op.object(&path).stat().await.expect("stat must succeed");
+    assert_eq!(meta.content_length(), (size * 2) as u64);
+
+    let bs = op.object(&path).read().await?;
+    assert_eq!(bs.len(), size * 2, "read size");
+    assert_eq!(
+        format!("{:x}", Sha256::digest(&bs[..size])),
+        format!("{:x}", Sha256::digest(content_a)),
+        "read content a"
+    );
+    assert_eq!(
+        format!("{:x}", Sha256::digest(&bs[size..])),
+        format!("{:x}", Sha256::digest(content_b)),
+        "read content b"
+    );
+
+    op.object(&path)
+        .delete()
+        .await
+        .expect("delete must succeed");
     Ok(())
 }

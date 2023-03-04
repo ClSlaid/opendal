@@ -1,4 +1,4 @@
-// Copyright 2023 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@ use std::env;
 use crate::raw::*;
 use crate::*;
 
-/// Builder will build an accessor;
+/// Builder is used to build a storage accessor used by [`Operator`].
+///
+/// It's recommended to use [`Operator::create`] instead of [`Operator::new`] to avoid use `Builder` trait directly.
 pub trait Builder: Default {
     /// Associated scheme for this builder.
     const SCHEME: Scheme;

@@ -1,5 +1,3 @@
-default feature is `rustls` which enable rustls support.
-
 ## Layer Features
 
 - `layers-all`: Enable all layers support.
@@ -9,6 +7,7 @@ default feature is `rustls` which enable rustls support.
 
 ## Service Features
 
+- `services-dashmap`: Enable dashmap service support.
 - `services-ftp`: Enable ftp service support.
 - `services-hdfs`: Enable hdfs service support.
 - `services-moka`: Enable moka service support.
@@ -19,7 +18,6 @@ default feature is `rustls` which enable rustls support.
 
 ## Dependencies Features
 
-- `compress`: Enable object decompress read support.
 - `rustls`: Enable TLS functionality provided by `rustls`, enabled by default
 - `native-tls`: Enable TLS functionality provided by `native-tls`
 - `native-tls-vendored`: Enable the `vendored` feature of `native-tls`

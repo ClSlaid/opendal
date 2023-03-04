@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 use core::fmt::Debug;
 use std::collections::HashMap;
 
@@ -26,13 +27,13 @@ use log::debug;
 use log::error;
 use tokio::sync::OnceCell;
 
-use super::dir_stream::DirStream;
 use super::error::parse_error;
 use super::message::BooleanResp;
 use super::message::FileStatusType;
 use super::message::FileStatusWrapper;
 use super::message::FileStatusesWrapper;
-use super::message::Redirection;
+use super::pager::WebhdfsPager;
+use super::writer::WebhdfsWriter;
 use crate::ops::*;
 use crate::raw::*;
 use crate::*;
@@ -55,7 +56,6 @@ const WEBHDFS_DEFAULT_ENDPOINT: &str = "http://127.0.0.1:9870";
 /// - [x] list
 /// - [ ] ~~scan~~
 /// - [ ] ~~presign~~
-/// - [ ] ~~multipart~~
 /// - [ ] blocking
 ///
 /// # Differences with hdfs
@@ -213,10 +213,17 @@ impl Builder for WebhdfsBuilder {
         debug!("building backend: {:?}", self);
 
         let root = normalize_root(&self.root.take().unwrap_or_default());
-        debug!("backend use root {}", root);
+        debug!("backend use root {root}");
 
+        // check scheme
         let endpoint = match self.endpoint.take() {
-            Some(e) => e,
+            Some(endpoint) => {
+                if endpoint.starts_with("http") {
+                    endpoint
+                } else {
+                    format!("http://{endpoint}")
+                }
+            }
             None => WEBHDFS_DEFAULT_ENDPOINT.to_string(),
         };
         debug!("backend use endpoint {}", endpoint);
@@ -243,17 +250,17 @@ impl Builder for WebhdfsBuilder {
 pub struct WebhdfsBackend {
     root: String,
     endpoint: String,
-    client: HttpClient,
+    pub client: HttpClient,
     auth: Option<String>,
     root_checker: OnceCell<()>,
 }
 
 impl WebhdfsBackend {
     // create object or make a directory
-    async fn webhdfs_create_object_req(
+    pub async fn webhdfs_create_object_req(
         &self,
         path: &str,
-        size: Option<u64>,
+        size: Option<usize>,
         content_type: Option<&str>,
         body: AsyncBody,
     ) -> Result<Request<AsyncBody>> {
@@ -264,7 +271,7 @@ impl WebhdfsBackend {
             "CREATE"
         };
         let mut url = format!(
-            "{}/webhdfs/v1/{}?op={}&overwrite=true&noredirect=true",
+            "{}/webhdfs/v1/{}?op={}&overwrite=true",
             self.endpoint,
             percent_encode_path(&p),
             op,
@@ -276,6 +283,7 @@ impl WebhdfsBackend {
         let req = Request::put(&url)
             .body(AsyncBody::Empty)
             .map_err(new_request_build_error)?;
+
         // mkdir does not redirect
         if path.ends_with('/') {
             return Ok(req);
@@ -283,14 +291,27 @@ impl WebhdfsBackend {
 
         let resp = self.client.send_async(req).await?;
 
-        self.webhdfs_put_redirect(resp, size, content_type, body)
-            .await
+        // should be a 307 TEMPORARY_REDIRECT
+        if resp.status() != StatusCode::TEMPORARY_REDIRECT {
+            return Err(parse_error(resp).await?);
+        }
+        let re_url = self.follow_redirect(resp)?;
+
+        let mut re_builder = Request::put(re_url);
+        if let Some(size) = size {
+            re_builder = re_builder.header(CONTENT_LENGTH, size.to_string());
+        }
+        if let Some(content_type) = content_type {
+            re_builder = re_builder.header(CONTENT_TYPE, content_type);
+        }
+
+        re_builder.body(body).map_err(new_request_build_error)
     }
 
     async fn webhdfs_open_req(&self, path: &str, range: &BytesRange) -> Result<Request<AsyncBody>> {
         let p = build_abs_path(&self.root, path);
         let mut url = format!(
-            "{}/webhdfs/v1/{}?op=OPEN&noredirect=true",
+            "{}/webhdfs/v1/{}?op=OPEN",
             self.endpoint,
             percent_encode_path(&p),
         );
@@ -360,7 +381,9 @@ impl WebhdfsBackend {
 
 impl WebhdfsBackend {
     /// get object from webhdfs
-    /// # Note
+    ///
+    /// # Notes
+    ///
     /// looks like webhdfs doesn't support range request from file end.
     /// so if we want to read the tail of object, the whole object should be transferred.
     async fn webhdfs_get_object(
@@ -371,15 +394,16 @@ impl WebhdfsBackend {
         let req = self.webhdfs_open_req(path, &range).await?;
         let resp = self.client.send_async(req).await?;
 
-        // this should be an 200 OK http response
-        // with JSON redirect message in its body
-        if resp.status() != StatusCode::OK {
-            // let the outside handle this error
-            return Ok(resp);
+        // this should be a 307 redirect
+        if resp.status() != StatusCode::TEMPORARY_REDIRECT {
+            return Err(parse_error(resp).await?);
         }
 
-        let redirected = self.webhdfs_get_redirect(resp).await?;
-        self.client.send_async(redirected).await
+        let re_url = self.follow_redirect(resp)?;
+        let re_req = Request::get(&re_url)
+            .body(AsyncBody::Empty)
+            .map_err(new_request_build_error)?;
+        self.client.send_async(re_req).await
     }
 
     async fn webhdfs_status_object(&self, path: &str) -> Result<Response<IncomingAsyncBody>> {
@@ -420,56 +444,32 @@ impl WebhdfsBackend {
 
         self.client.send_async(req).await
     }
-
-    /// get redirect destination from 307 TEMPORARY_REDIRECT http response
-    async fn follow_redirect(&self, resp: Response<IncomingAsyncBody>) -> Result<String> {
-        let bs = resp.into_body().bytes().await.map_err(|e| {
-            Error::new(ErrorKind::Unexpected, "redirection receive fail")
-                .with_context("service", Scheme::Webhdfs)
-                .set_source(e)
-        })?;
-        let loc = serde_json::from_reader::<_, Redirection>(bs.reader())
-            .map_err(|e| {
-                Error::new(ErrorKind::Unexpected, "redirection fail")
-                    .with_context("service", Scheme::Webhdfs)
-                    .set_permanent()
-                    .set_source(e)
-            })?
-            .location;
-
-        Ok(loc)
-    }
 }
 
 impl WebhdfsBackend {
-    async fn webhdfs_get_redirect(
-        &self,
-        redirection: Response<IncomingAsyncBody>,
-    ) -> Result<Request<AsyncBody>> {
-        let redirect = self.follow_redirect(redirection).await?;
-
-        Request::get(redirect)
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)
-    }
-
-    async fn webhdfs_put_redirect(
-        &self,
-        resp: Response<IncomingAsyncBody>,
-        size: Option<u64>,
-        content_type: Option<&str>,
-        body: AsyncBody,
-    ) -> Result<Request<AsyncBody>> {
-        let redirect = self.follow_redirect(resp).await?;
-
-        let mut req = Request::put(redirect);
-        if let Some(size) = size {
-            req = req.header(CONTENT_LENGTH, size.to_string());
-        }
-        if let Some(content_type) = content_type {
-            req = req.header(CONTENT_TYPE, content_type);
-        }
-        req.body(body).map_err(new_request_build_error)
+    /// get redirect destination from 307 TEMPORARY_REDIRECT http response
+    fn follow_redirect(&self, resp: Response<IncomingAsyncBody>) -> Result<String> {
+        let loc = match parse_location(resp.headers())? {
+            Some(p) => {
+                if !p.starts_with('/') {
+                    // is not relative path
+                    p.to_string()
+                } else {
+                    // is relative path
+                    // prefix with endpoint url
+                    let url = self.endpoint.clone();
+                    format!("{url}/{p}")
+                }
+            }
+            None => {
+                let err = Error::new(
+                    ErrorKind::Unexpected,
+                    "redirection fail: no location header",
+                );
+                return Err(err);
+            }
+        };
+        Ok(loc)
     }
 
     fn consume_success_mkdir(&self, path: &str, parts: Parts, body: &str) -> Result<RpCreate> {
@@ -490,9 +490,7 @@ impl WebhdfsBackend {
             ));
         }
     }
-}
 
-impl WebhdfsBackend {
     async fn check_root(&self) -> Result<()> {
         let resp = self.webhdfs_status_object("/").await?;
         match resp.status() {
@@ -538,7 +536,9 @@ impl WebhdfsBackend {
 impl Accessor for WebhdfsBackend {
     type Reader = IncomingAsyncBody;
     type BlockingReader = ();
-    type Pager = DirStream;
+    type Writer = WebhdfsWriter;
+    type BlockingWriter = ();
+    type Pager = WebhdfsPager;
     type BlockingPager = ();
 
     fn metadata(&self) -> AccessorMetadata {
@@ -606,34 +606,24 @@ impl Accessor for WebhdfsBackend {
         }
     }
 
-    async fn write(&self, path: &str, args: OpWrite, r: input::Reader) -> Result<RpWrite> {
-        let req = self
-            .webhdfs_create_object_req(
-                path,
-                Some(args.size()),
-                args.content_type(),
-                AsyncBody::Reader(r),
-            )
-            .await?;
-        let resp = self.client.send_async(req).await?;
-
-        let status = resp.status();
-        match status {
-            StatusCode::OK | StatusCode::CREATED => {
-                resp.into_body().consume().await?;
-                Ok(RpWrite::default())
-            }
-            _ => Err(parse_error(resp).await?),
+    async fn write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::Writer)> {
+        if args.append() {
+            return Err(Error::new(
+                ErrorKind::Unsupported,
+                "append write is not supported",
+            ));
         }
+
+        Ok((
+            RpWrite::default(),
+            WebhdfsWriter::new(self.clone(), args, path.to_string()),
+        ))
     }
 
     async fn stat(&self, path: &str, _: OpStat) -> Result<RpStat> {
         // if root exists and is a directory, stat will be ok
         self.root_checker
-            .get_or_try_init(|| async {
-                debug!("checking root existence");
-                self.check_root().await
-            })
+            .get_or_try_init(|| async { self.check_root().await })
             .await?;
 
         let resp = self.webhdfs_status_object(path).await?;
@@ -694,11 +684,11 @@ impl Accessor for WebhdfsBackend {
                         .file_statuses
                         .file_status;
 
-                let objects = DirStream::new(path, file_statuses);
+                let objects = WebhdfsPager::new(path, file_statuses);
                 Ok((RpList::default(), objects))
             }
             StatusCode::NOT_FOUND => {
-                let objects = DirStream::new(path, vec![]);
+                let objects = WebhdfsPager::new(path, vec![]);
                 Ok((RpList::default(), objects))
             }
             _ => Err(parse_error(resp).await?),

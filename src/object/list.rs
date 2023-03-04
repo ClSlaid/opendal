@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,25 +26,27 @@ use futures::Stream;
 use crate::raw::*;
 use crate::*;
 
-/// ObjectLister is returned by `Object::list` to list objects.
+/// ObjectLister is designed to list entries inside object in an asynchronous manner.
+///
+/// Users can construct ObjectLister by `list` or `scan`.
 ///
 /// User can use object lister as `Stream<Item = Result<Object>>` or
 /// call `next_page` directly.
 pub struct ObjectLister {
     acc: FusedAccessor,
-    pager: Option<output::Pager>,
+    pager: Option<oio::Pager>,
 
-    buf: VecDeque<output::Entry>,
+    buf: VecDeque<oio::Entry>,
     /// We will move `pager` inside future and return it back while future is ready.
     /// Thus, we should not allow calling other function while we already have
     /// a future.
     #[allow(clippy::type_complexity)]
-    fut: Option<BoxFuture<'static, (output::Pager, Result<Option<Vec<output::Entry>>>)>>,
+    fut: Option<BoxFuture<'static, (oio::Pager, Result<Option<Vec<oio::Entry>>>)>>,
 }
 
 impl ObjectLister {
     /// Create a new object lister.
-    pub(crate) fn new(acc: FusedAccessor, pager: output::Pager) -> Self {
+    pub(crate) fn new(acc: FusedAccessor, pager: oio::Pager) -> Self {
         Self {
             acc,
             pager: Some(pager),
@@ -77,7 +79,7 @@ impl ObjectLister {
                 .pager
                 .as_mut()
                 .expect("pager must be valid")
-                .next_page()
+                .next()
                 .await?
             {
                 // Ideally, the convert from `Vec` to `VecDeque` will not do reallocation.
@@ -124,7 +126,7 @@ impl Stream for ObjectLister {
 
         let mut pager = self.pager.take().expect("pager must be valid");
         let fut = async move {
-            let res = pager.next_page().await;
+            let res = pager.next().await;
 
             (pager, res)
         };
@@ -133,15 +135,18 @@ impl Stream for ObjectLister {
     }
 }
 
+/// BlockingObjectLister is designed to list entries inside object in a blocking manner.
+///
+/// Users can construct ObjectLister by `blocking_list` or `blocking_scan`.
 pub struct BlockingObjectLister {
     acc: FusedAccessor,
-    pager: output::BlockingPager,
-    buf: VecDeque<output::Entry>,
+    pager: oio::BlockingPager,
+    buf: VecDeque<oio::Entry>,
 }
 
 impl BlockingObjectLister {
     /// Create a new object lister.
-    pub(crate) fn new(acc: FusedAccessor, pager: output::BlockingPager) -> Self {
+    pub(crate) fn new(acc: FusedAccessor, pager: oio::BlockingPager) -> Self {
         Self {
             acc,
             pager,
@@ -159,7 +164,7 @@ impl BlockingObjectLister {
         let entries = if !self.buf.is_empty() {
             mem::take(&mut self.buf)
         } else {
-            match self.pager.next_page()? {
+            match self.pager.next()? {
                 // Ideally, the convert from `Vec` to `VecDeque` will not do reallocation.
                 //
                 // However, this could be changed as described in [impl<T, A> From<Vec<T, A>> for VecDeque<T, A>](https://doc.rust-lang.org/std/collections/struct.VecDeque.html#impl-From%3CVec%3CT%2C%20A%3E%3E-for-VecDeque%3CT%2C%20A%3E)
@@ -186,7 +191,7 @@ impl Iterator for BlockingObjectLister {
             return Some(Ok(oe.into_object(self.operator())));
         }
 
-        self.buf = match self.pager.next_page() {
+        self.buf = match self.pager.next() {
             // Ideally, the convert from `Vec` to `VecDeque` will not do reallocation.
             //
             // However, this could be changed as described in [impl<T, A> From<Vec<T, A>> for VecDeque<T, A>](https://doc.rust-lang.org/std/collections/struct.VecDeque.html#impl-From%3CVec%3CT%2C%20A%3E%3E-for-VecDeque%3CT%2C%20A%3E)

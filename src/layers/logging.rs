@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,14 +14,11 @@
 
 use std::fmt::Debug;
 use std::io;
-use std::io::Read;
-use std::pin::Pin;
 use std::task::Context;
 use std::task::Poll;
 
 use async_trait::async_trait;
 use bytes::Bytes;
-use futures::AsyncRead;
 use futures::FutureExt;
 use futures::TryFutureExt;
 use log::debug;
@@ -168,6 +165,9 @@ impl<A: Accessor> LayeredAccessor for LoggingAccessor<A> {
     type Inner = A;
     type Reader = LoggingReader<A::Reader>;
     type BlockingReader = LoggingReader<A::BlockingReader>;
+    // TODO: we should add logging for writer.
+    type Writer = A::Writer;
+    type BlockingWriter = A::BlockingWriter;
     type Pager = LoggingPager<A::Pager>;
     type BlockingPager = LoggingPager<A::BlockingPager>;
 
@@ -285,39 +285,25 @@ impl<A: Accessor> LayeredAccessor for LoggingAccessor<A> {
             })
     }
 
-    async fn write(&self, path: &str, args: OpWrite, r: input::Reader) -> Result<RpWrite> {
+    async fn write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::Writer)> {
         debug!(
             target: LOGGING_TARGET,
-            "service={} operation={} path={} size={:?} -> started",
+            "service={} operation={} path={} -> started",
             self.scheme,
             Operation::Write,
-            path,
-            args.size()
+            path
         );
-
-        let size = args.size();
-
-        let reader = LoggingReader::new(
-            self.scheme,
-            Operation::Write,
-            path,
-            Some(args.size()),
-            r,
-            self.failure_level,
-        );
-        let r = Box::new(reader) as input::Reader;
 
         self.inner
-            .write(path, args, r)
+            .write(path, args)
             .await
             .map(|v| {
                 debug!(
                     target: LOGGING_TARGET,
-                    "service={} operation={} path={} size={:?} -> written",
+                    "service={} operation={} path={} -> start writing",
                     self.scheme,
                     Operation::Write,
                     path,
-                    size
                 );
                 v
             })
@@ -326,11 +312,10 @@ impl<A: Accessor> LayeredAccessor for LoggingAccessor<A> {
                     log!(
                         target: LOGGING_TARGET,
                         lvl,
-                        "service={} operation={} path={} size={:?} -> {}: {err:?}",
+                        "service={} operation={} path={} -> {}: {err:?}",
                         self.scheme,
                         Operation::Write,
                         path,
-                        size,
                         self.err_status(&err)
                     )
                 };
@@ -545,189 +530,42 @@ impl<A: Accessor> LayeredAccessor for LoggingAccessor<A> {
             })
     }
 
-    async fn create_multipart(
-        &self,
-        path: &str,
-        args: OpCreateMultipart,
-    ) -> Result<RpCreateMultipart> {
+    async fn batch(&self, args: OpBatch) -> Result<RpBatch> {
+        let (op, count) = (args.operation().operation(), args.operation().len());
+
         debug!(
             target: LOGGING_TARGET,
-            "service={} operation={} path={} -> started",
+            "service={} operation={}-{op} count={count} -> started",
             self.scheme,
-            Operation::CreateMultipart,
-            path
+            Operation::Batch,
         );
 
         self.inner
-            .create_multipart(path, args.clone())
-            .inspect(|v| match v {
-                Ok(_) => {
-                    debug!(
-                        target: LOGGING_TARGET,
-                        "service={} operation={} path={} -> finished",
-                        self.scheme,
-                        Operation::CreateMultipart,
-                        path
-                    );
-                }
-                Err(err) => {
-                    if let Some(lvl) = self.err_level(err) {
-                        log!(
-                            target: LOGGING_TARGET,
-                            lvl,
-                            "service={} operation={} path={} -> {}: {err:?}",
-                            self.scheme,
-                            Operation::CreateMultipart,
-                            path,
-                            self.err_status(err)
-                        );
-                    }
-                }
-            })
-            .await
-    }
-
-    async fn write_multipart(
-        &self,
-        path: &str,
-        args: OpWriteMultipart,
-        r: input::Reader,
-    ) -> Result<RpWriteMultipart> {
-        debug!(
-            target: LOGGING_TARGET,
-            "service={} operation={} path={} upload_id={} part_number={:?} size={:?} -> started",
-            self.scheme,
-            Operation::WriteMultipart,
-            path,
-            args.upload_id(),
-            args.part_number(),
-            args.size()
-        );
-
-        let r = LoggingReader::new(
-            self.scheme,
-            Operation::Write,
-            path,
-            Some(args.size()),
-            r,
-            self.failure_level,
-        );
-        let r = Box::new(r);
-
-        self.inner
-            .write_multipart(path, args.clone(), r)
-            .inspect_ok(|_| {
+            .batch(args)
+            .map_ok(|v| {
                 debug!(
                     target: LOGGING_TARGET,
-                    "service={} operation={} path={} upload_id={} part_number={:?} size={:?} -> written",
+                    "service={} operation={}-{op} count={count} -> finished: {}, succeed: {}, failed: {}",
                     self.scheme,
-                    Operation::WriteMultipart,
-                    path,
-                    args.upload_id(),
-                    args.part_number(),
-                    args.size()
+                    Operation::Batch,
+                    v.results().len(),
+                    v.results().len_ok(),
+                    v.results().len_err(),
                 );
+                v
             })
-            .inspect_err(|err| {
-                if let Some(lvl) = self.err_level(err) {
+            .map_err(|err| {
+                if let Some(lvl) = self.err_level(&err) {
                     log!(
                         target: LOGGING_TARGET,
                         lvl,
-                       "service={} operation={} path={} upload_id={} part_number={:?} size={:?} -> {}: {err:?}",
+                        "service={} operation={}-{op} count={count} -> {}: {err:?}",
                         self.scheme,
-                        Operation::WriteMultipart,
-                        path,
-                        args.upload_id(),
-                        args.part_number(),
-                        args.size(),
-                        self.err_status(err)
+                        Operation::Batch,
+                        self.err_status(&err)
                     );
                 }
-            }).await
-    }
-
-    async fn complete_multipart(
-        &self,
-        path: &str,
-        args: OpCompleteMultipart,
-    ) -> Result<RpCompleteMultipart> {
-        debug!(
-            target: LOGGING_TARGET,
-            "service={} operation={} path={} upload_id={} -> started",
-            self.scheme,
-            Operation::CompleteMultipart,
-            path,
-            args.upload_id(),
-        );
-
-        self.inner
-            .complete_multipart(path, args.clone())
-            .inspect_ok(|_| {
-                debug!(
-                    target: LOGGING_TARGET,
-                    "service={} operation={} path={} upload_id={} -> finished",
-                    self.scheme,
-                    Operation::CompleteMultipart,
-                    path,
-                    args.upload_id()
-                );
-            })
-            .inspect_err(|err| {
-                if let Some(lvl) = self.err_level(err) {
-                    log!(
-                        target: LOGGING_TARGET,
-                        lvl,
-                        "service={} operation={} path={} upload_id={} -> {}: {err:?}",
-                        self.scheme,
-                        Operation::CompleteMultipart,
-                        path,
-                        args.upload_id(),
-                        self.err_status(err)
-                    );
-                }
-            })
-            .await
-    }
-
-    async fn abort_multipart(
-        &self,
-        path: &str,
-        args: OpAbortMultipart,
-    ) -> Result<RpAbortMultipart> {
-        debug!(
-            target: LOGGING_TARGET,
-            "service={} operation={} path={} upload_id={} -> started",
-            self.scheme,
-            Operation::AbortMultipart,
-            path,
-            args.upload_id()
-        );
-
-        self.inner
-            .abort_multipart(path, args.clone())
-            .inspect_ok(|_| {
-                debug!(
-                    target: LOGGING_TARGET,
-                    "service={} operation={} path={} upload_id={} -> finished",
-                    self.scheme,
-                    Operation::AbortMultipart,
-                    path,
-                    args.upload_id()
-                );
-            })
-            .inspect_err(|err| {
-                if let Some(lvl) = self.err_level(err) {
-                    log!(
-                        target: LOGGING_TARGET,
-                        lvl,
-                        "service={} operation={} path={} upload_id={} -> {}: {err:?}",
-                        self.scheme,
-                        Operation::AbortMultipart,
-                        path,
-                        args.upload_id(),
-                        self.err_status(err)
-                    );
-                }
+                err
             })
             .await
     }
@@ -817,40 +655,24 @@ impl<A: Accessor> LayeredAccessor for LoggingAccessor<A> {
             })
     }
 
-    fn blocking_write(
-        &self,
-        path: &str,
-        args: OpWrite,
-        r: input::BlockingReader,
-    ) -> Result<RpWrite> {
+    fn blocking_write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::BlockingWriter)> {
         debug!(
             target: LOGGING_TARGET,
-            "service={} operation={} path={} size={:?} -> started",
+            "service={} operation={} path={} -> started",
             self.scheme,
             Operation::BlockingWrite,
             path,
-            args.size()
-        );
-
-        let reader = LoggingReader::new(
-            self.scheme,
-            Operation::BlockingWrite,
-            path,
-            Some(args.size()),
-            r,
-            self.failure_level,
         );
 
         self.inner
-            .blocking_write(path, args.clone(), Box::new(reader))
+            .blocking_write(path, args)
             .map(|v| {
                 debug!(
                     target: LOGGING_TARGET,
-                    "service={} operation={} path={} size={:?} -> written",
+                    "service={} operation={} path={} -> written",
                     self.scheme,
                     Operation::BlockingWrite,
                     path,
-                    args.size()
                 );
                 v
             })
@@ -859,11 +681,10 @@ impl<A: Accessor> LayeredAccessor for LoggingAccessor<A> {
                     log!(
                         target: LOGGING_TARGET,
                         lvl,
-                        "service={} operation={} path={} size={:?} -> {}: {err:?}",
+                        "service={} operation={} path={} -> {}: {err:?}",
                         self.scheme,
                         Operation::BlockingWrite,
                         path,
-                        args.size(),
                         self.err_status(&err)
                     );
                 }
@@ -1088,8 +909,8 @@ impl<R> Drop for LoggingReader<R> {
     }
 }
 
-impl<R: output::Read> output::Read for LoggingReader<R> {
-    fn poll_read(&mut self, cx: &mut Context<'_>, buf: &mut [u8]) -> Poll<io::Result<usize>> {
+impl<R: oio::Read> oio::Read for LoggingReader<R> {
+    fn poll_read(&mut self, cx: &mut Context<'_>, buf: &mut [u8]) -> Poll<Result<usize>> {
         match self.inner.poll_read(cx, buf) {
             Poll::Ready(res) => match res {
                 Ok(n) => {
@@ -1135,11 +956,11 @@ impl<R: output::Read> output::Read for LoggingReader<R> {
         }
     }
 
-    fn poll_seek(&mut self, cx: &mut Context<'_>, pos: io::SeekFrom) -> Poll<io::Result<u64>> {
+    fn poll_seek(&mut self, cx: &mut Context<'_>, pos: io::SeekFrom) -> Poll<Result<u64>> {
         self.inner.poll_seek(cx, pos)
     }
 
-    fn poll_next(&mut self, cx: &mut Context<'_>) -> Poll<Option<io::Result<Bytes>>> {
+    fn poll_next(&mut self, cx: &mut Context<'_>) -> Poll<Option<Result<Bytes>>> {
         match self.inner.poll_next(cx) {
             Poll::Ready(res) => match res {
                 Some(Ok(bs)) => {
@@ -1187,60 +1008,8 @@ impl<R: output::Read> output::Read for LoggingReader<R> {
     }
 }
 
-impl<R: input::Read> AsyncRead for LoggingReader<R> {
-    fn poll_read(
-        mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-        buf: &mut [u8],
-    ) -> Poll<io::Result<usize>> {
-        match Pin::new(&mut self.inner).poll_read(cx, buf) {
-            Poll::Ready(res) => match res {
-                Ok(n) => {
-                    self.has_read += n as u64;
-                    trace!(
-                        target: LOGGING_TARGET,
-                        "service={} operation={} path={} has_read={} -> {}: {}B",
-                        self.scheme,
-                        self.op,
-                        self.path,
-                        self.has_read,
-                        self.op,
-                        n
-                    );
-                    Poll::Ready(Ok(n))
-                }
-                Err(err) => {
-                    if let Some(lvl) = self.failure_level {
-                        log!(
-                            target: LOGGING_TARGET,
-                            lvl,
-                            "service={} operation={} path={} has_read={} -> failed: {err:?}",
-                            self.scheme,
-                            self.op,
-                            self.path,
-                            self.has_read,
-                        )
-                    }
-                    Poll::Ready(Err(err))
-                }
-            },
-            Poll::Pending => {
-                trace!(
-                    target: LOGGING_TARGET,
-                    "service={} operation={} path={} has_read={} -> pending",
-                    self.scheme,
-                    self.op,
-                    self.path,
-                    self.has_read
-                );
-                Poll::Pending
-            }
-        }
-    }
-}
-
-impl<R: output::BlockingRead> output::BlockingRead for LoggingReader<R> {
-    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+impl<R: oio::BlockingRead> oio::BlockingRead for LoggingReader<R> {
+    fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
         match self.inner.read(buf) {
             Ok(n) => {
                 self.has_read += n as u64;
@@ -1274,11 +1043,11 @@ impl<R: output::BlockingRead> output::BlockingRead for LoggingReader<R> {
     }
 
     #[inline]
-    fn seek(&mut self, pos: io::SeekFrom) -> io::Result<u64> {
+    fn seek(&mut self, pos: io::SeekFrom) -> Result<u64> {
         self.inner.seek(pos)
     }
 
-    fn next(&mut self) -> Option<io::Result<Bytes>> {
+    fn next(&mut self) -> Option<Result<Bytes>> {
         match self.inner.next() {
             Some(Ok(bs)) => {
                 self.has_read += bs.len() as u64;
@@ -1309,41 +1078,6 @@ impl<R: output::BlockingRead> output::BlockingRead for LoggingReader<R> {
                 Some(Err(err))
             }
             None => None,
-        }
-    }
-}
-
-impl<R: input::BlockingRead> Read for LoggingReader<R> {
-    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        match self.inner.read(buf) {
-            Ok(n) => {
-                self.has_read += n as u64;
-                trace!(
-                    target: LOGGING_TARGET,
-                    "service={} operation={} path={} has_read={} -> {}: {}B",
-                    self.scheme,
-                    self.op,
-                    self.path,
-                    self.has_read,
-                    self.op,
-                    n
-                );
-                Ok(n)
-            }
-            Err(err) => {
-                if let Some(lvl) = self.failure_level {
-                    log!(
-                        target: LOGGING_TARGET,
-                        lvl,
-                        "service={} operation={} path={} has_read={} -> failed: {err:?}",
-                        self.scheme,
-                        self.op,
-                        self.path,
-                        self.has_read,
-                    );
-                }
-                Err(err)
-            }
         }
     }
 }
@@ -1419,9 +1153,9 @@ impl<P> LoggingPager<P> {
 }
 
 #[async_trait]
-impl<P: output::Page> output::Page for LoggingPager<P> {
-    async fn next_page(&mut self) -> Result<Option<Vec<output::Entry>>> {
-        let res = self.inner.next_page().await;
+impl<P: oio::Page> oio::Page for LoggingPager<P> {
+    async fn next(&mut self) -> Result<Option<Vec<oio::Entry>>> {
+        let res = self.inner.next().await;
 
         match &res {
             Ok(Some(des)) => {
@@ -1463,9 +1197,9 @@ impl<P: output::Page> output::Page for LoggingPager<P> {
     }
 }
 
-impl<P: output::BlockingPage> output::BlockingPage for LoggingPager<P> {
-    fn next_page(&mut self) -> Result<Option<Vec<output::Entry>>> {
-        let res = self.inner.next_page();
+impl<P: oio::BlockingPage> oio::BlockingPage for LoggingPager<P> {
+    fn next(&mut self) -> Result<Option<Vec<oio::Entry>>> {
+        let res = self.inner.next();
 
         match &res {
             Ok(Some(des)) => {

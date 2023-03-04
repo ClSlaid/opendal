@@ -11,10 +11,13 @@
 - Documentation: [stable](https://docs.rs/opendal/) | [main](https://opendal.databend.rs/opendal/)
 - [Release notes](https://docs.rs/opendal/latest/opendal/docs/changelog/index.html)
 
+![](https://user-images.githubusercontent.com/5351546/222356748-14276998-501b-4d2a-9b09-b8cff3018204.png)
+
 ## Services
 
 - [azblob](https://docs.rs/opendal/latest/opendal/services/struct.Azblob.html): [Azure Storage Blob](https://azure.microsoft.com/en-us/services/storage/blobs/) services.
 - [azdfs](https://docs.rs/opendal/latest/opendal/services/struct.Azdfs.html): [Azure Data Lake Storage Gen2](https://azure.microsoft.com/en-us/products/storage/data-lake-storage/) services. (As known as [abfs](https://learn.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-abfs-driver))
+- [dashmap](https://docs.rs/opendal/latest/opendal/services/struct.Dashmap.html): [dashmap](https://github.com/xacrimon/dashmap) backend support.
 - [fs](https://docs.rs/opendal/latest/opendal/services/struct.Fs.html): POSIX alike file system.
 - [ftp](https://docs.rs/opendal/latest/opendal/services/struct.Ftp.html): FTP and FTPS support.
 - [gcs](https://docs.rs/opendal/latest/opendal/services/struct.Gcs.html): [Google Cloud Storage](https://cloud.google.com/storage) Service.
@@ -53,13 +56,12 @@ Access data **painlessly**
 - Automatic [retry](https://docs.rs/opendal/latest/opendal/layers/struct.RetryLayer.html) support
 - Full observability: [logging](https://docs.rs/opendal/latest/opendal/layers/struct.LoggingLayer.html), [tracing](https://docs.rs/opendal/latest/opendal/layers/struct.TracingLayer.html), [metrics](https://docs.rs/opendal/latest/opendal/layers/struct.MetricsLayer.html).
 - [Native chaos testing](https://docs.rs/opendal/latest/opendal/layers/struct.ChaosLayer.html)
-- Native service-side encryption support
 
 Access data **efficiently**
 
-- Zero cost: mapping to underlying API calls directly
-- Best effort: auto pick the best `read`/`seek`/`next` implementations based on services
-- [Auto metadata reuse](https://docs.rs/opendal/latest/opendal/docs/rfcs/rfc_0561_list_metadata_reuse/index.html): avoid extra `metadata` calls
+- Zero cost: Maps to API calls directly
+- Best effort: Automatically selects best read/seek/next based on services
+- Avoid extra calls: Reuses metadata when possible
 
 ## Quickstart
 
@@ -91,7 +93,7 @@ async fn main() -> Result<()> {
     let bs = o.read().await?;
 
     // Fetch metadata
-    let meta = o.metadata().await?;
+    let meta = o.stat().await?;
     let mode = meta.mode();
     let length = meta.content_length();
 

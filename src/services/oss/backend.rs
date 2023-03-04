@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,11 +13,15 @@
 // limitations under the License.
 
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::sync::Arc;
 
 use async_trait::async_trait;
+use bytes::Buf;
+use bytes::Bytes;
+use http::header::CONTENT_DISPOSITION;
 use http::header::CONTENT_LENGTH;
 use http::header::CONTENT_TYPE;
 use http::header::RANGE;
@@ -28,9 +32,12 @@ use http::Uri;
 use log::debug;
 use reqsign::AliyunOssBuilder;
 use reqsign::AliyunOssSigner;
+use serde::Deserialize;
+use serde::Serialize;
 
-use super::dir_stream::DirStream;
 use super::error::parse_error;
+use super::pager::OssPager;
+use super::writer::OssWriter;
 use crate::ops::*;
 use crate::raw::*;
 use crate::*;
@@ -46,7 +53,6 @@ use crate::*;
 /// - [x] list
 /// - [x] scan
 /// - [ ] presign
-/// - [ ] multipart
 /// - [ ] blocking
 ///
 /// # Configuration
@@ -250,7 +256,19 @@ impl OssBuilder {
                         .with_context("endpoint", &ep)
                 })?;
                 let full_host = format!("{bucket}.{host}");
-                let endpoint = format!("https://{full_host}");
+                let endpoint = match uri.scheme_str() {
+                    Some(scheme_str) => match scheme_str {
+                        "http" | "https" => format!("{scheme_str}://{full_host}"),
+                        _ => {
+                            return Err(Error::new(
+                                ErrorKind::BackendConfigInvalid,
+                                "endpoint protocol is invalid",
+                            )
+                            .with_context("service", Scheme::Oss));
+                        }
+                    },
+                    None => format!("https://{full_host}"),
+                };
                 (endpoint, full_host)
             }
             None => {
@@ -360,7 +378,7 @@ impl Builder for OssBuilder {
 #[derive(Clone)]
 /// Aliyun Object Storage Service backend
 pub struct OssBackend {
-    client: HttpClient,
+    pub client: HttpClient,
 
     root: String,
     bucket: String,
@@ -370,7 +388,7 @@ pub struct OssBackend {
     host: String,
     endpoint: String,
     presign_endpoint: String,
-    signer: Arc<AliyunOssSigner>,
+    pub signer: Arc<AliyunOssSigner>,
 }
 
 impl Debug for OssBackend {
@@ -388,7 +406,9 @@ impl Debug for OssBackend {
 impl Accessor for OssBackend {
     type Reader = IncomingAsyncBody;
     type BlockingReader = ();
-    type Pager = DirStream;
+    type Writer = OssWriter;
+    type BlockingWriter = ();
+    type Pager = OssPager;
     type BlockingPager = ();
 
     fn metadata(&self) -> AccessorMetadata {
@@ -399,7 +419,7 @@ impl Accessor for OssBackend {
         am.set_scheme(Scheme::Oss)
             .set_root(&self.root)
             .set_name(&self.bucket)
-            .set_capabilities(Read | Write | List | Scan | Presign)
+            .set_capabilities(Read | Write | List | Scan | Presign | Batch)
             .set_hints(ReadStreamable);
 
         am
@@ -407,7 +427,7 @@ impl Accessor for OssBackend {
 
     async fn create(&self, path: &str, _: OpCreate) -> Result<RpCreate> {
         let resp = self
-            .oss_put_object(path, None, None, AsyncBody::Empty)
+            .oss_put_object(path, None, None, None, AsyncBody::Empty)
             .await?;
         let status = resp.status();
 
@@ -434,24 +454,18 @@ impl Accessor for OssBackend {
         }
     }
 
-    async fn write(&self, path: &str, args: OpWrite, r: input::Reader) -> Result<RpWrite> {
-        let resp = self
-            .oss_put_object(
-                path,
-                Some(args.size()),
-                args.content_type(),
-                AsyncBody::Reader(r),
-            )
-            .await?;
-
-        let status = resp.status();
-        match status {
-            StatusCode::CREATED | StatusCode::OK => {
-                resp.into_body().consume().await?;
-                Ok(RpWrite::new(args.size()))
-            }
-            _ => Err(parse_error(resp).await?),
+    async fn write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::Writer)> {
+        if args.append() {
+            return Err(Error::new(
+                ErrorKind::Unsupported,
+                "append write is not supported",
+            ));
         }
+
+        Ok((
+            RpWrite::default(),
+            OssWriter::new(self.clone(), args, path.to_string()),
+        ))
     }
 
     async fn stat(&self, path: &str, _: OpStat) -> Result<RpStat> {
@@ -490,14 +504,14 @@ impl Accessor for OssBackend {
     async fn list(&self, path: &str, args: OpList) -> Result<(RpList, Self::Pager)> {
         Ok((
             RpList::default(),
-            DirStream::new(Arc::new(self.clone()), &self.root, path, "/", args.limit()),
+            OssPager::new(Arc::new(self.clone()), &self.root, path, "/", args.limit()),
         ))
     }
 
     async fn scan(&self, path: &str, args: OpScan) -> Result<(RpScan, Self::Pager)> {
         Ok((
             RpScan::default(),
-            DirStream::new(Arc::new(self.clone()), &self.root, path, "", args.limit()),
+            OssPager::new(Arc::new(self.clone()), &self.root, path, "", args.limit()),
         ))
     }
 
@@ -506,15 +520,14 @@ impl Accessor for OssBackend {
         let mut req = match args.operation() {
             PresignOperation::Stat(_) => self.oss_head_object_request(path, true)?,
             PresignOperation::Read(v) => self.oss_get_object_request(path, v.range(), true)?,
-            PresignOperation::Write(v) => {
-                self.oss_put_object_request(path, None, v.content_type(), AsyncBody::Empty, true)?
-            }
-            _ => {
-                return Err(Error::new(
-                    ErrorKind::Unsupported,
-                    "oss doesn't support multipart now",
-                ))
-            }
+            PresignOperation::Write(v) => self.oss_put_object_request(
+                path,
+                None,
+                v.content_type(),
+                v.content_disposition(),
+                AsyncBody::Empty,
+                true,
+            )?,
         };
 
         self.signer
@@ -530,14 +543,75 @@ impl Accessor for OssBackend {
             parts.headers,
         )))
     }
+
+    async fn batch(&self, args: OpBatch) -> Result<RpBatch> {
+        let ops = args.into_operation();
+        match ops {
+            BatchOperations::Delete(ops) => {
+                // Sadly, OSS will not return failed keys, so we will build
+                // a set to calculate the failed keys.
+                let mut keys = HashSet::new();
+
+                let ops_len = ops.len();
+                if ops_len > 1000 {
+                    return Err(Error::new(
+                        ErrorKind::Unsupported,
+                        "oss services only allow delete up to 1000 keys at once",
+                    )
+                    .with_context("length", ops_len.to_string()));
+                }
+
+                let paths = ops
+                    .into_iter()
+                    .map(|(p, _)| {
+                        keys.insert(p.clone());
+                        p
+                    })
+                    .collect();
+
+                let resp = self.oss_delete_objects(paths).await?;
+
+                let status = resp.status();
+
+                if let StatusCode::OK = status {
+                    let bs = resp.into_body().bytes().await?;
+
+                    let result: DeleteObjectsResult = quick_xml::de::from_reader(bs.reader())
+                        .map_err(new_xml_deserialize_error)?;
+
+                    let mut batched_result = Vec::with_capacity(ops_len);
+                    for i in result.deleted {
+                        let path = build_rel_path(&self.root, &i.key);
+                        keys.remove(&path);
+                        batched_result.push((path, Ok(RpDelete::default())));
+                    }
+                    // TODO: we should handle those errors with code.
+                    for i in keys {
+                        batched_result.push((
+                            i,
+                            Err(Error::new(
+                                ErrorKind::Unexpected,
+                                "oss delete this key failed for reason we don't know",
+                            )),
+                        ));
+                    }
+
+                    Ok(RpBatch::new(BatchedResults::Delete(batched_result)))
+                } else {
+                    Err(parse_error(resp).await?)
+                }
+            }
+        }
+    }
 }
 
 impl OssBackend {
-    fn oss_put_object_request(
+    pub fn oss_put_object_request(
         &self,
         path: &str,
-        size: Option<u64>,
+        size: Option<usize>,
         content_type: Option<&str>,
+        content_disposition: Option<&str>,
         body: AsyncBody,
         is_presign: bool,
     ) -> Result<Request<AsyncBody>> {
@@ -551,6 +625,10 @@ impl OssBackend {
 
         if let Some(mime) = content_type {
             req = req.header(CONTENT_TYPE, mime);
+        }
+
+        if let Some(pos) = content_disposition {
+            req = req.header(CONTENT_DISPOSITION, pos);
         }
 
         let req = req.body(body).map_err(new_request_build_error)?;
@@ -657,11 +735,19 @@ impl OssBackend {
     async fn oss_put_object(
         &self,
         path: &str,
-        size: Option<u64>,
+        size: Option<usize>,
         content_type: Option<&str>,
+        content_disposition: Option<&str>,
         body: AsyncBody,
     ) -> Result<Response<IncomingAsyncBody>> {
-        let mut req = self.oss_put_object_request(path, size, content_type, body, false)?;
+        let mut req = self.oss_put_object_request(
+            path,
+            size,
+            content_type,
+            content_disposition,
+            body,
+            false,
+        )?;
 
         self.signer.sign(&mut req).map_err(new_request_sign_error)?;
         self.client.send_async(req).await
@@ -686,11 +772,148 @@ impl OssBackend {
         self.client.send_async(req).await
     }
 
+    async fn oss_delete_objects(&self, paths: Vec<String>) -> Result<Response<IncomingAsyncBody>> {
+        let url = format!("{}/?delete", self.endpoint);
+
+        let req = Request::post(&url);
+
+        let content = quick_xml::se::to_string(&DeleteObjectsRequest {
+            object: paths
+                .into_iter()
+                .map(|path| DeleteObjectsRequestObject {
+                    key: build_abs_path(&self.root, &path),
+                })
+                .collect(),
+        })
+        .map_err(new_xml_deserialize_error)?;
+
+        // Make sure content length has been set to avoid post with chunked encoding.
+        let req = req.header(CONTENT_LENGTH, content.len());
+        // Set content-type to `application/xml` to avoid mixed with form post.
+        let req = req.header(CONTENT_TYPE, "application/xml");
+        // Set content-md5 as required by API.
+        let req = req.header("CONTENT-MD5", format_content_md5(content.as_bytes()));
+
+        let mut req = req
+            .body(AsyncBody::Bytes(Bytes::from(content)))
+            .map_err(new_request_build_error)?;
+
+        self.signer.sign(&mut req).map_err(new_request_sign_error)?;
+
+        self.client.send_async(req).await
+    }
+
     fn get_endpoint(&self, is_presign: bool) -> &str {
         if is_presign {
             &self.presign_endpoint
         } else {
             &self.endpoint
         }
+    }
+}
+
+/// Request of DeleteObjects.
+#[derive(Default, Debug, Serialize)]
+#[serde(default, rename = "Delete", rename_all = "PascalCase")]
+struct DeleteObjectsRequest {
+    object: Vec<DeleteObjectsRequestObject>,
+}
+
+#[derive(Default, Debug, Serialize)]
+#[serde(rename_all = "PascalCase")]
+struct DeleteObjectsRequestObject {
+    key: String,
+}
+
+/// Result of DeleteObjects.
+#[derive(Default, Debug, Deserialize)]
+#[serde(default, rename = "DeleteResult", rename_all = "PascalCase")]
+struct DeleteObjectsResult {
+    deleted: Vec<DeleteObjectsResultDeleted>,
+}
+
+#[derive(Default, Debug, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+struct DeleteObjectsResultDeleted {
+    key: String,
+}
+
+#[derive(Default, Debug, Deserialize)]
+#[serde(default, rename_all = "PascalCase")]
+struct DeleteObjectsResultError {
+    code: String,
+    key: String,
+    message: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use bytes::Buf;
+    use bytes::Bytes;
+
+    use super::*;
+
+    /// This example is from https://www.alibabacloud.com/help/zh/object-storage-service/latest/deletemultipleobjects
+    #[test]
+    fn test_serialize_delete_objects_request() {
+        let req = DeleteObjectsRequest {
+            object: vec![
+                DeleteObjectsRequestObject {
+                    key: "multipart.data".to_string(),
+                },
+                DeleteObjectsRequestObject {
+                    key: "test.jpg".to_string(),
+                },
+                DeleteObjectsRequestObject {
+                    key: "demo.jpg".to_string(),
+                },
+            ],
+        };
+
+        let actual = quick_xml::se::to_string(&req).expect("must succeed");
+
+        pretty_assertions::assert_eq!(
+            actual,
+            r#"<Delete>
+  <Object>
+    <Key>multipart.data</Key>
+  </Object>
+  <Object>
+    <Key>test.jpg</Key>
+  </Object>
+  <Object>
+    <Key>demo.jpg</Key>
+  </Object>
+</Delete>"#
+                // Cleanup space and new line
+                .replace([' ', '\n'], "")
+        )
+    }
+
+    /// This example is from https://www.alibabacloud.com/help/zh/object-storage-service/latest/deletemultipleobjects
+    #[test]
+    fn test_deserialize_delete_objects_result() {
+        let bs = Bytes::from(
+            r#"<?xml version="1.0" encoding="UTF-8"?>
+<DeleteResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
+    <Deleted>
+       <Key>multipart.data</Key>
+    </Deleted>
+    <Deleted>
+       <Key>test.jpg</Key>
+    </Deleted>
+    <Deleted>
+       <Key>demo.jpg</Key>
+    </Deleted>
+</DeleteResult>"#,
+        );
+
+        let out: DeleteObjectsResult =
+            quick_xml::de::from_reader(bs.reader()).expect("must success");
+
+        assert_eq!(out.deleted.len(), 3);
+        assert_eq!(out.deleted[0].key, "multipart.data");
+        assert_eq!(out.deleted[1].key, "test.jpg");
+        assert_eq!(out.deleted[2].key, "demo.jpg");
     }
 }

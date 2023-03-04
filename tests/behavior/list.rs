@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -73,7 +73,6 @@ macro_rules! behavior_list_tests {
                 test_check,
                 test_list_dir,
                 test_list_rich_dir,
-                test_list_dir_metadata_cache,
                 test_list_empty_dir,
                 test_list_non_exist_dir,
                 test_list_sub_dir,
@@ -107,7 +106,7 @@ pub async fn test_list_dir(op: Operator) -> Result<()> {
     let mut obs = op.object("/").list().await?;
     let mut found = false;
     while let Some(de) = obs.try_next().await? {
-        let meta = de.metadata().await?;
+        let meta = de.stat().await?;
         if de.path() == path {
             assert_eq!(meta.mode(), ObjectMode::FILE);
             assert_eq!(meta.content_length(), size as u64);
@@ -159,31 +158,6 @@ pub async fn test_list_rich_dir(op: Operator) -> Result<()> {
     Ok(())
 }
 
-/// List dir should return newly created file with correct metadata.
-pub async fn test_list_dir_metadata_cache(op: Operator) -> Result<()> {
-    let path = uuid::Uuid::new_v4().to_string();
-    debug!("Generate a random file: {}", &path);
-    let (content, _) = gen_bytes();
-
-    op.object(&path)
-        .write(content)
-        .await
-        .expect("write must succeed");
-
-    let mut obs = op.object("/").list().await?;
-    while let Some(de) = obs.try_next().await? {
-        let meta_from_raw = de.stat().await?;
-        let meta_from_cache = de.metadata().await?;
-        assert_eq!(meta_from_raw, meta_from_cache)
-    }
-
-    op.object(&path)
-        .delete()
-        .await
-        .expect("delete must succeed");
-    Ok(())
-}
-
 /// List empty dir should return nothing.
 pub async fn test_list_empty_dir(op: Operator) -> Result<()> {
     let dir = format!("{}/", uuid::Uuid::new_v4());
@@ -228,7 +202,7 @@ pub async fn test_list_sub_dir(op: Operator) -> Result<()> {
     let mut found = false;
     while let Some(de) = obs.try_next().await? {
         if de.path() == path {
-            assert_eq!(de.mode().await?, ObjectMode::DIR);
+            assert_eq!(de.stat().await?.mode(), ObjectMode::DIR);
             assert_eq!(de.name(), path);
 
             found = true
@@ -276,7 +250,7 @@ pub async fn test_list_nested_dir(op: Operator) -> Result<()> {
     let meta = objects
         .get(&file_path)
         .expect("file should be found in list")
-        .metadata()
+        .stat()
         .await?;
     assert_eq!(meta.mode(), ObjectMode::FILE);
     assert_eq!(meta.content_length(), 0);
@@ -285,7 +259,7 @@ pub async fn test_list_nested_dir(op: Operator) -> Result<()> {
     let meta = objects
         .get(&dir_path)
         .expect("file should be found in list")
-        .metadata()
+        .stat()
         .await?;
     assert_eq!(meta.mode(), ObjectMode::DIR);
 

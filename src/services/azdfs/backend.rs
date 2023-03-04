@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ use std::mem;
 use std::sync::Arc;
 
 use async_trait::async_trait;
+use http::header::CONTENT_DISPOSITION;
 use http::header::CONTENT_LENGTH;
 use http::header::CONTENT_TYPE;
 use http::Request;
@@ -28,8 +29,9 @@ use http::StatusCode;
 use log::debug;
 use reqsign::AzureStorageSigner;
 
-use super::dir_stream::DirStream;
 use super::error::parse_error;
+use super::pager::AzdfsPager;
+use super::writer::AzdfsWriter;
 use crate::object::ObjectMetadata;
 use crate::ops::*;
 use crate::raw::*;
@@ -50,7 +52,6 @@ use crate::*;
 /// - [x] list
 /// - [ ] ~~scan~~
 /// - [ ] presign
-/// - [ ] multipart
 /// - [ ] blocking
 ///
 /// # Configuration
@@ -290,10 +291,11 @@ impl Builder for AzdfsBuilder {
 #[derive(Debug, Clone)]
 pub struct AzdfsBackend {
     filesystem: String,
-    client: HttpClient,
+    // TODO: remove pub after https://github.com/datafuselabs/opendal/issues/1427
+    pub client: HttpClient,
     root: String, // root will be "/" or /abc/
     endpoint: String,
-    signer: Arc<AzureStorageSigner>,
+    pub signer: Arc<AzureStorageSigner>,
     _account_name: String,
 }
 
@@ -301,7 +303,9 @@ pub struct AzdfsBackend {
 impl Accessor for AzdfsBackend {
     type Reader = IncomingAsyncBody;
     type BlockingReader = ();
-    type Pager = DirStream;
+    type Writer = AzdfsWriter;
+    type BlockingWriter = ();
+    type Pager = AzdfsPager;
     type BlockingPager = ();
 
     fn metadata(&self) -> AccessorMetadata {
@@ -324,7 +328,7 @@ impl Accessor for AzdfsBackend {
             _ => unimplemented!("not supported object mode"),
         };
 
-        let mut req = self.azdfs_create_request(path, resource, None, AsyncBody::Empty)?;
+        let mut req = self.azdfs_create_request(path, resource, None, None, AsyncBody::Empty)?;
 
         self.signer.sign(&mut req).map_err(new_request_sign_error)?;
 
@@ -355,42 +359,18 @@ impl Accessor for AzdfsBackend {
         }
     }
 
-    async fn write(&self, path: &str, args: OpWrite, r: input::Reader) -> Result<RpWrite> {
-        let mut req =
-            self.azdfs_create_request(path, "file", args.content_type(), AsyncBody::Empty)?;
-
-        self.signer.sign(&mut req).map_err(new_request_sign_error)?;
-
-        let resp = self.client.send_async(req).await?;
-
-        let status = resp.status();
-        match status {
-            StatusCode::CREATED | StatusCode::OK => {
-                resp.into_body().consume().await?;
-            }
-            _ => {
-                return Err(parse_error(resp)
-                    .await?
-                    .with_operation("Backend::azdfs_create_request"));
-            }
+    async fn write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::Writer)> {
+        if args.append() {
+            return Err(Error::new(
+                ErrorKind::Unsupported,
+                "append write is not supported",
+            ));
         }
 
-        let mut req = self.azdfs_update_request(path, Some(args.size()), AsyncBody::Reader(r))?;
-
-        self.signer.sign(&mut req).map_err(new_request_sign_error)?;
-
-        let resp = self.client.send_async(req).await?;
-
-        let status = resp.status();
-        match status {
-            StatusCode::OK | StatusCode::ACCEPTED => {
-                resp.into_body().consume().await?;
-                Ok(RpWrite::new(args.size()))
-            }
-            _ => Err(parse_error(resp)
-                .await?
-                .with_operation("Backend::azdfs_update_request")),
-        }
+        Ok((
+            RpWrite::default(),
+            AzdfsWriter::new(self.clone(), args, path.to_string()),
+        ))
     }
 
     async fn stat(&self, path: &str, _: OpStat) -> Result<RpStat> {
@@ -424,7 +404,7 @@ impl Accessor for AzdfsBackend {
     }
 
     async fn list(&self, path: &str, args: OpList) -> Result<(RpList, Self::Pager)> {
-        let op = DirStream::new(
+        let op = AzdfsPager::new(
             Arc::new(self.clone()),
             self.root.clone(),
             path.to_string(),
@@ -478,11 +458,12 @@ impl AzdfsBackend {
     /// resource should be one of `file` or `directory`
     ///
     /// ref: https://learn.microsoft.com/en-us/rest/api/storageservices/datalakestoragegen2/path/create
-    fn azdfs_create_request(
+    pub fn azdfs_create_request(
         &self,
         path: &str,
         resource: &str,
         content_type: Option<&str>,
+        content_disposition: Option<&str>,
         body: AsyncBody,
     ) -> Result<Request<AsyncBody>> {
         let p = build_abs_path(&self.root, path)
@@ -505,6 +486,10 @@ impl AzdfsBackend {
             req = req.header(CONTENT_TYPE, ty)
         }
 
+        if let Some(pos) = content_disposition {
+            req = req.header(CONTENT_DISPOSITION, pos)
+        }
+
         // Set body
         let req = req.body(body).map_err(new_request_build_error)?;
 
@@ -512,10 +497,10 @@ impl AzdfsBackend {
     }
 
     /// ref: https://learn.microsoft.com/en-us/rest/api/storageservices/datalakestoragegen2/path/update
-    fn azdfs_update_request(
+    pub fn azdfs_update_request(
         &self,
         path: &str,
-        size: Option<u64>,
+        size: Option<usize>,
         body: AsyncBody,
     ) -> Result<Request<AsyncBody>> {
         let p = build_abs_path(&self.root, path);

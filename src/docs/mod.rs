@@ -1,4 +1,4 @@
-// Copyright 2023 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,17 +14,21 @@
 
 //! This module holds documentation for OpenDAL.
 //!
-//! It's highly recommend to start with reading [`concepts`] first.
+//! It's highly recommended that you start by reading [`concepts'] first.
 
 pub mod comparisons;
 
 pub mod concepts;
+
+pub mod internals;
 
 /// Changes log for all OpenDAL released versions.
 #[doc = include_str!("../../CHANGELOG.md")]
 pub mod changelog {}
 
 /// All features that provided by OpenDAL.
+///
+/// default feature: `rustls`, which enable rustls support.
 #[doc = include_str!("features.md")]
 pub mod features {}
 

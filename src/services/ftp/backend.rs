@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ use async_tls::TlsConnector;
 use async_trait::async_trait;
 use bb8::PooledConnection;
 use bb8::RunError;
-use futures::io::copy;
+use futures::AsyncRead;
 use futures::AsyncReadExt;
 use http::Uri;
 use log::debug;
@@ -36,9 +36,10 @@ use suppaftp::Status;
 use time::OffsetDateTime;
 use tokio::sync::OnceCell;
 
-use super::dir_stream::DirStream;
-use super::dir_stream::ReadDir;
+use super::pager::FtpPager;
+use super::pager::ReadDir;
 use super::util::FtpReader;
+use super::writer::FtpWriter;
 use crate::ops::*;
 use crate::raw::*;
 use crate::*;
@@ -54,7 +55,6 @@ use crate::*;
 /// - [x] list
 /// - [ ] ~~scan~~
 /// - [ ] ~~presign~~
-/// - [ ] ~~multipart~~
 /// - [ ] blocking
 ///
 /// # Configuration
@@ -313,7 +313,9 @@ impl Debug for FtpBackend {
 impl Accessor for FtpBackend {
     type Reader = FtpReader;
     type BlockingReader = ();
-    type Pager = DirStream;
+    type Writer = FtpWriter;
+    type BlockingWriter = ();
+    type Pager = FtpPager;
     type BlockingPager = ();
 
     fn metadata(&self) -> AccessorMetadata {
@@ -364,7 +366,7 @@ impl Accessor for FtpBackend {
         let meta = self.ftp_stat(path).await?;
 
         let br = args.range();
-        let (r, size): (input::Reader, _) = match (br.offset(), br.size()) {
+        let (r, size): (Box<dyn AsyncRead + Send + Unpin>, _) = match (br.offset(), br.size()) {
             (Some(offset), Some(size)) => {
                 ftp_stream.resume_transfer(offset as usize).await?;
                 let ds = ftp_stream.retr_as_stream(path).await?.take(size);
@@ -391,18 +393,18 @@ impl Accessor for FtpBackend {
         Ok((RpRead::new(size), FtpReader::new(r, ftp_stream)))
     }
 
-    async fn write(&self, path: &str, _: OpWrite, r: input::Reader) -> Result<RpWrite> {
-        let mut ftp_stream = self.ftp_connect(Operation::Write).await?;
+    async fn write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::Writer)> {
+        if args.append() {
+            return Err(Error::new(
+                ErrorKind::Unsupported,
+                "append write is not supported",
+            ));
+        }
 
-        let mut data_stream = ftp_stream.append_with_stream(path).await?;
-
-        let bytes = copy(r, &mut data_stream).await.map_err(|err| {
-            Error::new(ErrorKind::Unexpected, "copy from ftp stream").set_source(err)
-        })?;
-
-        ftp_stream.finalize_put_stream(data_stream).await?;
-
-        Ok(RpWrite::new(bytes))
+        Ok((
+            RpWrite::new(),
+            FtpWriter::new(self.clone(), path.to_string()),
+        ))
     }
 
     async fn stat(&self, path: &str, _: OpStat) -> Result<RpStat> {
@@ -460,13 +462,13 @@ impl Accessor for FtpBackend {
 
         Ok((
             RpList::default(),
-            DirStream::new(if path == "/" { "" } else { path }, rd, args.limit()),
+            FtpPager::new(if path == "/" { "" } else { path }, rd, args.limit()),
         ))
     }
 }
 
 impl FtpBackend {
-    async fn ftp_connect(&self, _: Operation) -> Result<PooledConnection<'static, Manager>> {
+    pub async fn ftp_connect(&self, _: Operation) -> Result<PooledConnection<'static, Manager>> {
         let pool = self
             .pool
             .get_or_try_init(|| async {

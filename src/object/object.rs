@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,12 +17,10 @@ use std::io::Read;
 use std::ops::RangeBounds;
 use std::sync::Arc;
 
-use futures::io::Cursor;
+use bytes::Bytes;
+use flagset::FlagSet;
 use futures::AsyncReadExt;
-use parking_lot::Mutex;
-use parking_lot::MutexGuard;
 use time::Duration;
-use time::OffsetDateTime;
 use tokio::io::ReadBuf;
 
 use super::BlockingObjectLister;
@@ -41,9 +39,9 @@ use crate::*;
 #[derive(Clone, Debug)]
 pub struct Object {
     acc: FusedAccessor,
-    path: String,
+    path: Arc<String>,
 
-    meta: Arc<Mutex<ObjectMetadata>>,
+    meta: Option<Arc<ObjectMetadata>>,
 }
 
 impl Object {
@@ -53,14 +51,14 @@ impl Object {
     /// - Path endswith `/` means it's a dir path.
     /// - Otherwise, it's a file path.
     pub fn new(op: Operator, path: &str) -> Self {
-        Self::with(op, path, ObjectMetadata::new(ObjectMode::Unknown))
+        Self::with(op, path, None)
     }
 
-    pub(crate) fn with(op: Operator, path: &str, meta: ObjectMetadata) -> Self {
+    pub(crate) fn with(op: Operator, path: &str, meta: Option<ObjectMetadata>) -> Self {
         Self {
             acc: op.inner(),
-            path: normalize_path(path),
-            meta: Arc::new(Mutex::new(meta)),
+            path: Arc::new(normalize_path(path)),
+            meta: meta.map(Arc::new),
         }
     }
 
@@ -149,44 +147,6 @@ impl Object {
         get_basename(&self.path)
     }
 
-    /// Return this object entry's object mode.
-    pub async fn mode(&self) -> Result<ObjectMode> {
-        {
-            let guard = self.meta.lock();
-            // Object mode other than unknown is OK to be returned.
-            if guard.mode() != ObjectMode::Unknown {
-                return Ok(guard.mode());
-            }
-            // Object mode is unknown, but the object metadata is marked
-            // as complete.
-            if guard.mode() == ObjectMode::Unknown && guard.is_complete() {
-                return Ok(guard.mode());
-            }
-        }
-
-        let guard = self.metadata_ref().await?;
-        Ok(guard.mode())
-    }
-
-    /// Return this object entry's object mode in blocking way.
-    pub fn blocking_mode(&self) -> Result<ObjectMode> {
-        {
-            let guard = self.meta.lock();
-            // Object mode other than unknown is OK to be returned.
-            if guard.mode() != ObjectMode::Unknown {
-                return Ok(guard.mode());
-            }
-            // Object mode is unknown, but the object metadata is marked
-            // as complete.
-            if guard.mode() == ObjectMode::Unknown && guard.is_complete() {
-                return Ok(guard.mode());
-            }
-        }
-
-        let guard = self.blocking_metadata_ref()?;
-        Ok(guard.mode())
-    }
-
     /// Create an empty object, like using the following linux commands:
     ///
     /// - `touch path/to/file`
@@ -207,7 +167,7 @@ impl Object {
     /// # use futures::TryStreamExt;
     /// # #[tokio::main]
     /// # async fn test(op: Operator) -> Result<()> {
-    /// let o = op.object("path/to/file");
+    /// let mut o = op.object("path/to/file");
     /// let _ = o.create().await?;
     /// # Ok(())
     /// # }
@@ -221,7 +181,7 @@ impl Object {
     /// # use futures::TryStreamExt;
     /// # #[tokio::main]
     /// # async fn test(op: Operator) -> Result<()> {
-    /// let o = op.object("path/to/dir/");
+    /// let mut o = op.object("path/to/dir/");
     /// let _ = o.create().await?;
     /// # Ok(())
     /// # }
@@ -259,7 +219,7 @@ impl Object {
     /// # use opendal::Operator;
     /// # use futures::TryStreamExt;
     /// # fn test(op: Operator) -> Result<()> {
-    /// let o = op.object("path/to/file");
+    /// let mut o = op.object("path/to/file");
     /// let _ = o.blocking_create()?;
     /// # Ok(())
     /// # }
@@ -272,7 +232,7 @@ impl Object {
     /// # use opendal::Operator;
     /// # use futures::TryStreamExt;
     /// # async fn test(op: Operator) -> Result<()> {
-    /// let o = op.object("path/to/dir/");
+    /// let mut o = op.object("path/to/dir/");
     /// let _ = o.blocking_create()?;
     /// # Ok(())
     /// # }
@@ -302,7 +262,7 @@ impl Object {
     /// # use futures::TryStreamExt;
     /// # #[tokio::main]
     /// # async fn test(op: Operator) -> Result<()> {
-    /// let o = op.object("path/to/file");
+    /// let mut o = op.object("path/to/file");
     /// # o.write(vec![0; 4096]).await?;
     /// let bs = o.read().await?;
     /// # Ok(())
@@ -324,7 +284,7 @@ impl Object {
     /// # use opendal::Operator;
     /// #
     /// # fn test(op: Operator) -> Result<()> {
-    /// let o = op.object("path/to/file");
+    /// # let mut o = op.object("path/to/file");
     /// # o.blocking_write(vec![0; 4096])?;
     /// let bs = o.blocking_read()?;
     /// # Ok(())
@@ -341,7 +301,7 @@ impl Object {
     ///
     /// # Notes
     ///
-    /// - The returning contnet's length may be smaller than the range specified.
+    /// - The returning content's length may be smaller than the range specified.
     ///
     /// # Examples
     ///
@@ -351,7 +311,7 @@ impl Object {
     /// # use futures::TryStreamExt;
     /// # #[tokio::main]
     /// # async fn test(op: Operator) -> Result<()> {
-    /// let o = op.object("path/to/file");
+    /// let mut o = op.object("path/to/file");
     /// # o.write(vec![0; 4096]).await?;
     /// let bs = o.range_read(1024..2048).await?;
     /// # Ok(())
@@ -380,6 +340,7 @@ impl Object {
         let mut buf = ReadBuf::uninit(dst);
         unsafe { buf.assume_init(length) };
 
+        // TODO: use native read api
         s.read_exact(buf.initialized_mut()).await.map_err(|err| {
             Error::new(ErrorKind::Unexpected, "read from storage")
                 .with_operation("Object:range_read")
@@ -408,7 +369,7 @@ impl Object {
     /// # use futures::TryStreamExt;
     /// # use opendal::Scheme;
     /// # async fn test(op: Operator) -> Result<()> {
-    /// let o = op.object("path/to/file");
+    /// # let mut o = op.object("path/to/file");
     /// # o.blocking_write(vec![0; 4096])?;
     /// let bs = o.blocking_range_read(1024..2048)?;
     /// # Ok(())
@@ -484,7 +445,7 @@ impl Object {
     ///
     /// # Notes
     ///
-    /// - The returning contnet's length may be smaller than the range specified.
+    /// - The returning content's length may be smaller than the range specified.
     ///
     /// # Examples
     ///
@@ -543,141 +504,7 @@ impl Object {
 
         let op = OpRead::new().with_range(range.into());
 
-        BlockingObjectReader::create(self.accessor(), self.path(), self.meta.clone(), op)
-    }
-
-    /// Read the whole object into a bytes with auto detected compress algorithm.
-    ///
-    /// If we can't find the correct algorithm, we return `Ok(None)` instead.
-    ///
-    /// # Feature
-    ///
-    /// This function needs to enable feature `compress`.
-    ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// # use std::io::Result;
-    /// # use opendal::Operator;
-    /// # use futures::TryStreamExt;
-    /// # #[tokio::main]
-    /// # async fn test(op: Operator) -> Result<()> {
-    /// let o = op.object("path/to/file.gz");
-    /// # o.write(vec![0; 4096]).await?;
-    /// let bs = o.decompress_read().await?.expect("must read succeed");
-    /// # Ok(())
-    /// # }
-    /// ```
-    #[cfg(feature = "compress")]
-    pub async fn decompress_read(&self) -> Result<Option<Vec<u8>>> {
-        let algo = match CompressAlgorithm::from_path(self.path()) {
-            None => return Ok(None),
-            Some(algo) => algo,
-        };
-
-        self.decompress_read_with(algo).await.map(Some)
-    }
-
-    /// Create a reader with auto-detected compress algorithm.
-    ///
-    /// If we can't find the correct algorithm, we will return `Ok(None)`.
-    ///
-    /// # Feature
-    ///
-    /// This function needs to enable feature `compress`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use std::io::Result;
-    /// # use opendal::Operator;
-    /// # use futures::TryStreamExt;
-    /// # #[tokio::main]
-    /// # async fn test(op: Operator) -> Result<()> {
-    /// let o = op.object("path/to/file.gz");
-    /// # o.write(vec![0; 4096]).await?;
-    /// let r = o.decompress_reader().await?;
-    /// # Ok(())
-    /// # }
-    /// ```
-    #[cfg(feature = "compress")]
-    pub async fn decompress_reader(&self) -> Result<Option<impl input::Read>> {
-        let algo = match CompressAlgorithm::from_path(self.path()) {
-            Some(v) => v,
-            None => return Ok(None),
-        };
-
-        let r = self.reader().await?;
-
-        Ok(Some(DecompressReader::new(r, algo)))
-    }
-
-    /// Read the whole object into a bytes with specific compress algorithm.
-    ///
-    /// # Feature
-    ///
-    /// This function needs to enable feature `compress`.
-    ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// # use std::io::Result;
-    /// # use opendal::Operator;
-    /// # use futures::TryStreamExt;
-    /// # use opendal::raw::CompressAlgorithm;
-    /// # #[tokio::main]
-    /// # async fn test(op: Operator) -> Result<()> {
-    /// let o = op.object("path/to/file.gz");
-    /// # o.write(vec![0; 4096]).await?;
-    /// let bs = o.decompress_read_with(CompressAlgorithm::Gzip).await?;
-    /// # Ok(())
-    /// # }
-    /// ```
-    #[cfg(feature = "compress")]
-    pub async fn decompress_read_with(&self, algo: CompressAlgorithm) -> Result<Vec<u8>> {
-        let r = self.decompress_reader_with(algo).await?;
-        let mut bs = Cursor::new(Vec::new());
-
-        futures::io::copy(r, &mut bs).await.map_err(|err| {
-            Error::new(ErrorKind::Unexpected, "decompress read with failed")
-                .with_operation("Object::decompress_read_with")
-                .with_context("service", self.accessor().metadata().scheme().into_static())
-                .with_context("path", self.path())
-                .set_source(err)
-        })?;
-
-        Ok(bs.into_inner())
-    }
-
-    /// Create a reader with specific compress algorithm.
-    ///
-    /// # Feature
-    ///
-    /// This function needs to enable feature `compress`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use std::io::Result;
-    /// # use opendal::Operator;
-    /// # use futures::TryStreamExt;
-    /// # use opendal::raw::CompressAlgorithm;
-    /// # #[tokio::main]
-    /// # async fn test(op: Operator) -> Result<()> {
-    /// let o = op.object("path/to/file.gz");
-    /// # o.write(vec![0; 4096]).await?;
-    /// let r = o.decompress_reader_with(CompressAlgorithm::Gzip).await?;
-    /// # Ok(())
-    /// # }
-    /// ```
-    #[cfg(feature = "compress")]
-    pub async fn decompress_reader_with(
-        &self,
-        algo: CompressAlgorithm,
-    ) -> Result<impl input::Read> {
-        let r = self.reader().await?;
-
-        Ok(DecompressReader::new(r, algo))
+        BlockingObjectReader::create(self.accessor(), self.path(), op)
     }
 
     /// Write bytes into object.
@@ -697,15 +524,51 @@ impl Object {
     ///
     /// # #[tokio::main]
     /// # async fn test(op: Operator) -> Result<()> {
-    /// let o = op.object("path/to/file");
+    /// let mut o = op.object("path/to/file");
     /// let _ = o.write(vec![0; 4096]).await?;
     /// # Ok(())
     /// # }
     /// ```
-    pub async fn write(&self, bs: impl Into<Vec<u8>>) -> Result<()> {
-        let bs: Vec<u8> = bs.into();
-        let op = OpWrite::new(bs.len() as u64);
-        self.write_with(op, bs).await
+    pub async fn write(&self, bs: impl Into<Bytes>) -> Result<()> {
+        self.write_with(OpWrite::new(), bs).await
+    }
+
+    /// Write multiple bytes into object.
+    ///
+    /// # Notes
+    ///
+    /// - Write will make sure all bytes has been written, or an error will be returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use std::io::Result;
+    /// # use opendal::Operator;
+    /// # use futures::StreamExt;
+    /// # use futures::SinkExt;
+    /// use bytes::Bytes;
+    ///
+    /// # #[tokio::main]
+    /// # async fn test(op: Operator) -> Result<()> {
+    /// let mut w = op.object("path/to/file").writer().await?;
+    /// w.append(vec![0; 4096]).await?;
+    /// w.append(vec![1; 4096]).await?;
+    /// w.close().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn writer(&self) -> Result<ObjectWriter> {
+        if !validate_path(self.path(), ObjectMode::FILE) {
+            return Err(
+                Error::new(ErrorKind::ObjectIsADirectory, "write path is a directory")
+                    .with_operation("Object::write_with")
+                    .with_context("service", self.accessor().metadata().scheme().into_static())
+                    .with_context("path", self.path()),
+            );
+        }
+
+        let op = OpWrite::default().with_append();
+        ObjectWriter::create(self.accessor(), self.path(), op).await
     }
 
     /// Write data with option described in OpenDAL [rfc-0661](../../docs/rfcs/0661-path-in-accessor.md)
@@ -724,14 +587,14 @@ impl Object {
     ///
     /// # #[tokio::main]
     /// # async fn test(op: Operator) -> Result<()> {
-    /// let o = op.object("path/to/file");
+    /// let mut o = op.object("path/to/file");
     /// let bs = b"hello, world!".to_vec();
-    /// let args = OpWrite::new(bs.len() as u64).with_content_type("text/plain");
+    /// let args = OpWrite::new().with_content_type("text/plain");
     /// let _ = o.write_with(args, bs).await?;
     /// # Ok(())
     /// # }
     /// ```
-    pub async fn write_with(&self, args: OpWrite, bs: impl Into<Vec<u8>>) -> Result<()> {
+    pub async fn write_with(&self, args: OpWrite, bs: impl Into<Bytes>) -> Result<()> {
         if !validate_path(self.path(), ObjectMode::FILE) {
             return Err(
                 Error::new(ErrorKind::ObjectIsADirectory, "write path is a directory")
@@ -741,15 +604,9 @@ impl Object {
             );
         }
 
-        let bs = bs.into();
-        let r = Cursor::new(bs);
-        let rp = self.acc.write(self.path(), args, Box::new(r)).await?;
-
-        // Always write latest metadata into cache.
-        {
-            let mut guard = self.meta.lock();
-            *guard = ObjectMetadata::new(ObjectMode::FILE).with_content_length(rp.written());
-        }
+        let (_, mut w) = self.acc.write(self.path(), args).await?;
+        w.write(bs.into()).await?;
+        w.close().await?;
 
         Ok(())
     }
@@ -770,15 +627,50 @@ impl Object {
     /// use bytes::Bytes;
     ///
     /// # fn test(op: Operator) -> Result<()> {
-    /// let o = op.object("path/to/file");
+    /// let mut o = op.object("path/to/file");
     /// let _ = o.blocking_write(vec![0; 4096])?;
     /// # Ok(())
     /// # }
     /// ```
-    pub fn blocking_write(&self, bs: impl Into<Vec<u8>>) -> Result<()> {
-        let bs: Vec<u8> = bs.into();
-        let op = OpWrite::new(bs.len() as u64);
-        self.blocking_write_with(op, bs)
+    pub fn blocking_write(&self, bs: impl Into<Bytes>) -> Result<()> {
+        self.blocking_write_with(OpWrite::new(), bs)
+    }
+
+    /// Write multiple bytes into object.
+    ///
+    /// # Notes
+    ///
+    /// - Write will make sure all bytes has been written, or an error will be returned.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # use std::io::Result;
+    /// # use opendal::Operator;
+    /// # use futures::StreamExt;
+    /// # use futures::SinkExt;
+    /// use bytes::Bytes;
+    ///
+    /// # fn test(op: Operator) -> Result<()> {
+    /// let mut w = op.object("path/to/file").blocking_writer()?;
+    /// w.append(vec![0; 4096])?;
+    /// w.append(vec![1; 4096])?;
+    /// w.close()?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn blocking_writer(&self) -> Result<BlockingObjectWriter> {
+        if !validate_path(self.path(), ObjectMode::FILE) {
+            return Err(
+                Error::new(ErrorKind::ObjectIsADirectory, "write path is a directory")
+                    .with_operation("Object::write_with")
+                    .with_context("service", self.accessor().metadata().scheme().into_static())
+                    .with_context("path", self.path()),
+            );
+        }
+
+        let op = OpWrite::default().with_append();
+        BlockingObjectWriter::create(self.accessor(), self.path(), op)
     }
 
     /// Write data with option described in OpenDAL [rfc-0661](../../docs/rfcs/0661-path-in-accessor.md)
@@ -796,14 +688,14 @@ impl Object {
     /// use opendal::ops::OpWrite;
     ///
     /// # async fn test(op: Operator) -> Result<()> {
-    /// let o = op.object("hello.txt");
+    /// let mut o = op.object("hello.txt");
     /// let bs = b"hello, world!".to_vec();
-    /// let ow = OpWrite::new(bs.len() as u64).with_content_type("text/plain");
+    /// let ow = OpWrite::new().with_content_type("text/plain");
     /// let _ = o.blocking_write_with(ow, bs)?;
     /// # Ok(())
     /// # }
     /// ```
-    pub fn blocking_write_with(&self, args: OpWrite, bs: impl Into<Vec<u8>>) -> Result<()> {
+    pub fn blocking_write_with(&self, args: OpWrite, bs: impl Into<Bytes>) -> Result<()> {
         if !validate_path(self.path(), ObjectMode::FILE) {
             return Err(
                 Error::new(ErrorKind::ObjectIsADirectory, "write path is a directory")
@@ -813,100 +705,10 @@ impl Object {
             );
         }
 
-        let bs = bs.into();
-        let r = std::io::Cursor::new(bs);
-        let rp = self.acc.blocking_write(self.path(), args, Box::new(r))?;
+        let (_, mut w) = self.acc.blocking_write(self.path(), args)?;
+        w.write(bs.into())?;
+        w.close()?;
 
-        // Always write latest metadata into cache.
-        {
-            let mut guard = self.meta.lock();
-            *guard = ObjectMetadata::new(ObjectMode::FILE).with_content_length(rp.written());
-        }
-        Ok(())
-    }
-
-    /// Write data into object from a [`input::Read`].
-    ///
-    /// # Notes
-    ///
-    /// - Write will make sure all bytes has been written, or an error will be returned.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use std::io::Result;
-    /// # use opendal::Operator;
-    /// # use futures::StreamExt;
-    /// # use futures::SinkExt;
-    /// use bytes::Bytes;
-    /// use futures::io::Cursor;
-    ///
-    /// # #[tokio::main]
-    /// # async fn test(op: Operator) -> Result<()> {
-    /// let o = op.object("path/to/file");
-    /// let r = Cursor::new(vec![0; 4096]);
-    /// let _ = o.write_from(4096, r).await?;
-    /// # Ok(())
-    /// # }
-    /// ```
-    pub async fn write_from(&self, size: u64, br: impl input::Read + 'static) -> Result<()> {
-        if !validate_path(self.path(), ObjectMode::FILE) {
-            return Err(
-                Error::new(ErrorKind::ObjectIsADirectory, "write path is a directory")
-                    .with_operation("Object::write_from")
-                    .with_context("service", self.accessor().metadata().scheme().into_static())
-                    .with_context("path", self.path()),
-            );
-        }
-
-        let _ = self
-            .acc
-            .write(self.path(), OpWrite::new(size), Box::new(br))
-            .await?;
-        Ok(())
-    }
-
-    /// Write data into object from a [`input::BlockingRead`].
-    ///
-    /// # Notes
-    ///
-    /// - Write will make sure all bytes has been written, or an error will be returned.
-    ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// # use std::io::Result;
-    /// # use opendal::Operator;
-    /// # use futures::StreamExt;
-    /// # use futures::SinkExt;
-    /// use std::io::Cursor;
-    ///
-    /// use bytes::Bytes;
-    ///
-    /// # async fn test(op: Operator) -> Result<()> {
-    /// let o = op.object("path/to/file");
-    /// let r = Cursor::new(vec![0; 4096]);
-    /// let _ = o.blocking_write_from(4096, r)?;
-    /// # Ok(())
-    /// # }
-    /// ```
-    pub fn blocking_write_from(
-        &self,
-        size: u64,
-        br: impl input::BlockingRead + 'static,
-    ) -> Result<()> {
-        if !validate_path(self.path(), ObjectMode::FILE) {
-            return Err(
-                Error::new(ErrorKind::ObjectIsADirectory, "write path is a directory")
-                    .with_operation("Object::blocking_write_from")
-                    .with_context("service", self.accessor().metadata().scheme().into_static())
-                    .with_context("path", self.path()),
-            );
-        }
-
-        let _ = self
-            .acc
-            .blocking_write(self.path(), OpWrite::new(size), Box::new(br))?;
         Ok(())
     }
 
@@ -931,11 +733,6 @@ impl Object {
     pub async fn delete(&self) -> Result<()> {
         let _ = self.acc.delete(self.path(), OpDelete::new()).await?;
 
-        // Always write latest metadata into cache.
-        {
-            let mut guard = self.meta.lock();
-            *guard = ObjectMetadata::new(ObjectMode::Unknown);
-        }
         Ok(())
     }
 
@@ -959,11 +756,6 @@ impl Object {
     pub fn blocking_delete(&self) -> Result<()> {
         let _ = self.acc.blocking_delete(self.path(), OpDelete::new())?;
 
-        // Always write latest metadata into cache.
-        {
-            let mut guard = self.meta.lock();
-            *guard = ObjectMetadata::new(ObjectMode::Unknown);
-        }
         Ok(())
     }
 
@@ -985,9 +777,14 @@ impl Object {
     /// # async fn test(op: Operator) -> Result<()> {
     /// let o = op.object("path/to/dir/");
     /// let mut ds = o.list().await?;
-    /// // ObjectStreamer implements `futures::Stream`
-    /// while let Some(de) = ds.try_next().await? {
-    ///     match de.mode().await? {
+    /// while let Some(mut de) = ds.try_next().await? {
+    ///     let meta = de
+    ///         .metadata({
+    ///             use opendal::ObjectMetakey::*;
+    ///             Mode
+    ///         })
+    ///         .await?;
+    ///     match meta.mode() {
     ///         ObjectMode::FILE => {
     ///             println!("Handling file")
     ///         }
@@ -1032,9 +829,12 @@ impl Object {
     /// # fn test(op: Operator) -> Result<()> {
     /// let o = op.object("path/to/dir/");
     /// let mut ds = o.blocking_list()?;
-    /// while let Some(de) = ds.next() {
-    ///     let de = de?;
-    ///     match de.blocking_mode()? {
+    /// while let Some(mut de) = ds.next() {
+    ///     let meta = de?.blocking_metadata({
+    ///         use opendal::ObjectMetakey::*;
+    ///         Mode
+    ///     })?;
+    ///     match meta.mode() {
     ///         ObjectMode::FILE => {
     ///             println!("Handling file")
     ///         }
@@ -1076,13 +876,19 @@ impl Object {
     /// # use opendal::Operator;
     /// # use opendal::ObjectMode;
     /// # use futures::TryStreamExt;
+    /// #
     /// # #[tokio::main]
     /// # async fn test(op: Operator) -> Result<()> {
     /// let o = op.object("path/to/dir/");
     /// let mut ds = o.scan().await?;
-    /// // ObjectStreamer implements `futures::Stream`
-    /// while let Some(de) = ds.try_next().await? {
-    ///     match de.mode().await? {
+    /// while let Some(mut de) = ds.try_next().await? {
+    ///     let meta = de
+    ///         .metadata({
+    ///             use opendal::ObjectMetakey::*;
+    ///             Mode
+    ///         })
+    ///         .await?;
+    ///     match meta.mode() {
     ///         ObjectMode::FILE => {
     ///             println!("Handling file")
     ///         }
@@ -1127,9 +933,12 @@ impl Object {
     /// # fn test(op: Operator) -> Result<()> {
     /// let o = op.object("path/to/dir/");
     /// let mut ds = o.blocking_list()?;
-    /// while let Some(de) = ds.next() {
-    ///     let de = de?;
-    ///     match de.blocking_mode()? {
+    /// while let Some(mut de) = ds.next() {
+    ///     let meta = de?.blocking_metadata({
+    ///         use opendal::ObjectMetakey::*;
+    ///         Mode
+    ///     })?;
+    ///     match meta.mode() {
     ///         ObjectMode::FILE => {
     ///             println!("Handling file")
     ///         }
@@ -1157,79 +966,18 @@ impl Object {
         Ok(BlockingObjectLister::new(self.acc.clone(), pager))
     }
 
-    /// metadata_ref is used to get object metadata with mutex guard.
-    ///
-    /// Called can decide to access or clone the content of object metadata.
-    /// But they can't pass the guard outside or across the await boundary.
+    /// Get current object's metadata **without cache** directly.
     ///
     /// # Notes
     ///
-    /// We return `MutexGuard<'_, ObjectMetadata>` here to make rustc 1.60 happy.
-    /// After MSRV bumped to higher version, we can elide this.
-    async fn metadata_ref(&self) -> Result<MutexGuard<'_, ObjectMetadata>> {
-        // Make sure the mutex guard has been dropped.
-        {
-            let guard = self.meta.lock();
-            if guard.is_complete() {
-                return Ok(guard);
-            }
-        }
-
-        let rp = self.acc.stat(self.path(), OpStat::new()).await?;
-        let meta = rp.into_metadata();
-
-        let mut guard = self.meta.lock();
-        *guard = meta;
-
-        Ok(guard)
-    }
-
-    fn blocking_metadata_ref(&self) -> Result<MutexGuard<'_, ObjectMetadata>> {
-        // Make sure the mutex guard has been dropped.
-        {
-            let guard = self.meta.lock();
-            if guard.is_complete() {
-                return Ok(guard);
-            }
-        }
-
-        let rp = self.acc.blocking_stat(self.path(), OpStat::new())?;
-        let meta = rp.into_metadata();
-
-        let mut guard = self.meta.lock();
-        *guard = meta;
-
-        Ok(guard)
-    }
-
-    /// Get current object's metadata **without cache**.
+    /// Use `stat` if you:
     ///
-    /// # Notes
+    /// - Want detect the outside changes of object.
+    /// - Don't want to read from cached object metadata.
     ///
-    /// This function works exactly the same with `Object::metadata`.The
-    /// only difference is it will not try to load data from cached metadata.
-    ///
-    /// Use this function to detect the outside changes of object.
-    pub async fn stat(&self) -> Result<ObjectMetadata> {
-        let rp = self.acc.stat(self.path(), OpStat::new()).await?;
-        let meta = rp.into_metadata();
-
-        // Always write latest metadata into cache.
-        {
-            let mut guard = self.meta.lock();
-            *guard = meta.clone();
-        }
-
-        Ok(meta)
-    }
-
-    /// Get current object's metadata with cache.
-    ///
-    /// # Notes
-    ///
-    /// This function will try access the local metadata cache first.
-    /// If there are outside changes of the object, `metadata` could return
-    /// out-of-date metadata. To overcome this, please use [`Object::stat`].
+    /// You may want to use `metadata` if you are working with objects
+    /// returned by [`ObjectLister`]. It's highly possible that metadata
+    /// you want has already been cached.
     ///
     /// # Examples
     ///
@@ -1241,7 +989,7 @@ impl Object {
     /// #
     /// # #[tokio::main]
     /// # async fn test(op: Operator) -> Result<()> {
-    /// if let Err(e) = op.object("test").metadata().await {
+    /// if let Err(e) = op.object("test").stat().await {
     ///     if e.kind() == ErrorKind::ObjectNotFound {
     ///         println!("object not exist")
     ///     }
@@ -1249,108 +997,36 @@ impl Object {
     /// # Ok(())
     /// # }
     /// ```
-    pub async fn metadata(&self) -> Result<ObjectMetadata> {
-        let guard = self.metadata_ref().await?;
+    pub async fn stat(&self) -> Result<ObjectMetadata> {
+        let rp = self.acc.stat(self.path(), OpStat::new()).await?;
+        let meta = rp.into_metadata();
 
-        Ok(guard.clone())
+        Ok(meta)
     }
 
-    /// The size of `Entry`'s corresponding object
+    /// Get current object's metadata **without cache** directly.
     ///
-    /// `content_length` is a prefetched metadata field in `Entry`.
-    pub async fn content_length(&self) -> Result<u64> {
-        {
-            let guard = self.meta.lock();
-            if let Some(v) = guard.content_length_raw() {
-                return Ok(v);
-            }
-            if guard.is_complete() {
-                return Ok(0);
-            }
-        }
-
-        let guard = self.metadata_ref().await?;
-        Ok(guard.content_length())
-    }
-
-    /// The MD5 message digest of `Entry`'s corresponding object
+    /// # Notes
     ///
-    /// `content_md5` is a prefetched metadata field in `Entry`
+    /// Use `stat` if you:
     ///
-    /// It doesn't mean this metadata field of object doesn't exist if `content_md5` is `None`.
-    /// Then you have to call `output::Entry::metadata()` to get the metadata you want.
-    pub async fn content_md5(&self) -> Result<Option<String>> {
-        {
-            let guard = self.meta.lock();
-
-            if let Some(v) = guard.content_md5() {
-                return Ok(Some(v.to_string()));
-            }
-            if guard.is_complete() {
-                return Ok(None);
-            }
-        }
-
-        let guard = self.metadata_ref().await?;
-        Ok(guard.content_md5().map(|v| v.to_string()))
-    }
-
-    /// The last modified UTC datetime of `Entry`'s corresponding object
+    /// - Want detect the outside changes of object.
+    /// - Don't want to read from cached object metadata.
     ///
-    /// `last_modified` is a prefetched metadata field in `Entry`
-    ///
-    /// It doesn't mean this metadata field of object doesn't exist if `last_modified` is `None`.
-    /// Then you have to call `output::Entry::metadata()` to get the metadata you want.
-    pub async fn last_modified(&self) -> Result<Option<OffsetDateTime>> {
-        {
-            let guard = self.meta.lock();
-
-            if let Some(v) = guard.last_modified() {
-                return Ok(Some(v));
-            }
-            if guard.is_complete() {
-                return Ok(None);
-            }
-        }
-
-        let guard = self.metadata_ref().await?;
-        Ok(guard.last_modified())
-    }
-
-    /// The ETag string of `Entry`'s corresponding object
-    ///
-    /// `etag` is a prefetched metadata field in `Entry`.
-    ///
-    /// It doesn't mean this metadata field of object doesn't exist if `etag` is `None`.
-    /// Then you have to call `output::Entry::metadata()` to get the metadata you want.
-    pub async fn etag(&self) -> Result<Option<String>> {
-        {
-            let guard = self.meta.lock();
-
-            if let Some(v) = guard.etag() {
-                return Ok(Some(v.to_string()));
-            }
-            if guard.is_complete() {
-                return Ok(None);
-            }
-        }
-
-        let meta = self.metadata().await?;
-        Ok(meta.etag().map(|v| v.to_string()))
-    }
-
-    /// Get current object's metadata.
+    /// You may want to use `metadata` if you are working with objects
+    /// returned by [`ObjectLister`]. It's highly possible that metadata
+    /// you want has already been cached.
     ///
     /// # Examples
     ///
-    /// ```no_run
+    /// ```
     /// # use anyhow::Result;
     /// # use futures::io;
     /// # use opendal::Operator;
     /// use opendal::ErrorKind;
     /// #
-    /// # async fn test(op: Operator) -> Result<()> {
-    /// if let Err(e) = op.object("test").blocking_metadata() {
+    /// # fn test(op: Operator) -> Result<()> {
+    /// if let Err(e) = op.object("test").blocking_stat() {
     ///     if e.kind() == ErrorKind::ObjectNotFound {
     ///         println!("object not exist")
     ///     }
@@ -1358,23 +1034,207 @@ impl Object {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn blocking_metadata(&self) -> Result<ObjectMetadata> {
-        // Make sure the mutex guard has been dropped.
-        {
-            let guard = self.meta.lock();
-            if guard.is_complete() {
-                return Ok(guard.clone());
-            }
-        }
-
+    pub fn blocking_stat(&self) -> Result<ObjectMetadata> {
         let rp = self.acc.blocking_stat(self.path(), OpStat::new())?;
         let meta = rp.into_metadata();
 
-        {
-            let mut guard = self.meta.lock();
-            *guard = meta.clone();
+        Ok(meta)
+    }
+
+    /// Get current object's metadata with cache.
+    ///
+    /// `metadata` will check the given query with already cached metadata
+    ///  first. And query from storage if not found.
+    ///
+    /// # Notes
+    ///
+    /// Use `metadata` if you are working with objects returned by
+    /// [`ObjectLister`]. It's highly possible that metadata you want
+    /// has already been cached.
+    ///
+    /// You may want to use `stat`, if you:
+    ///
+    /// - Want detect the outside changes of object.
+    /// - Don't want to read from cached object metadata.
+    ///
+    /// # Behavior
+    ///
+    /// Visiting not fetched metadata will lead to panic in debug build.
+    /// It must be a bug, please fix it instead.
+    ///
+    /// # Examples
+    ///
+    /// ## Query already cached metadata
+    ///
+    /// By query metadata with `None`, we can only query in-memory metadata
+    /// cache. In this way, we can make sure that no API call will send.
+    ///
+    /// ```
+    /// # use anyhow::Result;
+    /// # use opendal::Operator;
+    /// # #[tokio::main]
+    /// # async fn test(op: Operator) -> Result<()> {
+    /// let meta = op.object("test").metadata(None).await?;
+    /// // content length COULD be correct.
+    /// let _ = meta.content_length();
+    /// // etag COULD be correct.
+    /// let _ = meta.etag();
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// ## Query content length and content type
+    ///
+    /// ```
+    /// # use anyhow::Result;
+    /// # use opendal::Operator;
+    /// use opendal::ObjectMetakey;
+    ///
+    /// # #[tokio::main]
+    /// # async fn test(op: Operator) -> Result<()> {
+    /// let meta = op
+    ///     .object("test")
+    ///     .metadata({
+    ///         use ObjectMetakey::*;
+    ///         ContentLength | ContentType
+    ///     })
+    ///     .await?;
+    /// // content length MUST be correct.
+    /// let _ = meta.content_length();
+    /// // etag COULD be correct.
+    /// let _ = meta.etag();
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// ## Query all metadata
+    ///
+    /// By query metadata with `Complete`, we can make sure that we have fetched all metadata of this object.
+    ///
+    /// ```
+    /// # use anyhow::Result;
+    /// # use opendal::Operator;
+    /// use opendal::ObjectMetakey;
+    ///
+    /// # #[tokio::main]
+    /// # async fn test(op: Operator) -> Result<()> {
+    /// let meta = op
+    ///     .object("test")
+    ///     .metadata({ ObjectMetakey::Complete })
+    ///     .await?;
+    /// // content length MUST be correct.
+    /// let _ = meta.content_length();
+    /// // etag MUST be correct.
+    /// let _ = meta.etag();
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn metadata(
+        &self,
+        flags: impl Into<FlagSet<ObjectMetakey>>,
+    ) -> Result<Arc<ObjectMetadata>> {
+        if let Some(meta) = &self.meta {
+            if meta.bit().contains(flags) || meta.bit().contains(ObjectMetakey::Complete) {
+                return Ok(meta.clone());
+            }
         }
 
+        let meta = Arc::new(self.stat().await?);
+        Ok(meta)
+    }
+
+    /// Get current object's metadata with cache in blocking way.
+    ///
+    /// `metadata` will check the given query with already cached metadata
+    ///  first. And query from storage if not found.
+    ///
+    /// # Notes
+    ///
+    /// Use `metadata` if you are working with objects returned by
+    /// [`ObjectLister`]. It's highly possible that metadata you want
+    /// has already been cached.
+    ///
+    /// You may want to use `stat`, if you:
+    ///
+    /// - Want detect the outside changes of object.
+    /// - Don't want to read from cached object metadata.
+    ///
+    /// # Behavior
+    ///
+    /// Visiting not fetched metadata will lead to panic in debug build.
+    /// It must be a bug, please fix it instead.
+    ///
+    /// # Examples
+    ///
+    /// ## Query already cached metadata
+    ///
+    /// By query metadata with `None`, we can only query in-memory metadata
+    /// cache. In this way, we can make sure that no API call will send.
+    ///
+    /// ```
+    /// # use anyhow::Result;
+    /// # use opendal::Operator;
+    /// # fn test(op: Operator) -> Result<()> {
+    /// let meta = op.object("test").blocking_metadata(None)?;
+    /// // content length COULD be correct.
+    /// let _ = meta.content_length();
+    /// // etag COULD be correct.
+    /// let _ = meta.etag();
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// ## Query content length and content type
+    ///
+    /// ```
+    /// # use anyhow::Result;
+    /// # use opendal::Operator;
+    /// use opendal::ObjectMetakey;
+    ///
+    /// # fn test(op: Operator) -> Result<()> {
+    /// let meta = op.object("test").blocking_metadata({
+    ///     use ObjectMetakey::*;
+    ///     ContentLength | ContentType
+    /// })?;
+    /// // content length MUST be correct.
+    /// let _ = meta.content_length();
+    /// // etag COULD be correct.
+    /// let _ = meta.etag();
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// ## Query all metadata
+    ///
+    /// By query metadata with `Complete`, we can make sure that we have fetched all metadata of this object.
+    ///
+    /// ```
+    /// # use anyhow::Result;
+    /// # use opendal::Operator;
+    /// use opendal::ObjectMetakey;
+    ///
+    /// # fn test(op: Operator) -> Result<()> {
+    /// let meta = op
+    ///     .object("test")
+    ///     .blocking_metadata({ ObjectMetakey::Complete })?;
+    /// // content length MUST be correct.
+    /// let _ = meta.content_length();
+    /// // etag MUST be correct.
+    /// let _ = meta.etag();
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn blocking_metadata(
+        &self,
+        flags: impl Into<FlagSet<ObjectMetakey>>,
+    ) -> Result<Arc<ObjectMetadata>> {
+        if let Some(meta) = &self.meta {
+            if meta.bit().contains(flags) || meta.bit().contains(ObjectMetakey::Complete) {
+                return Ok(meta.clone());
+            }
+        }
+
+        let meta = Arc::new(self.blocking_stat()?);
         Ok(meta)
     }
 
@@ -1395,7 +1255,7 @@ impl Object {
     /// }
     /// ```
     pub async fn is_exist(&self) -> Result<bool> {
-        let r = self.metadata_ref().await;
+        let r = self.stat().await;
         match r {
             Ok(_) => Ok(true),
             Err(err) => match err.kind() {
@@ -1419,7 +1279,7 @@ impl Object {
     /// }
     /// ```
     pub fn blocking_is_exist(&self) -> Result<bool> {
-        let r = self.blocking_metadata();
+        let r = self.blocking_stat();
         match r {
             Ok(_) => Ok(true),
             Err(err) => match err.kind() {
@@ -1428,6 +1288,7 @@ impl Object {
             },
         }
     }
+
     /// Presign an operation for stat(head).
     ///
     /// # Example
@@ -1516,7 +1377,7 @@ impl Object {
     /// curl -X PUT "https://s3.amazonaws.com/examplebucket/test.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=access_key_id/20130721/us-east-1/s3/aws4_request&X-Amz-Date=20130721T201207Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=<signature-value>" -d "Hello, World!"
     /// ```
     pub fn presign_write(&self, expire: Duration) -> Result<PresignedRequest> {
-        self.presign_write_with(OpWrite::new(0), expire)
+        self.presign_write_with(OpWrite::new(), expire)
     }
 
     /// Presign an operation for write with option described in OpenDAL [rfc-0661](../../docs/rfcs/0661-path-in-accessor.md)
@@ -1534,7 +1395,7 @@ impl Object {
     ///
     /// #[tokio::main]
     /// async fn test(op: Operator) -> Result<()> {
-    ///     let args = OpWrite::new(0).with_content_type("text/csv");
+    ///     let args = OpWrite::new().with_content_type("text/csv");
     ///     let signed_req = op.object("test").presign_write_with(args, Duration::hours(1))?;
     ///     let req = http::Request::builder()
     ///         .method(signed_req.method())
@@ -1549,19 +1410,5 @@ impl Object {
 
         let rp = self.acc.presign(self.path(), op)?;
         Ok(rp.into_presigned_request())
-    }
-
-    /// Construct a multipart with existing upload id.
-    pub fn to_multipart(&self, upload_id: &str) -> ObjectMultipart {
-        ObjectMultipart::new(self.operator(), &self.path, upload_id)
-    }
-
-    /// Create a new multipart for current path.
-    pub async fn create_multipart(&self) -> Result<ObjectMultipart> {
-        let rp = self
-            .acc
-            .create_multipart(self.path(), OpCreateMultipart::new())
-            .await?;
-        Ok(self.to_multipart(rp.upload_id()))
     }
 }

@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
 //! use opendal::ErrorKind;
 //! # #[tokio::main]
 //! # async fn test(op: Operator) -> Result<()> {
-//! if let Err(e) = op.object("test_file").metadata().await {
+//! if let Err(e) = op.object("test_file").stat().await {
 //!     if e.kind() == ErrorKind::ObjectNotFound {
 //!         println!("object not exist")
 //!     }
@@ -38,10 +38,10 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::io;
 
-/// Result that is a wrapper of `Reustl<T, opendal::Error>`
+/// Result that is a wrapper of `Result<T, opendal::Error>`
 pub type Result<T> = std::result::Result<T, Error>;
 
-/// ErrorKind is all kinds of opendal's Error.
+/// ErrorKind is all kinds of Error of opendal.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum ErrorKind {
@@ -232,12 +232,12 @@ impl Error {
     ///
     /// If the error already carries an operation, we will push a new context
     /// `(called, operation)`.
-    pub fn with_operation(mut self, operation: &'static str) -> Self {
+    pub fn with_operation(mut self, operation: impl Into<&'static str>) -> Self {
         if !self.operation.is_empty() {
             self.context.push(("called", self.operation.to_string()));
         }
 
-        self.operation = operation;
+        self.operation = operation.into();
         self
     }
 

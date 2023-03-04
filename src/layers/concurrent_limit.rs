@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,6 +28,11 @@ use crate::raw::*;
 use crate::*;
 
 /// Add concurrent request limit.
+///
+/// # Notes
+///
+/// Users can control how many concurrent connections could be established
+/// between OpenDAL and underlying storage services.
 ///
 /// # Examples
 ///
@@ -76,6 +81,8 @@ impl<A: Accessor> LayeredAccessor for ConcurrentLimitAccessor<A> {
     type Inner = A;
     type Reader = ConcurrentLimitWrapper<A::Reader>;
     type BlockingReader = ConcurrentLimitWrapper<A::BlockingReader>;
+    type Writer = ConcurrentLimitWrapper<A::Writer>;
+    type BlockingWriter = ConcurrentLimitWrapper<A::BlockingWriter>;
     type Pager = ConcurrentLimitWrapper<A::Pager>;
     type BlockingPager = ConcurrentLimitWrapper<A::BlockingPager>;
 
@@ -107,14 +114,18 @@ impl<A: Accessor> LayeredAccessor for ConcurrentLimitAccessor<A> {
             .map(|(rp, r)| (rp, ConcurrentLimitWrapper::new(r, permit)))
     }
 
-    async fn write(&self, path: &str, args: OpWrite, r: input::Reader) -> Result<RpWrite> {
-        let _permit = self
+    async fn write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::Writer)> {
+        let permit = self
             .semaphore
-            .acquire()
+            .clone()
+            .acquire_owned()
             .await
             .expect("semaphore must be valid");
 
-        self.inner.write(path, args, r).await
+        self.inner
+            .write(path, args)
+            .await
+            .map(|(rp, w)| (rp, ConcurrentLimitWrapper::new(w, permit)))
     }
 
     async fn stat(&self, path: &str, args: OpStat) -> Result<RpStat> {
@@ -165,61 +176,14 @@ impl<A: Accessor> LayeredAccessor for ConcurrentLimitAccessor<A> {
             .map(|(rp, s)| (rp, ConcurrentLimitWrapper::new(s, permit)))
     }
 
-    async fn create_multipart(
-        &self,
-        path: &str,
-        args: OpCreateMultipart,
-    ) -> Result<RpCreateMultipart> {
+    async fn batch(&self, args: OpBatch) -> Result<RpBatch> {
         let _permit = self
             .semaphore
             .acquire()
             .await
             .expect("semaphore must be valid");
 
-        self.inner.create_multipart(path, args).await
-    }
-
-    async fn write_multipart(
-        &self,
-        path: &str,
-        args: OpWriteMultipart,
-        r: input::Reader,
-    ) -> Result<RpWriteMultipart> {
-        let _permit = self
-            .semaphore
-            .acquire()
-            .await
-            .expect("semaphore must be valid");
-
-        self.inner.write_multipart(path, args, r).await
-    }
-
-    async fn complete_multipart(
-        &self,
-        path: &str,
-        args: OpCompleteMultipart,
-    ) -> Result<RpCompleteMultipart> {
-        let _permit = self
-            .semaphore
-            .acquire()
-            .await
-            .expect("semaphore must be valid");
-
-        self.inner.complete_multipart(path, args).await
-    }
-
-    async fn abort_multipart(
-        &self,
-        path: &str,
-        args: OpAbortMultipart,
-    ) -> Result<RpAbortMultipart> {
-        let _permit = self
-            .semaphore
-            .acquire()
-            .await
-            .expect("semaphore must be valid");
-
-        self.inner.abort_multipart(path, args).await
+        self.inner.batch(args).await
     }
 
     fn blocking_create(&self, path: &str, args: OpCreate) -> Result<RpCreate> {
@@ -243,18 +207,16 @@ impl<A: Accessor> LayeredAccessor for ConcurrentLimitAccessor<A> {
             .map(|(rp, r)| (rp, ConcurrentLimitWrapper::new(r, permit)))
     }
 
-    fn blocking_write(
-        &self,
-        path: &str,
-        args: OpWrite,
-        r: input::BlockingReader,
-    ) -> Result<RpWrite> {
-        let _permit = self
+    fn blocking_write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::BlockingWriter)> {
+        let permit = self
             .semaphore
-            .try_acquire()
+            .clone()
+            .try_acquire_owned()
             .expect("semaphore must be valid");
 
-        self.inner.blocking_write(path, args, r)
+        self.inner
+            .blocking_write(path, args)
+            .map(|(rp, w)| (rp, ConcurrentLimitWrapper::new(w, permit)))
     }
 
     fn blocking_stat(&self, path: &str, args: OpStat) -> Result<RpStat> {
@@ -316,43 +278,72 @@ impl<R> ConcurrentLimitWrapper<R> {
     }
 }
 
-impl<R: output::Read> output::Read for ConcurrentLimitWrapper<R> {
-    fn poll_read(&mut self, cx: &mut Context<'_>, buf: &mut [u8]) -> Poll<std::io::Result<usize>> {
+impl<R: oio::Read> oio::Read for ConcurrentLimitWrapper<R> {
+    fn poll_read(&mut self, cx: &mut Context<'_>, buf: &mut [u8]) -> Poll<Result<usize>> {
         self.inner.poll_read(cx, buf)
     }
 
-    fn poll_seek(&mut self, cx: &mut Context<'_>, pos: SeekFrom) -> Poll<std::io::Result<u64>> {
+    fn poll_seek(&mut self, cx: &mut Context<'_>, pos: SeekFrom) -> Poll<Result<u64>> {
         self.inner.poll_seek(cx, pos)
     }
 
-    fn poll_next(&mut self, cx: &mut Context<'_>) -> Poll<Option<std::io::Result<Bytes>>> {
+    fn poll_next(&mut self, cx: &mut Context<'_>) -> Poll<Option<Result<Bytes>>> {
         self.inner.poll_next(cx)
     }
 }
 
-impl<R: output::BlockingRead> output::BlockingRead for ConcurrentLimitWrapper<R> {
-    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+impl<R: oio::BlockingRead> oio::BlockingRead for ConcurrentLimitWrapper<R> {
+    fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
         self.inner.read(buf)
     }
 
-    fn seek(&mut self, pos: SeekFrom) -> std::io::Result<u64> {
+    fn seek(&mut self, pos: SeekFrom) -> Result<u64> {
         self.inner.seek(pos)
     }
 
-    fn next(&mut self) -> Option<std::io::Result<Bytes>> {
+    fn next(&mut self) -> Option<Result<Bytes>> {
         self.inner.next()
     }
 }
 
 #[async_trait]
-impl<R: output::Page> output::Page for ConcurrentLimitWrapper<R> {
-    async fn next_page(&mut self) -> Result<Option<Vec<output::Entry>>> {
-        self.inner.next_page().await
+impl<R: oio::Write> oio::Write for ConcurrentLimitWrapper<R> {
+    async fn write(&mut self, bs: Bytes) -> Result<()> {
+        self.inner.write(bs).await
+    }
+
+    async fn append(&mut self, bs: Bytes) -> Result<()> {
+        self.inner.append(bs).await
+    }
+
+    async fn close(&mut self) -> Result<()> {
+        self.inner.close().await
     }
 }
 
-impl<R: output::BlockingPage> output::BlockingPage for ConcurrentLimitWrapper<R> {
-    fn next_page(&mut self) -> Result<Option<Vec<output::Entry>>> {
-        self.inner.next_page()
+impl<R: oio::BlockingWrite> oio::BlockingWrite for ConcurrentLimitWrapper<R> {
+    fn write(&mut self, bs: Bytes) -> Result<()> {
+        self.inner.write(bs)
+    }
+
+    fn append(&mut self, bs: Bytes) -> Result<()> {
+        self.inner.append(bs)
+    }
+
+    fn close(&mut self) -> Result<()> {
+        self.inner.close()
+    }
+}
+
+#[async_trait]
+impl<R: oio::Page> oio::Page for ConcurrentLimitWrapper<R> {
+    async fn next(&mut self) -> Result<Option<Vec<oio::Entry>>> {
+        self.inner.next().await
+    }
+}
+
+impl<R: oio::BlockingPage> oio::BlockingPage for ConcurrentLimitWrapper<R> {
+    fn next(&mut self) -> Result<Option<Vec<oio::Entry>>> {
+        self.inner.next()
     }
 }

@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -135,6 +135,8 @@ impl<A: Accessor> LayeredAccessor for ImmutableIndexAccessor<A> {
     type Inner = A;
     type Reader = A::Reader;
     type BlockingReader = A::BlockingReader;
+    type Writer = A::Writer;
+    type BlockingWriter = A::BlockingWriter;
     type Pager = ImmutableDir;
     type BlockingPager = ImmutableDir;
 
@@ -185,6 +187,14 @@ impl<A: Accessor> LayeredAccessor for ImmutableIndexAccessor<A> {
         self.inner.blocking_read(path, args)
     }
 
+    async fn write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::Writer)> {
+        self.inner.write(path, args).await
+    }
+
+    fn blocking_write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::BlockingWriter)> {
+        self.inner.blocking_write(path, args)
+    }
+
     fn blocking_list(&self, path: &str, _: OpList) -> Result<(RpList, Self::BlockingPager)> {
         let mut path = path;
         if path == "/" {
@@ -219,7 +229,7 @@ impl ImmutableDir {
         Self { idx }
     }
 
-    fn inner_next_page(&mut self) -> Option<Vec<output::Entry>> {
+    fn inner_next_page(&mut self) -> Option<Vec<oio::Entry>> {
         if self.idx.is_empty() {
             return None;
         }
@@ -235,7 +245,7 @@ impl ImmutableDir {
                         ObjectMode::FILE
                     };
                     let meta = ObjectMetadata::new(mode);
-                    output::Entry::with(v, meta)
+                    oio::Entry::with(v, meta)
                 })
                 .collect(),
         )
@@ -243,14 +253,14 @@ impl ImmutableDir {
 }
 
 #[async_trait]
-impl output::Page for ImmutableDir {
-    async fn next_page(&mut self) -> Result<Option<Vec<output::Entry>>> {
+impl oio::Page for ImmutableDir {
+    async fn next(&mut self) -> Result<Option<Vec<oio::Entry>>> {
         Ok(self.inner_next_page())
     }
 }
 
-impl output::BlockingPage for ImmutableDir {
-    fn next_page(&mut self) -> Result<Option<Vec<output::Entry>>> {
+impl oio::BlockingPage for ImmutableDir {
+    fn next(&mut self) -> Result<Option<Vec<oio::Entry>>> {
         Ok(self.inner_next_page())
     }
 }
@@ -296,7 +306,10 @@ mod tests {
                 "duplicated value: {}",
                 entry.path()
             );
-            map.insert(entry.path().to_string(), entry.mode().await?);
+            map.insert(
+                entry.path().to_string(),
+                entry.metadata(ObjectMetakey::Mode).await?.mode(),
+            );
         }
 
         assert_eq!(map["file"], ObjectMode::FILE);
@@ -331,7 +344,10 @@ mod tests {
                 "duplicated value: {}",
                 entry.path()
             );
-            map.insert(entry.path().to_string(), entry.mode().await?);
+            map.insert(
+                entry.path().to_string(),
+                entry.metadata(ObjectMetakey::Mode).await?.mode(),
+            );
         }
 
         debug!("current files: {:?}", map);
@@ -372,7 +388,10 @@ mod tests {
                 "duplicated value: {}",
                 entry.path()
             );
-            map.insert(entry.path().to_string(), entry.mode().await?);
+            map.insert(
+                entry.path().to_string(),
+                entry.metadata(ObjectMetakey::Mode).await?.mode(),
+            );
         }
 
         assert_eq!(map.len(), 1);
@@ -388,7 +407,10 @@ mod tests {
                 "duplicated value: {}",
                 entry.path()
             );
-            map.insert(entry.path().to_string(), entry.mode().await?);
+            map.insert(
+                entry.path().to_string(),
+                entry.metadata(ObjectMetakey::Mode).await?.mode(),
+            );
         }
 
         assert_eq!(
@@ -436,7 +458,10 @@ mod tests {
                 "duplicated value: {}",
                 entry.path()
             );
-            map.insert(entry.path().to_string(), entry.mode().await?);
+            map.insert(
+                entry.path().to_string(),
+                entry.metadata(ObjectMetakey::Mode).await?.mode(),
+            );
         }
 
         debug!("current files: {:?}", map);

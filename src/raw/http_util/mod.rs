@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,6 +28,10 @@ pub use body::Body;
 pub use body::IncomingAsyncBody;
 
 mod header;
+pub use header::format_authorization_by_basic;
+pub use header::format_authorization_by_bearer;
+pub use header::format_content_md5;
+pub use header::parse_content_disposition;
 pub use header::parse_content_length;
 pub use header::parse_content_md5;
 pub use header::parse_content_range;
@@ -35,6 +39,7 @@ pub use header::parse_content_type;
 pub use header::parse_etag;
 pub use header::parse_into_object_metadata;
 pub use header::parse_last_modified;
+pub use header::parse_location;
 
 mod uri;
 pub use uri::percent_encode_path;

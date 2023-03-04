@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@
 //!         .finish();
 //!
 //!     // Create object handler.
-//!     let o = op.object("test_file");
+//!     let mut o = op.object("test_file");
 //!
 //!     // Write data
 //!     o.write("Hello, World!").await?;
@@ -49,7 +49,7 @@
 //!     let bs = o.read().await?;
 //!
 //!     // Fetch metadata
-//!     let meta = o.metadata().await?;
+//!     let meta = o.stat().await?;
 //!     let mode = meta.mode();
 //!     let length = meta.content_length();
 //!
@@ -76,13 +76,15 @@ pub use operator::OperatorBuilder;
 pub use operator::OperatorMetadata;
 
 mod object;
+pub use object::BlockingObjectReader;
+pub use object::BlockingObjectWriter;
 pub use object::Object;
 pub use object::ObjectLister;
 pub use object::ObjectMetadata;
+pub use object::ObjectMetakey;
 pub use object::ObjectMode;
-pub use object::ObjectMultipart;
-pub use object::ObjectPart;
 pub use object::ObjectReader;
+pub use object::ObjectWriter;
 
 mod scheme;
 pub use scheme::Scheme;
@@ -115,13 +117,10 @@ mod tests {
     fn assert_size() {
         assert_eq!(88, size_of::<AccessorMetadata>());
         assert_eq!(16, size_of::<Operator>());
-        assert_eq!(16, size_of::<BatchOperator>());
-        assert_eq!(208, size_of::<output::Entry>());
-        assert_eq!(48, size_of::<Object>());
-        assert_eq!(184, size_of::<ObjectMetadata>());
+        assert_eq!(112, size_of::<BatchOperator>());
+        assert_eq!(32, size_of::<Object>());
+        assert_eq!(192, size_of::<ObjectMetadata>());
         assert_eq!(1, size_of::<ObjectMode>());
-        assert_eq!(64, size_of::<ObjectMultipart>());
-        assert_eq!(32, size_of::<ObjectPart>());
         assert_eq!(24, size_of::<Scheme>());
     }
 }

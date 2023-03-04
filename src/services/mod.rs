@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,11 @@ pub use azblob::Azblob;
 
 mod azdfs;
 pub use azdfs::Azdfs;
+
+#[cfg(feature = "services-dashmap")]
+mod dashmap;
+#[cfg(feature = "services-dashmap")]
+pub use self::dashmap::Dashmap;
 
 mod fs;
 pub use fs::Fs;

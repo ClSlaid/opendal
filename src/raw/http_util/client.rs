@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 use std::env;
 use std::fmt::Debug;
 use std::fmt::Formatter;
-use std::io;
 use std::str::FromStr;
 use std::sync::Arc;
 
@@ -108,6 +107,29 @@ impl HttpClient {
     ///
     /// And this API is an internal API, OpenDAL could change it while bumping
     /// minor versions.
+    ///
+    /// ## Reminders
+    /// ### no auto redirect
+    /// OpenDAL will handle all HTTP responses, including redirections.
+    /// Auto redirect may cause OpenDAL to fail.
+    ///
+    /// For reqwest client, please make sure your client's redirect policy is `Policy::none()`.
+    /// ```no_run
+    /// # use anyhow::Result;
+    /// # use reqwest::redirect::Policy;
+    /// # fn main() -> Result<()> {
+    /// let _client = reqwest::ClientBuilder::new()
+    ///     .redirect(Policy::none())
+    ///     .build()?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    /// For ureq client, please make sure your client's redirect count is `0`:
+    /// ```no_run
+    /// # fn main() {
+    /// let _client = ureq::AgentBuilder::new().redirects(0).build();
+    /// # }
+    /// ```
     pub fn with_client(async_client: reqwest::Client, sync_client: ureq::Agent) -> Self {
         Self {
             async_client,
@@ -190,7 +212,7 @@ impl HttpClient {
 
         req_builder = if let AsyncBody::Multipart(field, r) = body {
             let mut form = reqwest::multipart::Form::new();
-            let part = reqwest::multipart::Part::stream(AsyncBody::Reader(r));
+            let part = reqwest::multipart::Part::stream(AsyncBody::Bytes(r));
             form = form.part(field, part);
 
             req_builder.multipart(form)
@@ -238,16 +260,11 @@ impl HttpClient {
         }
 
         let stream = resp.bytes_stream().map_err(|err| {
-            io::Error::new(
-                // If stream returns a body related error, we can convert
-                // it to interrupt so we can retry it.
-                if err.is_body() {
-                    io::ErrorKind::Interrupted
-                } else {
-                    io::ErrorKind::Other
-                },
-                err,
-            )
+            // If stream returns a body related error, we can convert
+            // it to interrupt so we can retry it.
+            Error::new(ErrorKind::Unexpected, "read data from http stream")
+                .map(|v| if err.is_body() { v.set_temporary() } else { v })
+                .set_source(err)
         });
 
         let body = IncomingAsyncBody::new(Box::new(stream), content_length);

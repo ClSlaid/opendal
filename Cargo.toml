@@ -1,15 +1,29 @@
+# Copyright 2022 Datafuse Labs
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 [package]
 authors = ["Databend Authors <opensource@datafuselabs.com>"]
 categories = ["filesystem"]
 description = "OpenDAL: Access data freely, painlessly, and efficiently."
 edition = "2021"
-exclude = [".github/", "bindings/", "profiles/", "oay/", "oli/", "tests/"]
+exclude = [".github/", "bindings/", "profiles/", "oli/", "tests/"]
 homepage = "https://opendal.databend.rs/"
 keywords = ["storage", "fs", "s3", "azblob", "gcs"]
 license = "Apache-2.0"
 name = "opendal"
 repository = "https://github.com/datafuselabs/opendal"
-version = "0.27.1"
+version = "0.29.0"
 # MSRV of OpenDAL. Please update this field while bump.
 rust-version = "1.60"
 
@@ -28,8 +42,6 @@ default = ["rustls"]
 # And doesn't have any other effects.
 docs = []
 
-# Enable compress support so that users can decompress while reading.
-compress = ["async-compression"]
 # Enable trust-dns for pure rust dns cache.
 trust-dns = ["reqwest/trust-dns", "dep:trust-dns-resolver"]
 
@@ -49,6 +61,8 @@ layers-metrics = ["dep:metrics"]
 # Enable layers tracing support.
 layers-tracing = ["dep:tracing"]
 
+# Enable services dashmap support
+services-dashmap = ["dep:dashmap"]
 # Enable services hdfs support
 services-hdfs = ["dep:hdrs"]
 # Enable services ftp support
@@ -75,25 +89,16 @@ bench = false
 harness = false
 name = "ops"
 
-[[bench]]
-harness = false
-name = "io"
-required-features = ["layers-all"]
-
 [dependencies]
 anyhow = { version = "1.0.30", features = ["std"] }
 async-compat = "0.2"
-# Temp workaround, should come back to tagged version after https://github.com/Nemo157/async-compression/issues/150 resolved.
-async-compression = { package = "async-compression-issue-150-workaround", version = "0.3.15-issue-150", features = [
-  "futures-io",
-  "all-algorithms",
-], optional = true }
 async-tls = { version = "0.11", optional = true }
 async-trait = "0.1.50"
 backon = "0.4.0"
 base64 = "0.21"
 bb8 = { version = "0.8", optional = true }
 bytes = "1.2"
+dashmap = { version = "5.4", optional = true }
 flagset = "0.4"
 futures = { version = "0.3", features = ["alloc"] }
 hdrs = { version = "0.2", optional = true, features = ["async_file"] }
@@ -116,7 +121,7 @@ redis = { version = "0.22", features = [
   "tokio-comp",
   "connection-manager",
 ], optional = true }
-reqsign = "0.8.2"
+reqsign = "0.8.3"
 reqwest = { version = "0.11.13", features = [
   "multipart",
   "stream",
@@ -129,8 +134,10 @@ suppaftp = { version = "4.5", default-features = false, features = [
   "async-secure",
   "async-rustls",
 ], optional = true }
-time = { version = "0.3.10", features = ["serde"] }
 tikv-client = {version = "0.1.0", optional = true }
+# time 0.3.18 bump MSRV to 1.62, let's pin to 0.3.17 until we decide
+# to bump ours
+time = { version = ">=0.3.10, <=0.3.17", features = ["serde"] }
 tokio = { version = "1.20", features = ["fs"] }
 tracing = { version = "0.1", optional = true }
 trust-dns-resolver = { version = "0.22", optional = true }

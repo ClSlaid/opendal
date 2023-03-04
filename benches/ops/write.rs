@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 use criterion::Criterion;
 use opendal::Operator;
 use rand::prelude::*;
@@ -49,7 +50,7 @@ fn bench_write_once(c: &mut Criterion, name: &str, op: Operator) {
         group.throughput(criterion::Throughput::Bytes(size.bytes() as u64));
         group.bench_with_input(
             size.to_string(),
-            &(op.clone(), &path, content),
+            &(op.clone(), &path, content.clone()),
             |b, (op, path, content)| {
                 b.to_async(&*TOKIO).iter(|| async {
                     op.object(path).write(content.clone()).await.unwrap();

@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,17 +17,17 @@ use std::fmt::Debug;
 use std::fmt::Formatter;
 
 use async_trait::async_trait;
-use base64::engine::general_purpose;
-use base64::Engine;
-use http::header::AUTHORIZATION;
-use http::header::CONTENT_LENGTH;
-use http::header::CONTENT_TYPE;
+use bytes::Buf;
+use http::header;
 use http::Request;
 use http::Response;
 use http::StatusCode;
 use log::debug;
 
 use super::error::parse_error;
+use super::list_response::Multistatus;
+use super::pager::WebdavPager;
+use super::writer::WebdavWriter;
 use crate::ops::*;
 use crate::raw::*;
 use crate::*;
@@ -40,20 +40,15 @@ use crate::*;
 ///
 /// - [x] read
 /// - [x] write
-/// - [ ] list
+/// - [x] list
 /// - [ ] ~~scan~~
 /// - [ ] ~~presign~~
-/// - [ ] ~~multipart~~
 /// - [ ] blocking
 ///
 /// # Notes
 ///
 /// Bazel Remote Caching and Ccache HTTP Storage is also part of this service.
 /// Users can use `webdav` to connect those services.
-///
-/// # Status
-///
-/// - `list` is not supported so far.
 ///
 /// # Configuration
 ///
@@ -77,9 +72,10 @@ use crate::*;
 ///     // create backend builder
 ///     let mut builder = Webdav::default();
 ///
-///     builder.endpoint("127.0.0.1")
-///     .username("xxx")
-///     .password("xxx");
+///     builder
+///         .endpoint("127.0.0.1")
+///         .username("xxx")
+///         .password("xxx");
 ///
 ///     let op: Operator = Operator::create(builder)?.finish();
 ///     let _obj: Object = op.object("test_file");
@@ -91,6 +87,7 @@ pub struct WebdavBuilder {
     endpoint: Option<String>,
     username: Option<String>,
     password: Option<String>,
+    token: Option<String>,
     root: Option<String>,
     http_client: Option<HttpClient>,
 }
@@ -139,6 +136,16 @@ impl WebdavBuilder {
         self
     }
 
+    /// set the bearer token for Webdav
+    ///
+    /// default: no access token
+    pub fn token(&mut self, token: &str) -> &mut Self {
+        if !token.is_empty() {
+            self.token = Some(token.to_owned());
+        }
+        self
+    }
+
     /// Set root path of http backend.
     pub fn root(&mut self, root: &str) -> &mut Self {
         self.root = if root.is_empty() {
@@ -173,6 +180,7 @@ impl Builder for WebdavBuilder {
         map.get("endpoint").map(|v| builder.endpoint(v));
         map.get("username").map(|v| builder.username(v));
         map.get("password").map(|v| builder.password(v));
+        map.get("token").map(|v| builder.token(v));
 
         builder
     }
@@ -202,28 +210,16 @@ impl Builder for WebdavBuilder {
             })?
         };
 
-        // base64 encode
-        let auth = match (&self.username, &self.password) {
-            (Some(username), Some(password)) => {
-                format!(
-                    "Basic {}",
-                    general_purpose::STANDARD.encode(format!("{username}:{password}"))
-                )
-            }
-            (Some(username), None) => {
-                format!(
-                    "Basic {}",
-                    general_purpose::STANDARD.encode(format!("{username}:"))
-                )
-            }
-            (None, Some(_)) => {
-                return Err(
-                    Error::new(ErrorKind::BackendConfigInvalid, "missing username")
-                        .with_context("service", Scheme::Webdav),
-                )
-            }
-            _ => String::default(),
-        };
+        let mut auth = None;
+        if let Some(username) = &self.username {
+            auth = Some(format_authorization_by_basic(
+                username,
+                self.password.as_deref().unwrap_or_default(),
+            )?);
+        }
+        if let Some(token) = &self.token {
+            auth = Some(format_authorization_by_bearer(token)?)
+        }
 
         debug!("backend build finished: {:?}", &self);
         Ok(WebdavBackend {
@@ -238,9 +234,10 @@ impl Builder for WebdavBuilder {
 #[derive(Clone)]
 pub struct WebdavBackend {
     endpoint: String,
-    authorization: String,
     root: String,
     client: HttpClient,
+
+    authorization: Option<String>,
 }
 
 impl Debug for WebdavBackend {
@@ -257,38 +254,40 @@ impl Debug for WebdavBackend {
 impl Accessor for WebdavBackend {
     type Reader = IncomingAsyncBody;
     type BlockingReader = ();
-    type Pager = ();
+    type Writer = WebdavWriter;
+    type BlockingWriter = ();
+    type Pager = WebdavPager;
     type BlockingPager = ();
 
     fn metadata(&self) -> AccessorMetadata {
         let mut ma = AccessorMetadata::default();
         ma.set_scheme(Scheme::Webdav)
             .set_root(&self.root)
-            .set_capabilities(AccessorCapability::Read | AccessorCapability::Write)
+            .set_capabilities(
+                AccessorCapability::Read | AccessorCapability::Write | AccessorCapability::List,
+            )
             .set_hints(AccessorHint::ReadStreamable);
 
         ma
     }
 
     async fn create(&self, path: &str, _: OpCreate) -> Result<RpCreate> {
-        let resp = self
-            .webdav_put(path, Some(0), None, AsyncBody::Empty)
-            .await?;
-
-        let status = resp.status();
-
-        match status {
-            StatusCode::CREATED
-            | StatusCode::OK
-            // create existing dir will return conflict
-            | StatusCode::CONFLICT
-            // create existing file will return no_content
-            | StatusCode::NO_CONTENT => {
-                resp.into_body().consume().await?;
-                Ok(RpCreate::default())
-            }
-            _ => Err(parse_error(resp).await?),
+        // create dir recursively, split path by `/` and create each dir except the last one
+        let abs_path = build_abs_path(&self.root, path);
+        let abs_path = abs_path.as_str();
+        let mut parts: Vec<&str> = abs_path.split('/').filter(|x| !x.is_empty()).collect();
+        if !parts.is_empty() {
+            parts.pop();
         }
+
+        let mut sub_path = String::new();
+        for sub_part in parts {
+            let sub_path_with_slash = sub_part.to_owned() + "/";
+            sub_path.push_str(&sub_path_with_slash);
+            self.create_internal(&sub_path).await?;
+        }
+
+        self.create_internal(abs_path).await
     }
 
     async fn read(&self, path: &str, args: OpRead) -> Result<(RpRead, Self::Reader)> {
@@ -305,25 +304,17 @@ impl Accessor for WebdavBackend {
         }
     }
 
-    async fn write(&self, path: &str, args: OpWrite, r: input::Reader) -> Result<RpWrite> {
-        let resp = self
-            .webdav_put(
-                path,
-                Some(args.size()),
-                args.content_type(),
-                AsyncBody::Reader(r),
-            )
-            .await?;
-
-        let status = resp.status();
-
-        match status {
-            StatusCode::CREATED | StatusCode::OK => {
-                resp.into_body().consume().await?;
-                Ok(RpWrite::new(args.size()))
-            }
-            _ => Err(parse_error(resp).await?),
+    async fn write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::Writer)> {
+        if args.append() {
+            return Err(Error::new(
+                ErrorKind::Unsupported,
+                "append write is not supported",
+            ));
         }
+
+        let p = build_abs_path(&self.root, path);
+
+        Ok((RpWrite::default(), WebdavWriter::new(self.clone(), args, p)))
     }
 
     async fn stat(&self, path: &str, _: OpStat) -> Result<RpStat> {
@@ -357,6 +348,45 @@ impl Accessor for WebdavBackend {
             _ => Err(parse_error(resp).await?),
         }
     }
+
+    async fn list(&self, path: &str, _: OpList) -> Result<(RpList, Self::Pager)> {
+        // XML body must start without a new line. Otherwise, the server will panic: `xmlParseChunk() failed`
+        let all_prop_xml_body = r#"<?xml version="1.0" encoding="utf-8" ?>
+            <D:propfind xmlns:D="DAV:">
+                <D:allprop/>
+            </D:propfind>
+        "#;
+
+        let async_body = AsyncBody::Bytes(bytes::Bytes::from(all_prop_xml_body));
+        let resp = self
+            .webdav_propfind(path, None, "application/xml".into(), async_body)
+            .await?;
+        let status = resp.status();
+
+        match status {
+            StatusCode::OK | StatusCode::MULTI_STATUS => {
+                let bs = resp.into_body().bytes().await?;
+                let result: Multistatus =
+                    quick_xml::de::from_reader(bs.reader()).map_err(new_xml_deserialize_error)?;
+
+                Ok((
+                    RpList::default(),
+                    WebdavPager::new(&self.root, path, result),
+                ))
+            }
+            StatusCode::NOT_FOUND if path.ends_with('/') => Ok((
+                RpList::default(),
+                WebdavPager::new(
+                    &self.root,
+                    path,
+                    Multistatus {
+                        response: Vec::new(),
+                    },
+                ),
+            )),
+            _ => Err(parse_error(resp).await?),
+        }
+    }
 }
 
 impl WebdavBackend {
@@ -369,10 +399,14 @@ impl WebdavBackend {
 
         let url = format!("{}{}", self.endpoint, percent_encode_path(&p));
 
-        let mut req = Request::get(&url).header(AUTHORIZATION, &self.authorization);
+        let mut req = Request::get(&url);
+
+        if let Some(auth) = &self.authorization {
+            req = req.header(header::AUTHORIZATION, auth.clone())
+        }
 
         if !range.is_full() {
-            req = req.header(http::header::RANGE, range.to_header());
+            req = req.header(header::RANGE, range.to_header());
         }
 
         let req = req
@@ -382,7 +416,68 @@ impl WebdavBackend {
         self.client.send_async(req).await
     }
 
-    async fn webdav_put(
+    pub async fn webdav_put(
+        &self,
+        abs_path: &str,
+        size: Option<usize>,
+        content_type: Option<&str>,
+        content_disposition: Option<&str>,
+        body: AsyncBody,
+    ) -> Result<Response<IncomingAsyncBody>> {
+        let url = format!("{}/{}", self.endpoint, percent_encode_path(abs_path));
+
+        let mut req = Request::put(&url);
+
+        if let Some(auth) = &self.authorization {
+            req = req.header(header::AUTHORIZATION, auth.clone())
+        }
+
+        if let Some(size) = size {
+            req = req.header(header::CONTENT_LENGTH, size)
+        }
+
+        if let Some(mime) = content_type {
+            req = req.header(header::CONTENT_TYPE, mime)
+        }
+
+        if let Some(cd) = content_disposition {
+            req = req.header(header::CONTENT_DISPOSITION, cd)
+        }
+
+        // Set body
+        let req = req.body(body).map_err(new_request_build_error)?;
+
+        self.client.send_async(req).await
+    }
+
+    async fn webdav_mkcol(
+        &self,
+        abs_path: &str,
+        content_type: Option<&str>,
+        content_disposition: Option<&str>,
+        body: AsyncBody,
+    ) -> Result<Response<IncomingAsyncBody>> {
+        let url = format!("{}/{}", self.endpoint, percent_encode_path(abs_path));
+
+        let mut req = Request::builder().method("MKCOL").uri(&url);
+        if let Some(auth) = &self.authorization {
+            req = req.header(header::AUTHORIZATION, auth);
+        }
+
+        if let Some(mime) = content_type {
+            req = req.header(header::CONTENT_TYPE, mime)
+        }
+
+        if let Some(cd) = content_disposition {
+            req = req.header(header::CONTENT_DISPOSITION, cd)
+        }
+
+        let req = req.body(body).map_err(new_request_build_error)?;
+
+        self.client.send_async(req).await
+    }
+
+    async fn webdav_propfind(
         &self,
         path: &str,
         size: Option<u64>,
@@ -392,18 +487,23 @@ impl WebdavBackend {
         let p = build_abs_path(&self.root, path);
 
         let url = format!("{}/{}", self.endpoint, percent_encode_path(&p));
+        let mut req = Request::builder()
+            .method("PROPFIND")
+            .uri(&url)
+            .header("Depth", "1");
 
-        let mut req = Request::put(&url).header(AUTHORIZATION, &self.authorization);
+        if let Some(auth) = &self.authorization {
+            req = req.header(header::AUTHORIZATION, auth);
+        }
 
         if let Some(size) = size {
-            req = req.header(CONTENT_LENGTH, size)
+            req = req.header(header::CONTENT_LENGTH, size)
         }
 
         if let Some(mime) = content_type {
-            req = req.header(CONTENT_TYPE, mime)
+            req = req.header(header::CONTENT_TYPE, mime)
         }
 
-        // Set body
         let req = req.body(body).map_err(new_request_build_error)?;
 
         self.client.send_async(req).await
@@ -414,7 +514,11 @@ impl WebdavBackend {
 
         let url = format!("{}{}", self.endpoint, percent_encode_path(&p));
 
-        let req = Request::head(&url).header(AUTHORIZATION, &self.authorization);
+        let mut req = Request::head(&url);
+
+        if let Some(auth) = &self.authorization {
+            req = req.header(header::AUTHORIZATION, auth.clone())
+        }
 
         let req = req
             .body(AsyncBody::Empty)
@@ -428,11 +532,43 @@ impl WebdavBackend {
 
         let url = format!("{}/{}", self.endpoint, percent_encode_path(&p));
 
-        let req = Request::delete(&url)
-            .header(AUTHORIZATION, &self.authorization)
+        let mut req = Request::delete(&url);
+
+        if let Some(auth) = &self.authorization {
+            req = req.header(header::AUTHORIZATION, auth.clone())
+        }
+
+        let req = req
             .body(AsyncBody::Empty)
             .map_err(new_request_build_error)?;
 
         self.client.send_async(req).await
+    }
+
+    async fn create_internal(&self, abs_path: &str) -> Result<RpCreate> {
+        let resp = if abs_path.ends_with('/') {
+            self.webdav_mkcol(abs_path, None, None, AsyncBody::Empty)
+                .await?
+        } else {
+            self.webdav_put(abs_path, Some(0), None, None, AsyncBody::Empty)
+                .await?
+        };
+
+        let status = resp.status();
+
+        match status {
+            StatusCode::CREATED
+            | StatusCode::OK
+            // `File exists` will return `Method Not Allowed`
+            | StatusCode::METHOD_NOT_ALLOWED
+            // create existing dir will return conflict
+            | StatusCode::CONFLICT
+            // create existing file will return no_content
+            | StatusCode::NO_CONTENT => {
+                resp.into_body().consume().await?;
+                Ok(RpCreate::default())
+            }
+            _ => Err(parse_error(resp).await?),
+        }
     }
 }

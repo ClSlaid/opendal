@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,8 +29,9 @@ use http::StatusCode;
 use log::debug;
 use reqsign::AzureStorageSigner;
 
-use super::dir_stream::DirStream;
 use super::error::parse_error;
+use super::pager::AzblobPager;
+use super::writer::AzblobWriter;
 use crate::object::ObjectMetadata;
 use crate::ops::*;
 use crate::raw::*;
@@ -49,7 +50,6 @@ const X_MS_BLOB_TYPE: &str = "x-ms-blob-type";
 /// - [x] list
 /// - [x] scan
 /// - [ ] presign
-/// - [ ] multipart
 /// - [ ] blocking
 ///
 /// # Configuration
@@ -405,10 +405,11 @@ impl Builder for AzblobBuilder {
 #[derive(Debug, Clone)]
 pub struct AzblobBackend {
     container: String,
-    client: HttpClient,
+    // TODO: remove pub after https://github.com/datafuselabs/opendal/issues/1427
+    pub client: HttpClient,
     root: String, // root will be "/" or /abc/
     endpoint: String,
-    signer: Arc<AzureStorageSigner>,
+    pub signer: Arc<AzureStorageSigner>,
     _account_name: String,
 }
 
@@ -416,7 +417,9 @@ pub struct AzblobBackend {
 impl Accessor for AzblobBackend {
     type Reader = IncomingAsyncBody;
     type BlockingReader = ();
-    type Pager = DirStream;
+    type Writer = AzblobWriter;
+    type BlockingWriter = ();
+    type Pager = AzblobPager;
     type BlockingPager = ();
 
     fn metadata(&self) -> AccessorMetadata {
@@ -466,27 +469,18 @@ impl Accessor for AzblobBackend {
         }
     }
 
-    async fn write(&self, path: &str, args: OpWrite, r: input::Reader) -> Result<RpWrite> {
-        let mut req = self.azblob_put_blob_request(
-            path,
-            Some(args.size()),
-            args.content_type(),
-            AsyncBody::Reader(r),
-        )?;
-
-        self.signer.sign(&mut req).map_err(new_request_sign_error)?;
-
-        let resp = self.client.send_async(req).await?;
-
-        let status = resp.status();
-
-        match status {
-            StatusCode::CREATED | StatusCode::OK => {
-                resp.into_body().consume().await?;
-                Ok(RpWrite::new(args.size()))
-            }
-            _ => Err(parse_error(resp).await?),
+    async fn write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::Writer)> {
+        if args.append() {
+            return Err(Error::new(
+                ErrorKind::Unsupported,
+                "append write is not supported",
+            ));
         }
+
+        Ok((
+            RpWrite::default(),
+            AzblobWriter::new(self.clone(), args, path.to_string()),
+        ))
     }
 
     async fn stat(&self, path: &str, _: OpStat) -> Result<RpStat> {
@@ -520,7 +514,7 @@ impl Accessor for AzblobBackend {
     }
 
     async fn list(&self, path: &str, args: OpList) -> Result<(RpList, Self::Pager)> {
-        let op = DirStream::new(
+        let op = AzblobPager::new(
             Arc::new(self.clone()),
             self.root.clone(),
             path.to_string(),
@@ -532,7 +526,7 @@ impl Accessor for AzblobBackend {
     }
 
     async fn scan(&self, path: &str, args: OpScan) -> Result<(RpScan, Self::Pager)> {
-        let op = DirStream::new(
+        let op = AzblobPager::new(
             Arc::new(self.clone()),
             self.root.clone(),
             path.to_string(),
@@ -584,10 +578,10 @@ impl AzblobBackend {
         self.client.send_async(req).await
     }
 
-    fn azblob_put_blob_request(
+    pub fn azblob_put_blob_request(
         &self,
         path: &str,
-        size: Option<u64>,
+        size: Option<usize>,
         content_type: Option<&str>,
         body: AsyncBody,
     ) -> Result<Request<AsyncBody>> {

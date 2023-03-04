@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
 use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::io;
-use std::io::Read;
-use std::pin::Pin;
 use std::sync::Arc;
 use std::task::Context;
 use std::task::Poll;
@@ -24,7 +22,6 @@ use std::time::Instant;
 
 use async_trait::async_trait;
 use bytes::Bytes;
-use futures::AsyncRead;
 use futures::FutureExt;
 use futures::TryFutureExt;
 use metrics::increment_counter;
@@ -149,6 +146,7 @@ struct MetricsHandler {
 
     requests_total_write: Counter,
     requests_duration_seconds_write: Histogram,
+    #[allow(dead_code)]
     bytes_total_write: Counter,
 
     requests_total_stat: Counter,
@@ -166,18 +164,8 @@ struct MetricsHandler {
     requests_total_presign: Counter,
     requests_duration_seconds_presign: Histogram,
 
-    requests_total_create_multipart: Counter,
-    requests_duration_seconds_create_multipart: Histogram,
-
-    requests_total_write_multipart: Counter,
-    requests_duration_seconds_write_multipart: Histogram,
-    bytes_total_write_multipart: Counter,
-
-    requests_total_complete_multipartt: Counter,
-    requests_duration_seconds_complete_multipart: Histogram,
-
-    requests_total_abort_multipart: Counter,
-    requests_duration_seconds_abort_multipart: Histogram,
+    requests_total_batch: Counter,
+    requests_duration_seconds_batch: Histogram,
 
     requests_total_blocking_create: Counter,
     requests_duration_seconds_blocking_create: Histogram,
@@ -188,6 +176,7 @@ struct MetricsHandler {
 
     requests_total_blocking_write: Counter,
     requests_duration_seconds_blocking_write: Histogram,
+    #[allow(dead_code)]
     bytes_total_blocking_write: Counter,
 
     requests_total_blocking_stat: Counter,
@@ -317,54 +306,15 @@ impl MetricsHandler {
                 LABEL_OPERATION => Operation::Presign.into_static(),
             ),
 
-            requests_total_create_multipart: register_counter!(
+            requests_total_batch: register_counter!(
                 METRIC_REQUESTS_TOTAL,
                 LABEL_SERVICE => service,
-                LABEL_OPERATION => Operation::CreateMultipart.into_static(),
+                LABEL_OPERATION => Operation::Batch.into_static(),
             ),
-            requests_duration_seconds_create_multipart: register_histogram!(
+            requests_duration_seconds_batch: register_histogram!(
                 METRIC_REQUESTS_DURATION_SECONDS,
                 LABEL_SERVICE => service,
-                LABEL_OPERATION => Operation::CreateMultipart.into_static(),
-            ),
-
-            requests_total_write_multipart: register_counter!(
-                METRIC_REQUESTS_TOTAL,
-                LABEL_SERVICE => service,
-                LABEL_OPERATION => Operation::WriteMultipart.into_static(),
-            ),
-            requests_duration_seconds_write_multipart: register_histogram!(
-                METRIC_REQUESTS_DURATION_SECONDS,
-                LABEL_SERVICE => service,
-                LABEL_OPERATION => Operation::WriteMultipart.into_static(),
-            ),
-
-            bytes_total_write_multipart: register_counter!(
-                METRIC_BYTES_TOTAL,
-                LABEL_SERVICE => service,
-                LABEL_OPERATION => Operation::WriteMultipart.into_static(),
-            ),
-
-            requests_total_complete_multipartt: register_counter!(
-                METRIC_REQUESTS_TOTAL,
-                LABEL_SERVICE => service,
-                LABEL_OPERATION => Operation::CompleteMultipart.into_static(),
-            ),
-            requests_duration_seconds_complete_multipart: register_histogram!(
-                METRIC_REQUESTS_DURATION_SECONDS,
-                LABEL_SERVICE => service,
-                LABEL_OPERATION => Operation::CompleteMultipart.into_static(),
-            ),
-
-            requests_total_abort_multipart: register_counter!(
-                METRIC_REQUESTS_TOTAL,
-                LABEL_SERVICE => service,
-                LABEL_OPERATION => Operation::AbortMultipart.into_static(),
-            ),
-            requests_duration_seconds_abort_multipart: register_histogram!(
-                METRIC_REQUESTS_DURATION_SECONDS,
-                LABEL_SERVICE => service,
-                LABEL_OPERATION => Operation::AbortMultipart.into_static(),
+                LABEL_OPERATION => Operation::Batch.into_static(),
             ),
 
             requests_total_blocking_create: register_counter!(
@@ -487,6 +437,9 @@ impl<A: Accessor> LayeredAccessor for MetricsAccessor<A> {
     type Inner = A;
     type Reader = MetricReader<A::Reader>;
     type BlockingReader = MetricReader<A::BlockingReader>;
+    // TODO: add metrics for writer
+    type Writer = A::Writer;
+    type BlockingWriter = A::BlockingWriter;
     type Pager = A::Pager;
     type BlockingPager = A::BlockingPager;
 
@@ -557,22 +510,13 @@ impl<A: Accessor> LayeredAccessor for MetricsAccessor<A> {
             .await
     }
 
-    async fn write(&self, path: &str, args: OpWrite, r: input::Reader) -> Result<RpWrite> {
+    async fn write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::Writer)> {
         self.handle.requests_total_write.increment(1);
-
-        let r = Box::new(MetricReader::new(
-            r,
-            Operation::Write,
-            self.handle.clone(),
-            self.handle.bytes_total_write.clone(),
-            self.handle.requests_duration_seconds_write.clone(),
-            None,
-        ));
 
         let start = Instant::now();
 
         self.inner
-            .write(path, args, r)
+            .write(path, args)
             .inspect_ok(|_| {
                 let dur = start.elapsed().as_secs_f64();
 
@@ -661,6 +605,22 @@ impl<A: Accessor> LayeredAccessor for MetricsAccessor<A> {
             .await
     }
 
+    async fn batch(&self, args: OpBatch) -> Result<RpBatch> {
+        self.handle.requests_total_batch.increment(1);
+
+        let start = Instant::now();
+        let result = self.inner.batch(args).await;
+        let dur = start.elapsed().as_secs_f64();
+
+        self.handle.requests_duration_seconds_batch.record(dur);
+
+        result.map_err(|e| {
+            self.handle
+                .increment_errors_total(Operation::Batch, e.kind());
+            e
+        })
+    }
+
     fn presign(&self, path: &str, args: OpPresign) -> Result<RpPresign> {
         self.handle.requests_total_presign.increment(1);
 
@@ -675,118 +635,6 @@ impl<A: Accessor> LayeredAccessor for MetricsAccessor<A> {
                 .increment_errors_total(Operation::Presign, e.kind());
             e
         })
-    }
-
-    async fn create_multipart(
-        &self,
-        path: &str,
-        args: OpCreateMultipart,
-    ) -> Result<RpCreateMultipart> {
-        self.handle.requests_total_create_multipart.increment(1);
-
-        let start = Instant::now();
-
-        self.inner
-            .create_multipart(path, args)
-            .inspect_ok(|_| {
-                let dur = start.elapsed().as_secs_f64();
-
-                self.handle
-                    .requests_duration_seconds_create_multipart
-                    .record(dur);
-            })
-            .inspect_err(|err| {
-                self.handle
-                    .increment_errors_total(Operation::CreateMultipart, err.kind());
-            })
-            .await
-    }
-
-    async fn write_multipart(
-        &self,
-        path: &str,
-        args: OpWriteMultipart,
-        r: input::Reader,
-    ) -> Result<RpWriteMultipart> {
-        self.handle.requests_total_write_multipart.increment(1);
-
-        let r = Box::new(MetricReader::new(
-            r,
-            Operation::WriteMultipart,
-            self.handle.clone(),
-            self.handle.bytes_total_write_multipart.clone(),
-            self.handle
-                .requests_duration_seconds_write_multipart
-                .clone(),
-            None,
-        ));
-
-        let start = Instant::now();
-
-        self.inner
-            .write_multipart(path, args, r)
-            .inspect_ok(|_| {
-                let dur = start.elapsed().as_secs_f64();
-
-                self.handle
-                    .requests_duration_seconds_write_multipart
-                    .record(dur);
-            })
-            .inspect_err(|err| {
-                self.handle
-                    .increment_errors_total(Operation::WriteMultipart, err.kind());
-            })
-            .await
-    }
-
-    async fn complete_multipart(
-        &self,
-        path: &str,
-        args: OpCompleteMultipart,
-    ) -> Result<RpCompleteMultipart> {
-        self.handle.requests_total_complete_multipartt.increment(1);
-
-        let start = Instant::now();
-
-        self.inner
-            .complete_multipart(path, args)
-            .inspect_ok(|_| {
-                let dur = start.elapsed().as_secs_f64();
-
-                self.handle
-                    .requests_duration_seconds_complete_multipart
-                    .record(dur);
-            })
-            .inspect_err(|err| {
-                self.handle
-                    .increment_errors_total(Operation::CompleteMultipart, err.kind());
-            })
-            .await
-    }
-
-    async fn abort_multipart(
-        &self,
-        path: &str,
-        args: OpAbortMultipart,
-    ) -> Result<RpAbortMultipart> {
-        self.handle.requests_total_abort_multipart.increment(1);
-
-        let start = Instant::now();
-
-        self.inner
-            .abort_multipart(path, args)
-            .inspect_ok(|_| {
-                let dur = start.elapsed().as_secs_f64();
-
-                self.handle
-                    .requests_duration_seconds_abort_multipart
-                    .record(dur);
-            })
-            .inspect_err(|err| {
-                self.handle
-                    .increment_errors_total(Operation::AbortMultipart, err.kind());
-            })
-            .await
     }
 
     fn blocking_create(&self, path: &str, args: OpCreate) -> Result<RpCreate> {
@@ -832,25 +680,11 @@ impl<A: Accessor> LayeredAccessor for MetricsAccessor<A> {
         })
     }
 
-    fn blocking_write(
-        &self,
-        path: &str,
-        args: OpWrite,
-        r: input::BlockingReader,
-    ) -> Result<RpWrite> {
+    fn blocking_write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::BlockingWriter)> {
         self.handle.requests_total_blocking_write.increment(1);
 
-        let r = Box::new(MetricReader::new(
-            r,
-            Operation::BlockingWrite,
-            self.handle.clone(),
-            self.handle.bytes_total_blocking_write.clone(),
-            self.handle.requests_duration_seconds_blocking_write.clone(),
-            None,
-        ));
-
         let start = Instant::now();
-        let result = self.inner.blocking_write(path, args, r);
+        let result = self.inner.blocking_write(path, args);
         let dur = start.elapsed().as_secs_f64();
 
         self.handle
@@ -970,8 +804,8 @@ impl<R> MetricReader<R> {
     }
 }
 
-impl<R: output::Read> output::Read for MetricReader<R> {
-    fn poll_read(&mut self, cx: &mut Context<'_>, buf: &mut [u8]) -> Poll<io::Result<usize>> {
+impl<R: oio::Read> oio::Read for MetricReader<R> {
+    fn poll_read(&mut self, cx: &mut Context<'_>, buf: &mut [u8]) -> Poll<Result<usize>> {
         self.inner.poll_read(cx, buf).map(|res| match res {
             Ok(bytes) => {
                 self.bytes += bytes as u64;
@@ -985,11 +819,11 @@ impl<R: output::Read> output::Read for MetricReader<R> {
         })
     }
 
-    fn poll_seek(&mut self, cx: &mut Context<'_>, pos: io::SeekFrom) -> Poll<io::Result<u64>> {
+    fn poll_seek(&mut self, cx: &mut Context<'_>, pos: io::SeekFrom) -> Poll<Result<u64>> {
         self.inner.poll_seek(cx, pos)
     }
 
-    fn poll_next(&mut self, cx: &mut Context<'_>) -> Poll<Option<io::Result<Bytes>>> {
+    fn poll_next(&mut self, cx: &mut Context<'_>) -> Poll<Option<Result<Bytes>>> {
         self.inner.poll_next(cx).map(|res| match res {
             Some(Ok(bytes)) => {
                 self.bytes += bytes.len() as u64;
@@ -1005,30 +839,8 @@ impl<R: output::Read> output::Read for MetricReader<R> {
     }
 }
 
-impl<R: AsyncRead + Unpin> AsyncRead for MetricReader<R> {
-    fn poll_read(
-        mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-        buf: &mut [u8],
-    ) -> Poll<io::Result<usize>> {
-        Pin::new(&mut self.inner)
-            .poll_read(cx, buf)
-            .map(|res| match res {
-                Ok(bytes) => {
-                    self.bytes += bytes as u64;
-                    Ok(bytes)
-                }
-                Err(e) => {
-                    self.handle
-                        .increment_errors_total(self.op, ErrorKind::Unexpected);
-                    Err(e)
-                }
-            })
-    }
-}
-
-impl<R: output::BlockingRead> output::BlockingRead for MetricReader<R> {
-    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+impl<R: oio::BlockingRead> oio::BlockingRead for MetricReader<R> {
+    fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
         self.inner
             .read(buf)
             .map(|n| {
@@ -1043,11 +855,11 @@ impl<R: output::BlockingRead> output::BlockingRead for MetricReader<R> {
     }
 
     #[inline]
-    fn seek(&mut self, pos: io::SeekFrom) -> io::Result<u64> {
+    fn seek(&mut self, pos: io::SeekFrom) -> Result<u64> {
         self.inner.seek(pos)
     }
 
-    fn next(&mut self) -> Option<io::Result<Bytes>> {
+    fn next(&mut self) -> Option<Result<Bytes>> {
         self.inner.next().map(|res| match res {
             Ok(bytes) => {
                 self.bytes += bytes.len() as u64;
@@ -1059,22 +871,6 @@ impl<R: output::BlockingRead> output::BlockingRead for MetricReader<R> {
                 Err(e)
             }
         })
-    }
-}
-
-impl<R: input::BlockingRead> Read for MetricReader<R> {
-    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        self.inner
-            .read(buf)
-            .map(|n| {
-                self.bytes += n as u64;
-                n
-            })
-            .map_err(|e| {
-                self.handle
-                    .increment_errors_total(self.op, ErrorKind::Unexpected);
-                e
-            })
     }
 }
 

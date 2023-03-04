@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ use serde_json;
 use time::format_description::well_known::Rfc3339;
 use time::OffsetDateTime;
 
-use super::dir_stream::DirStream;
 use super::error::parse_error;
-use super::error::parse_json_deserialize_error;
+use super::pager::GcsPager;
 use super::uri::percent_encode_path;
+use super::writer::GcsWriter;
 use crate::ops::*;
 use crate::raw::*;
 use crate::*;
@@ -53,7 +53,6 @@ const DEFAULT_GCS_SCOPE: &str = "https://www.googleapis.com/auth/devstorage.read
 /// - [x] list
 /// - [x] scan
 /// - [ ] presign
-/// - [ ] multipart
 /// - [ ] blocking
 ///
 /// # Configuration
@@ -153,7 +152,7 @@ impl GcsBuilder {
     /// Set the GCS service account.
     ///
     /// service account will be used for fetch token from vm metadata.
-    /// If not set, we will try to fecth with `default` service account.
+    /// If not set, we will try to fetch with `default` service account.
     pub fn service_account(&mut self, service_account: &str) -> &mut Self {
         if !service_account.is_empty() {
             self.service_account = Some(service_account.to_string())
@@ -196,7 +195,7 @@ impl GcsBuilder {
         self
     }
 
-    /// Specify the signer directly instead of builling by OpenDAL.
+    /// Specify the signer directly instead of building by OpenDAL.
     ///
     /// If signer is specified, the following settings will not be used
     /// any more:
@@ -327,8 +326,8 @@ pub struct GcsBackend {
     // root should end with "/"
     root: String,
 
-    client: HttpClient,
-    signer: Arc<GoogleSigner>,
+    pub client: HttpClient,
+    pub signer: Arc<GoogleSigner>,
 }
 
 impl Debug for GcsBackend {
@@ -347,7 +346,9 @@ impl Debug for GcsBackend {
 impl Accessor for GcsBackend {
     type Reader = IncomingAsyncBody;
     type BlockingReader = ();
-    type Pager = DirStream;
+    type Writer = GcsWriter;
+    type BlockingWriter = ();
+    type Pager = GcsPager;
     type BlockingPager = ();
 
     fn metadata(&self) -> AccessorMetadata {
@@ -389,24 +390,18 @@ impl Accessor for GcsBackend {
         }
     }
 
-    async fn write(&self, path: &str, args: OpWrite, r: input::Reader) -> Result<RpWrite> {
-        let mut req = self.gcs_insert_object_request(
-            path,
-            Some(args.size()),
-            args.content_type(),
-            AsyncBody::Reader(r),
-        )?;
-
-        self.signer.sign(&mut req).map_err(new_request_sign_error)?;
-
-        let resp = self.client.send_async(req).await?;
-
-        if (200..300).contains(&resp.status().as_u16()) {
-            resp.into_body().consume().await?;
-            Ok(RpWrite::new(args.size()))
-        } else {
-            Err(parse_error(resp).await?)
+    async fn write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::Writer)> {
+        if args.append() {
+            return Err(Error::new(
+                ErrorKind::Unsupported,
+                "append write is not supported",
+            ));
         }
+
+        Ok((
+            RpWrite::default(),
+            GcsWriter::new(self.clone(), args, path.to_string()),
+        ))
     }
 
     async fn stat(&self, path: &str, _: OpStat) -> Result<RpStat> {
@@ -421,7 +416,7 @@ impl Accessor for GcsBackend {
             // read http response body
             let slc = resp.into_body().bytes().await?;
             let meta: GetObjectJsonResponse =
-                serde_json::from_slice(&slc).map_err(parse_json_deserialize_error)?;
+                serde_json::from_slice(&slc).map_err(new_json_deserialize_error)?;
 
             let mode = if path.ends_with('/') {
                 ObjectMode::DIR
@@ -469,14 +464,14 @@ impl Accessor for GcsBackend {
     async fn list(&self, path: &str, args: OpList) -> Result<(RpList, Self::Pager)> {
         Ok((
             RpList::default(),
-            DirStream::new(Arc::new(self.clone()), &self.root, path, "/", args.limit()),
+            GcsPager::new(Arc::new(self.clone()), &self.root, path, "/", args.limit()),
         ))
     }
 
     async fn scan(&self, path: &str, args: OpScan) -> Result<(RpScan, Self::Pager)> {
         Ok((
             RpScan::default(),
-            DirStream::new(Arc::new(self.clone()), &self.root, path, "", args.limit()),
+            GcsPager::new(Arc::new(self.clone()), &self.root, path, "", args.limit()),
         ))
     }
 }
@@ -517,10 +512,10 @@ impl GcsBackend {
         self.client.send_async(req).await
     }
 
-    fn gcs_insert_object_request(
+    pub fn gcs_insert_object_request(
         &self,
         path: &str,
-        size: Option<u64>,
+        size: Option<usize>,
         content_type: Option<&str>,
         body: AsyncBody,
     ) -> Result<Request<AsyncBody>> {
@@ -653,7 +648,7 @@ struct GetObjectJsonResponse {
     md5_hash: String,
     /// Content type of this object.
     ///
-    /// For examlpe: `"contentType": "image/png",`
+    /// For example: `"contentType": "image/png",`
     content_type: String,
 }
 

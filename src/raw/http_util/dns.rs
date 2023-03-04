@@ -1,4 +1,4 @@
-// Copyright 2023 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -218,7 +218,7 @@ impl DnsCache {
         // entire cache to make more space.
         //
         // As described in DnsCache's doc, this limit should never be reached.
-        // We expect there only few entries holded in cache.
+        // We expect there only few entries held in cache.
         if guard.len() >= self.limits {
             guard.clear()
         }

@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,66 +31,6 @@ pub struct RpList {}
 /// Reply for `scan` operation.
 #[derive(Debug, Clone, Default)]
 pub struct RpScan {}
-
-/// Reply for `create_multipart` operation.
-#[derive(Debug, Clone, Default)]
-pub struct RpCreateMultipart {
-    upload_id: String,
-}
-
-impl RpCreateMultipart {
-    /// Create a new reply for create_multipart.
-    pub fn new(upload_id: &str) -> Self {
-        Self {
-            upload_id: upload_id.to_string(),
-        }
-    }
-
-    /// Get the upload_id.
-    pub fn upload_id(&self) -> &str {
-        &self.upload_id
-    }
-}
-
-/// Reply for `write_multipart` operation.
-#[derive(Debug, Clone)]
-pub struct RpWriteMultipart {
-    part_number: usize,
-    etag: String,
-}
-
-impl RpWriteMultipart {
-    /// Create a new reply for `write_multipart`.
-    pub fn new(part_number: usize, etag: &str) -> Self {
-        Self {
-            part_number,
-            etag: etag.to_string(),
-        }
-    }
-
-    /// Get the part_number from reply.
-    pub fn part_number(&self) -> usize {
-        self.part_number
-    }
-
-    /// Get the etag from reply.
-    pub fn etag(&self) -> &str {
-        &self.etag
-    }
-
-    /// Consume reply to build a object part.
-    pub fn into_object_part(self) -> ObjectPart {
-        ObjectPart::new(self.part_number, &self.etag)
-    }
-}
-
-/// Reply for `complete_multipart` operation.
-#[derive(Debug, Clone, Default)]
-pub struct RpCompleteMultipart {}
-
-/// Reply for `abort_multipart` operation.
-#[derive(Debug, Clone, Default)]
-pub struct RpAbortMultipart {}
 
 /// Reply for `presign` operation.
 #[derive(Debug, Clone)]
@@ -193,16 +133,60 @@ pub struct RpBatch {
 }
 
 impl RpBatch {
+    /// Create a new RpBatch.
+    pub fn new(results: BatchedResults) -> Self {
+        Self { results }
+    }
+
+    /// Get the results from RpBatch.
+    pub fn results(&self) -> &BatchedResults {
+        &self.results
+    }
+
     /// Consume RpBatch to get the batched results.
     pub fn into_results(self) -> BatchedResults {
         self.results
     }
 }
 
-/// Batch results of `bacth` operations.
+/// Batch results of `batch` operations.
 pub enum BatchedResults {
     /// results of delete batch operation
     Delete(Vec<(String, Result<RpDelete>)>),
+}
+
+impl BatchedResults {
+    /// Return the length of given results.
+    pub fn len(&self) -> usize {
+        use BatchedResults::*;
+        match self {
+            Delete(v) => v.len(),
+        }
+    }
+
+    /// Return if given results is empty.
+    pub fn is_empty(&self) -> bool {
+        use BatchedResults::*;
+        match self {
+            Delete(v) => v.is_empty(),
+        }
+    }
+
+    /// Return the length of ok results.
+    pub fn len_ok(&self) -> usize {
+        use BatchedResults::*;
+        match self {
+            Delete(v) => v.iter().filter(|v| v.1.is_ok()).count(),
+        }
+    }
+
+    /// Return the length of error results.
+    pub fn len_err(&self) -> usize {
+        use BatchedResults::*;
+        match self {
+            Delete(v) => v.iter().filter(|v| v.1.is_err()).count(),
+        }
+    }
 }
 
 /// Reply for `stat` operation.
@@ -217,6 +201,12 @@ impl RpStat {
         RpStat { meta }
     }
 
+    /// Operate on inner metadata.
+    pub fn map_metadata(mut self, f: impl FnOnce(ObjectMetadata) -> ObjectMetadata) -> Self {
+        self.meta = f(self.meta);
+        self
+    }
+
     /// Consume RpStat to get the inner metadata.
     pub fn into_metadata(self) -> ObjectMetadata {
         self.meta
@@ -225,19 +215,12 @@ impl RpStat {
 
 /// Reply for `write` operation.
 #[derive(Debug, Clone, Default)]
-pub struct RpWrite {
-    written: u64,
-}
+pub struct RpWrite {}
 
 impl RpWrite {
     /// Create a new reply for write.
-    pub fn new(written: u64) -> Self {
-        Self { written }
-    }
-
-    /// Get the written size (in bytes) of write operation.
-    pub fn written(&self) -> u64 {
-        self.written
+    pub fn new() -> Self {
+        Self {}
     }
 }
 

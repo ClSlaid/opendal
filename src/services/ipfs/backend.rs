@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,7 +41,6 @@ use crate::*;
 /// - [x] list
 /// - [ ] ~~scan~~
 /// - [ ] presign
-/// - [ ] ~~multipart~~
 /// - [ ] blocking
 ///
 /// # Configuration
@@ -210,6 +209,8 @@ impl Debug for IpfsBackend {
 impl Accessor for IpfsBackend {
     type Reader = IncomingAsyncBody;
     type BlockingReader = ();
+    type Writer = ();
+    type BlockingWriter = ();
     type Pager = DirStream;
     type BlockingPager = ();
 
@@ -375,6 +376,10 @@ impl Accessor for IpfsBackend {
                     m.set_mode(ObjectMode::DIR);
                 }
 
+                if let Some(v) = parse_content_disposition(resp.headers())? {
+                    m.set_content_disposition(v);
+                }
+
                 Ok(RpStat::new(m))
             }
             StatusCode::FOUND | StatusCode::MOVED_PERMANENTLY => {
@@ -463,8 +468,8 @@ impl DirStream {
 }
 
 #[async_trait]
-impl output::Page for DirStream {
-    async fn next_page(&mut self) -> Result<Option<Vec<output::Entry>>> {
+impl oio::Page for DirStream {
+    async fn next(&mut self) -> Result<Option<Vec<oio::Entry>>> {
         if self.consumed {
             return Ok(None);
         }
@@ -499,7 +504,7 @@ impl output::Page for DirStream {
                 name += "/";
             }
 
-            oes.push(output::Entry::new(&name, meta.with_complete()))
+            oes.push(oio::Entry::new(&name, meta))
         }
 
         self.consumed = true;

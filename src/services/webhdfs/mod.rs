@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,9 @@
 // limitations under the License.
 
 mod backend;
-mod message;
 pub use backend::WebhdfsBuilder as Webhdfs;
-mod dir_stream;
+
 mod error;
+mod message;
+mod pager;
+mod writer;

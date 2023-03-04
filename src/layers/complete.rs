@@ -1,4 +1,4 @@
-// Copyright 2023 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,25 +22,33 @@ use std::task::Poll;
 use async_trait::async_trait;
 
 use crate::ops::*;
-use crate::raw::output::into_reader::RangeReader;
-use crate::raw::output::to_flat_pager;
-use crate::raw::output::to_hierarchy_pager;
-use crate::raw::output::Entry;
-use crate::raw::output::IntoStreamableReader;
-use crate::raw::output::ToFlatPager;
-use crate::raw::output::ToHierarchyPager;
+use crate::raw::oio::into_reader::RangeReader;
+use crate::raw::oio::to_flat_pager;
+use crate::raw::oio::to_hierarchy_pager;
+use crate::raw::oio::Entry;
+use crate::raw::oio::IntoStreamableReader;
+use crate::raw::oio::ToFlatPager;
+use crate::raw::oio::ToHierarchyPager;
 use crate::raw::*;
 use crate::*;
 
 /// Complete underlying services features so that users can use them in
 /// the same way.
 ///
+/// # Notes
+///
+/// CompleteLayer is not a public accessible layer that can be used by
+/// external users. OpenDAL will make sure every accessor will apply this
+/// layer once and only once.
+///
+/// # Internal
+///
 /// So far CompleteLayer will do two completion:
 ///
 /// ## Read
 ///
-/// OpenDAL requires all reader implements [`output::Read`] and
-/// [`output::BlockingRead`]. However, not all services have the
+/// OpenDAL requires all reader implements [`oio::Read`] and
+/// [`oio::BlockingRead`]. However, not all services have the
 /// capabilities. CompleteLayer will add those capabilities in
 /// a zero cost way.
 ///
@@ -48,9 +56,51 @@ use crate::*;
 /// features that returning readers support.
 ///
 /// - If both `seekable` and `streamable`, return directly.
-/// - If not `streamable`, with [`output::into_streamable_reader`].
-/// - If not `seekable`, with [`output::into_reader::by_range`]
+/// - If not `streamable`, with [`oio::into_streamable_reader`].
+/// - If not `seekable`, with [`oio::into_reader::by_range`]
 /// - If neither not supported, wrap both by_range and into_streamable.
+///
+/// All implementations of ObjectReader should be `zero cost`. In our cases,
+/// which means others must pay the same cost for the same feature provide
+/// by us.
+///
+/// For examples, call `read` without `seek` should always act the same as
+/// calling `read` on plain reader.
+///
+/// ### Read is Seekable
+///
+/// We use internal `AccessorHint::ReadSeekable` to decide the most
+/// suitable implementations.
+///
+/// If there is a hint that `ReadSeekable`, we will open it with given args
+/// directly. Otherwise, we will pick a seekable reader implementation based
+/// on input range for it.
+///
+/// - `Some(offset), Some(size)` => `RangeReader`
+/// - `Some(offset), None` and `None, None` => `OffsetReader`
+/// - `None, Some(size)` => get the total size first to convert as `RangeReader`
+///
+/// No matter which reader we use, we will make sure the `read` operation
+/// is zero cost.
+///
+/// ### Read is Streamable
+///
+/// We use internal `AccessorHint::ReadStreamable` to decide the most
+/// suitable implementations.
+///
+/// If there is a hint that `ReadStreamable`, we will use existing reader
+/// directly. Otherwise, we will use transform this reader as a stream.
+///
+/// ### Consume instead of Drop
+///
+/// Normally, if reader is seekable, we need to drop current reader and start
+/// a new read call.
+///
+/// We can consume the data if the seek position is close enough. For
+/// example, users try to seek to `Current(1)`, we can just read the data
+/// can consume it.
+///
+/// In this way, we can reduce the extra cost of dropping reader.
 ///
 /// ## List
 ///
@@ -61,8 +111,8 @@ use crate::*;
 /// features that returning pagers support.
 ///
 /// - If both `flat` and `hierarchy`, return directly.
-/// - If only `flat`, with [`output::to_flat_pager`].
-/// - if only `hierarchy`, with [`output::to_hierarchy_pager`].
+/// - If only `flat`, with [`oio::to_flat_pager`].
+/// - if only `hierarchy`, with [`oio::to_hierarchy_pager`].
 /// - If neither not supported, something must be wrong.
 ///
 /// [`AccessorHint`]: crate::raw::AccessorHint
@@ -110,7 +160,7 @@ impl<A: Accessor> CompleteReaderAccessor<A> {
         match (seekable, streamable) {
             (true, true) => Ok((rp, CompleteReader::AlreadyComplete(r))),
             (true, false) => {
-                let r = output::into_streamable_reader(r, 256 * 1024);
+                let r = oio::into_streamable_reader(r, 256 * 1024);
                 Ok((rp, CompleteReader::NeedStreamable(r)))
             }
             _ => {
@@ -131,12 +181,12 @@ impl<A: Accessor> CompleteReaderAccessor<A> {
                         (offset, size)
                     }
                 };
-                let r = output::into_reader::by_range(self.inner.clone(), path, r, offset, size);
+                let r = oio::into_reader::by_range(self.inner.clone(), path, r, offset, size);
 
                 if streamable {
                     Ok((rp, CompleteReader::NeedSeekable(r)))
                 } else {
-                    let r = output::into_streamable_reader(r, 256 * 1024);
+                    let r = oio::into_streamable_reader(r, 256 * 1024);
                     Ok((rp, CompleteReader::NeedBoth(r)))
                 }
             }
@@ -158,7 +208,7 @@ impl<A: Accessor> CompleteReaderAccessor<A> {
         match (seekable, streamable) {
             (true, true) => Ok((rp, CompleteReader::AlreadyComplete(r))),
             (true, false) => {
-                let r = output::into_streamable_reader(r, 256 * 1024);
+                let r = oio::into_streamable_reader(r, 256 * 1024);
                 Ok((rp, CompleteReader::NeedStreamable(r)))
             }
             (false, _) => Err(Error::new(
@@ -276,6 +326,8 @@ impl<A: Accessor> LayeredAccessor for CompleteReaderAccessor<A> {
     type Inner = A;
     type Reader = CompleteReader<A, A::Reader>;
     type BlockingReader = CompleteReader<A, A::BlockingReader>;
+    type Writer = A::Writer;
+    type BlockingWriter = A::BlockingWriter;
     type Pager = CompletePager<A, A::Pager>;
     type BlockingPager = CompletePager<A, A::BlockingPager>;
 
@@ -289,6 +341,32 @@ impl<A: Accessor> LayeredAccessor for CompleteReaderAccessor<A> {
 
     fn blocking_read(&self, path: &str, args: OpRead) -> Result<(RpRead, Self::BlockingReader)> {
         self.complete_blocking_reader(path, args)
+    }
+
+    async fn stat(&self, path: &str, args: OpStat) -> Result<RpStat> {
+        self.inner.stat(path, args).await.map(|v| {
+            v.map_metadata(|m| {
+                let bit = m.bit();
+                m.with_bit(bit | ObjectMetakey::Complete)
+            })
+        })
+    }
+
+    fn blocking_stat(&self, path: &str, args: OpStat) -> Result<RpStat> {
+        self.inner.blocking_stat(path, args).map(|v| {
+            v.map_metadata(|m| {
+                let bit = m.bit();
+                m.with_bit(bit | ObjectMetakey::Complete)
+            })
+        })
+    }
+
+    async fn write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::Writer)> {
+        self.inner.write(path, args).await
+    }
+
+    fn blocking_write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::BlockingWriter)> {
+        self.inner.blocking_write(path, args)
     }
 
     async fn list(&self, path: &str, args: OpList) -> Result<(RpList, Self::Pager)> {
@@ -315,12 +393,12 @@ pub enum CompleteReader<A: Accessor, R> {
     NeedBoth(IntoStreamableReader<RangeReader<A>>),
 }
 
-impl<A, R> output::Read for CompleteReader<A, R>
+impl<A, R> oio::Read for CompleteReader<A, R>
 where
     A: Accessor<Reader = R>,
-    R: output::Read,
+    R: oio::Read,
 {
-    fn poll_read(&mut self, cx: &mut Context<'_>, buf: &mut [u8]) -> Poll<io::Result<usize>> {
+    fn poll_read(&mut self, cx: &mut Context<'_>, buf: &mut [u8]) -> Poll<Result<usize>> {
         use CompleteReader::*;
 
         match self {
@@ -331,7 +409,7 @@ where
         }
     }
 
-    fn poll_seek(&mut self, cx: &mut Context<'_>, pos: io::SeekFrom) -> Poll<io::Result<u64>> {
+    fn poll_seek(&mut self, cx: &mut Context<'_>, pos: io::SeekFrom) -> Poll<Result<u64>> {
         use CompleteReader::*;
 
         match self {
@@ -342,7 +420,7 @@ where
         }
     }
 
-    fn poll_next(&mut self, cx: &mut Context<'_>) -> Poll<Option<io::Result<bytes::Bytes>>> {
+    fn poll_next(&mut self, cx: &mut Context<'_>) -> Poll<Option<Result<bytes::Bytes>>> {
         use CompleteReader::*;
 
         match self {
@@ -354,12 +432,12 @@ where
     }
 }
 
-impl<A, R> output::BlockingRead for CompleteReader<A, R>
+impl<A, R> oio::BlockingRead for CompleteReader<A, R>
 where
     A: Accessor<BlockingReader = R>,
-    R: output::BlockingRead,
+    R: oio::BlockingRead,
 {
-    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+    fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
         use CompleteReader::*;
 
         match self {
@@ -369,7 +447,7 @@ where
         }
     }
 
-    fn seek(&mut self, pos: io::SeekFrom) -> io::Result<u64> {
+    fn seek(&mut self, pos: io::SeekFrom) -> Result<u64> {
         use CompleteReader::*;
 
         match self {
@@ -379,7 +457,7 @@ where
         }
     }
 
-    fn next(&mut self) -> Option<io::Result<bytes::Bytes>> {
+    fn next(&mut self) -> Option<Result<bytes::Bytes>> {
         use CompleteReader::*;
 
         match self {
@@ -397,34 +475,34 @@ pub enum CompletePager<A: Accessor, P> {
 }
 
 #[async_trait]
-impl<A, P> output::Page for CompletePager<A, P>
+impl<A, P> oio::Page for CompletePager<A, P>
 where
     A: Accessor<Pager = P>,
-    P: output::Page,
+    P: oio::Page,
 {
-    async fn next_page(&mut self) -> Result<Option<Vec<Entry>>> {
+    async fn next(&mut self) -> Result<Option<Vec<Entry>>> {
         use CompletePager::*;
 
         match self {
-            AlreadyComplete(p) => p.next_page().await,
-            NeedFlat(p) => p.next_page().await,
-            NeedHierarchy(p) => p.next_page().await,
+            AlreadyComplete(p) => p.next().await,
+            NeedFlat(p) => p.next().await,
+            NeedHierarchy(p) => p.next().await,
         }
     }
 }
 
-impl<A, P> output::BlockingPage for CompletePager<A, P>
+impl<A, P> oio::BlockingPage for CompletePager<A, P>
 where
     A: Accessor<BlockingPager = P>,
-    P: output::BlockingPage,
+    P: oio::BlockingPage,
 {
-    fn next_page(&mut self) -> Result<Option<Vec<Entry>>> {
+    fn next(&mut self) -> Result<Option<Vec<Entry>>> {
         use CompletePager::*;
 
         match self {
-            AlreadyComplete(p) => p.next_page(),
-            NeedFlat(p) => p.next_page(),
-            NeedHierarchy(p) => p.next_page(),
+            AlreadyComplete(p) => p.next(),
+            NeedFlat(p) => p.next(),
+            NeedHierarchy(p) => p.next(),
         }
     }
 }

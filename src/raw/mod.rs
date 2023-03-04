@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,8 +34,7 @@ mod layer;
 pub use layer::Layer;
 pub use layer::LayeredAccessor;
 
-mod io;
-pub use io::*;
+pub mod oio;
 
 mod path;
 pub use path::build_abs_path;
@@ -58,6 +57,9 @@ pub use rps::*;
 
 mod http_util;
 pub use http_util::*;
+
+mod serde_util;
+pub use serde_util::*;
 
 // Expose as a pub mod to avoid confusing.
 pub mod adapters;

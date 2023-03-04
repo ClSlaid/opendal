@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,8 +26,9 @@ use http::Uri;
 use log::debug;
 use reqsign::HuaweicloudObsSigner;
 
-use super::dir_stream::DirStream;
 use super::error::parse_error;
+use super::pager::ObsPager;
+use super::writer::ObsWriter;
 use crate::ops::*;
 use crate::raw::*;
 use crate::*;
@@ -43,7 +44,6 @@ use crate::*;
 /// - [x] list
 /// - [x] scan
 /// - [ ] presign
-/// - [ ] multipart
 /// - [ ] blocking
 ///
 /// # Configuration
@@ -293,10 +293,10 @@ impl Builder for ObsBuilder {
 /// Backend for Huaweicloud OBS services.
 #[derive(Debug, Clone)]
 pub struct ObsBackend {
-    client: HttpClient,
+    pub client: HttpClient,
     root: String,
     endpoint: String,
-    signer: Arc<HuaweicloudObsSigner>,
+    pub signer: Arc<HuaweicloudObsSigner>,
     bucket: String,
 }
 
@@ -304,7 +304,9 @@ pub struct ObsBackend {
 impl Accessor for ObsBackend {
     type Reader = IncomingAsyncBody;
     type BlockingReader = ();
-    type Pager = DirStream;
+    type Writer = ObsWriter;
+    type BlockingWriter = ();
+    type Pager = ObsPager;
     type BlockingPager = ();
 
     fn metadata(&self) -> AccessorMetadata {
@@ -353,27 +355,18 @@ impl Accessor for ObsBackend {
         }
     }
 
-    async fn write(&self, path: &str, args: OpWrite, r: input::Reader) -> Result<RpWrite> {
-        let mut req = self.obs_put_object_request(
-            path,
-            Some(args.size()),
-            args.content_type(),
-            AsyncBody::Reader(r),
-        )?;
-
-        self.signer.sign(&mut req).map_err(new_request_sign_error)?;
-
-        let resp = self.client.send_async(req).await?;
-
-        let status = resp.status();
-
-        match status {
-            StatusCode::CREATED | StatusCode::OK => {
-                resp.into_body().consume().await?;
-                Ok(RpWrite::new(args.size()))
-            }
-            _ => Err(parse_error(resp).await?),
+    async fn write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::Writer)> {
+        if args.append() {
+            return Err(Error::new(
+                ErrorKind::Unsupported,
+                "append write is not supported",
+            ));
         }
+
+        Ok((
+            RpWrite::default(),
+            ObsWriter::new(self.clone(), args, path.to_string()),
+        ))
     }
 
     async fn stat(&self, path: &str, _: OpStat) -> Result<RpStat> {
@@ -412,14 +405,14 @@ impl Accessor for ObsBackend {
     async fn list(&self, path: &str, args: OpList) -> Result<(RpList, Self::Pager)> {
         Ok((
             RpList::default(),
-            DirStream::new(Arc::new(self.clone()), &self.root, path, "/", args.limit()),
+            ObsPager::new(Arc::new(self.clone()), &self.root, path, "/", args.limit()),
         ))
     }
 
     async fn scan(&self, path: &str, args: OpScan) -> Result<(RpScan, Self::Pager)> {
         Ok((
             RpScan::default(),
-            DirStream::new(Arc::new(self.clone()), &self.root, path, "", args.limit()),
+            ObsPager::new(Arc::new(self.clone()), &self.root, path, "", args.limit()),
         ))
     }
 }
@@ -449,10 +442,10 @@ impl ObsBackend {
         self.client.send_async(req).await
     }
 
-    fn obs_put_object_request(
+    pub fn obs_put_object_request(
         &self,
         path: &str,
-        size: Option<u64>,
+        size: Option<usize>,
         content_type: Option<&str>,
         body: AsyncBody,
     ) -> Result<Request<AsyncBody>> {

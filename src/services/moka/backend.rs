@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ use crate::*;
 /// - [ ] ~~list~~
 /// - [ ] ~~scan~~
 /// - [ ] ~~presign~~
-/// - [ ] ~~multipart~~
 /// - [x] blocking
 #[derive(Default, Debug)]
 pub struct MokaBuilder {
@@ -153,7 +152,7 @@ impl Builder for MokaBuilder {
         let mut builder: CacheBuilder<String, Vec<u8>, _> =
             SegmentedCache::builder(self.num_segments.unwrap_or(1))
                 .thread_pool_enabled(self.thread_pool_enabled.unwrap_or(false));
-        // Use entries's bytes as capacity weigher.
+        // Use entries' bytes as capacity weigher.
         builder = builder.weigher(|k, v| (k.len() + v.len()) as u32);
         if let Some(v) = &self.name {
             builder = builder.name(v);

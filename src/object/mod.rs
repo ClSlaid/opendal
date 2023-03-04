@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,20 +17,19 @@ pub use mode::ObjectMode;
 
 mod metadata;
 pub use metadata::ObjectMetadata;
-
-mod multipart;
-pub use multipart::ObjectMultipart;
-pub use multipart::ObjectPart;
+pub use metadata::ObjectMetakey;
 
 #[allow(clippy::module_inception)]
 mod object;
 pub use object::Object;
 
 mod reader;
+pub use reader::BlockingObjectReader;
 pub use reader::ObjectReader;
 
-mod blocking_reader;
-pub use blocking_reader::BlockingObjectReader;
+mod writer;
+pub use writer::BlockingObjectWriter;
+pub use writer::ObjectWriter;
 
 mod list;
 pub use list::BlockingObjectLister;

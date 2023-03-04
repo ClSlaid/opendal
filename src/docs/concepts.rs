@@ -1,4 +1,4 @@
-// Copyright 2023 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,8 +19,10 @@
 //! There are three core concepts in OpenDAL:
 //!
 //! - [`Builder`]: Build an instance of underlying services.
-//! - [`Operator`]: A bridge between underlying implementation detail and  unified abstraction.
+//! - [`Operator`]: A bridge between underlying implementation detail and unified abstraction.
 //! - [`Object`]: The smallest unit representing a file/dir/... with path in specified services.
+//!
+//! If you are interested in internal implementation details, please have a look at [`internals`][super::internals].
 //!
 //! # Builder
 //!
@@ -78,7 +80,7 @@
 //! ```
 //!
 //! - `Operator` has it's internal `Arc`, so it's **cheap** to clone it.
-//! - `Operator` doesn't have generice parameters or lifetimes, so it's **easy** to use it everywhere.
+//! - `Operator` doesn't have generic parameters or lifetimes, so it's **easy** to use it everywhere.
 //! - `Operator` implements `Send` and `Sync`, so it's **safe** to send it between threads.
 //!
 //! # Object

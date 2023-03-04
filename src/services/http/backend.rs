@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ use std::fmt::Debug;
 use std::fmt::Formatter;
 
 use async_trait::async_trait;
+use http::header;
 use http::Request;
 use http::Response;
 use http::StatusCode;
@@ -38,7 +39,6 @@ use crate::*;
 /// - [ ] ~~list~~
 /// - [ ] ~~scan~~
 /// - [ ] ~~presign~~
-/// - [ ] ~~multipart~~
 /// - [ ] blocking
 ///
 /// # Notes
@@ -78,6 +78,9 @@ use crate::*;
 #[derive(Default)]
 pub struct HttpBuilder {
     endpoint: Option<String>,
+    username: Option<String>,
+    password: Option<String>,
+    token: Option<String>,
     root: Option<String>,
     http_client: Option<HttpClient>,
 }
@@ -103,6 +106,36 @@ impl HttpBuilder {
             Some(endpoint.to_string())
         };
 
+        self
+    }
+
+    /// set password for http backend
+    ///
+    /// default: no password
+    pub fn username(&mut self, username: &str) -> &mut Self {
+        if !username.is_empty() {
+            self.username = Some(username.to_owned());
+        }
+        self
+    }
+
+    /// set password for http backend
+    ///
+    /// default: no password
+    pub fn password(&mut self, password: &str) -> &mut Self {
+        if !password.is_empty() {
+            self.password = Some(password.to_owned());
+        }
+        self
+    }
+
+    /// set bearer token for http backend
+    ///
+    /// default: no access token
+    pub fn token(&mut self, token: &str) -> &mut Self {
+        if !token.is_empty() {
+            self.token = Some(token.to_owned());
+        }
         self
     }
 
@@ -138,6 +171,9 @@ impl Builder for HttpBuilder {
 
         map.get("root").map(|v| builder.root(v));
         map.get("endpoint").map(|v| builder.endpoint(v));
+        map.get("username").map(|v| builder.username(v));
+        map.get("password").map(|v| builder.password(v));
+        map.get("token").map(|v| builder.token(v));
 
         builder
     }
@@ -167,9 +203,21 @@ impl Builder for HttpBuilder {
             })?
         };
 
+        let mut auth = None;
+        if let Some(username) = &self.username {
+            auth = Some(format_authorization_by_basic(
+                username,
+                self.password.as_deref().unwrap_or_default(),
+            )?);
+        }
+        if let Some(token) = &self.token {
+            auth = Some(format_authorization_by_bearer(token)?)
+        }
+
         debug!("backend build finished: {:?}", &self);
         Ok(HttpBackend {
             endpoint: endpoint.to_string(),
+            authorization: auth,
             root,
             client,
         })
@@ -182,6 +230,8 @@ pub struct HttpBackend {
     endpoint: String,
     root: String,
     client: HttpClient,
+
+    authorization: Option<String>,
 }
 
 impl Debug for HttpBackend {
@@ -198,6 +248,8 @@ impl Debug for HttpBackend {
 impl Accessor for HttpBackend {
     type Reader = IncomingAsyncBody;
     type BlockingReader = ();
+    type Writer = ();
+    type BlockingWriter = ();
     type Pager = ();
     type BlockingPager = ();
 
@@ -255,8 +307,12 @@ impl HttpBackend {
 
         let mut req = Request::get(&url);
 
+        if let Some(auth) = &self.authorization {
+            req = req.header(header::AUTHORIZATION, auth.clone())
+        }
+
         if !range.is_full() {
-            req = req.header(http::header::RANGE, range.to_header());
+            req = req.header(header::RANGE, range.to_header());
         }
 
         let req = req
@@ -271,7 +327,11 @@ impl HttpBackend {
 
         let url = format!("{}{}", self.endpoint, percent_encode_path(&p));
 
-        let req = Request::head(&url);
+        let mut req = Request::head(&url);
+
+        if let Some(auth) = &self.authorization {
+            req = req.header(header::AUTHORIZATION, auth.clone())
+        }
 
         let req = req
             .body(AsyncBody::Empty)
@@ -284,6 +344,8 @@ impl HttpBackend {
 #[cfg(test)]
 mod tests {
     use anyhow::Result;
+    use wiremock::matchers::basic_auth;
+    use wiremock::matchers::bearer_token;
     use wiremock::matchers::method;
     use wiremock::matchers::path;
     use wiremock::Mock;
@@ -320,6 +382,66 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn test_read_via_basic_auth() -> Result<()> {
+        let _ = env_logger::builder().is_test(true).try_init();
+
+        let (username, password) = ("your_username", "your_password");
+
+        let mock_server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/hello"))
+            .and(basic_auth(username, password))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .insert_header("content-length", "13")
+                    .set_body_string("Hello, World!"),
+            )
+            .mount(&mock_server)
+            .await;
+
+        let mut builder = HttpBuilder::default();
+        builder.endpoint(&mock_server.uri());
+        builder.root("/");
+        builder.username(username).password(password);
+        let op = Operator::create(builder)?.finish();
+
+        let bs = op.object("hello").read().await?;
+
+        assert_eq!(bs, b"Hello, World!");
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_read_via_bearer_auth() -> Result<()> {
+        let _ = env_logger::builder().is_test(true).try_init();
+
+        let token = "your_token";
+
+        let mock_server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/hello"))
+            .and(bearer_token(token))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .insert_header("content-length", "13")
+                    .set_body_string("Hello, World!"),
+            )
+            .mount(&mock_server)
+            .await;
+
+        let mut builder = HttpBuilder::default();
+        builder.endpoint(&mock_server.uri());
+        builder.root("/");
+        builder.token(token);
+        let op = Operator::create(builder)?.finish();
+
+        let bs = op.object("hello").read().await?;
+
+        assert_eq!(bs, b"Hello, World!");
+        Ok(())
+    }
+
+    #[tokio::test]
     async fn test_stat() -> Result<()> {
         let _ = env_logger::builder().is_test(true).try_init();
 
@@ -335,7 +457,8 @@ mod tests {
         builder.root("/");
         let op = Operator::create(builder)?.finish();
 
-        let bs = op.object("hello").metadata().await?;
+        let o = op.object("hello");
+        let bs = o.stat().await?;
 
         assert_eq!(bs.mode(), ObjectMode::FILE);
         assert_eq!(bs.content_length(), 128);

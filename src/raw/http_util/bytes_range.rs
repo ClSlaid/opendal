@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,8 +39,8 @@ use crate::Result;
 ///
 /// # Notes
 ///
-/// BytesRange support construct via rust native range syntex like `..`, `1024..`, `..2048`.
-/// But it's has different symantic on `RangeTo`: `..<end>`.
+/// BytesRange support construct via rust native range syntax like `..`, `1024..`, `..2048`.
+/// But it's has different semantic on `RangeTo`: `..<end>`.
 /// In rust, `..<end>` means all items that `< end`, but in BytesRange, `..<end>` means the
 /// tailing part of content, a.k.a, the last `<end>` bytes of content.
 ///

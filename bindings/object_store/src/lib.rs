@@ -1,4 +1,4 @@
-// Copyright 2023 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ impl ObjectStore for OpendalStore {
     async fn head(&self, location: &Path) -> Result<ObjectMeta> {
         let o = self.inner.object(location.as_ref());
         let meta = o
-            .metadata()
+            .stat()
             .await
             .map_err(|err| format_object_store_error(err, location.as_ref()))?;
 
@@ -200,7 +200,7 @@ impl Stream for OpendalReader {
     type Item = Result<Bytes>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        use opendal::raw::output::Read;
+        use opendal::raw::oio::Read;
 
         self.inner
             .poll_next(cx)

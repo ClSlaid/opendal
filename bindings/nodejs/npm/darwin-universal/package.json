@@ -1,0 +1,15 @@
+{
+  "name": "opendal-darwin-universal",
+  "version": "0.0.0",
+  "os": [
+    "darwin"
+  ],
+  "main": "opendal.darwin-universal.node",
+  "files": [
+    "opendal.darwin-universal.node"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">= 10"
+  }
+}

@@ -1,4 +1,4 @@
-// Copyright 2023 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -115,3 +115,12 @@ pub mod rfc_0977_refactor_error {}
 
 #[doc = include_str!("1085_object_handler.md")]
 pub mod rfc_1085_object_handler {}
+
+#[doc = include_str!("1391_object_metadataer.md")]
+pub mod rfc_1391_object_metadataer {}
+
+#[doc = include_str!("1398_query_based_metadata.md")]
+pub mod rfc_1398_query_based_metadata {}
+
+#[doc = include_str!("1420_object_writer.md")]
+pub mod rfc_1420_object_writer {}

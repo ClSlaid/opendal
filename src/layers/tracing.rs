@@ -1,4 +1,4 @@
-// Copyright 2022 Datafuse Labs.
+// Copyright 2022 Datafuse Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,14 +14,11 @@
 
 use std::fmt::Debug;
 use std::io;
-use std::io::Read;
-use std::pin::Pin;
 use std::task::Context;
 use std::task::Poll;
 
 use async_trait::async_trait;
 use bytes::Bytes;
-use futures::AsyncRead;
 use futures::FutureExt;
 use tracing::Span;
 
@@ -87,7 +84,7 @@ use crate::*;
 ///             .write("0".repeat(16 * 1024 * 1024).into_bytes())
 ///             .await
 ///             .expect("must succeed");
-///         op.object("test").metadata().await.expect("must succeed");
+///         op.object("test").stat().await.expect("must succeed");
 ///         op.object("test").read().await.expect("must succeed");
 ///     });
 ///
@@ -136,6 +133,9 @@ impl<A: Accessor> LayeredAccessor for TracingAccessor<A> {
     type Inner = A;
     type Reader = TracingWrapper<A::Reader>;
     type BlockingReader = TracingWrapper<A::BlockingReader>;
+    // TODO: add tracing for me.
+    type Writer = A::Writer;
+    type BlockingWriter = A::BlockingWriter;
     type Pager = TracingWrapper<A::Pager>;
     type BlockingPager = TracingWrapper<A::BlockingPager>;
 
@@ -161,10 +161,9 @@ impl<A: Accessor> LayeredAccessor for TracingAccessor<A> {
             .await
     }
 
-    #[tracing::instrument(level = "debug", skip(self, r))]
-    async fn write(&self, path: &str, args: OpWrite, r: input::Reader) -> Result<RpWrite> {
-        let r = Box::new(TracingWrapper::new(Span::current(), r));
-        self.inner.write(path, args, r).await
+    #[tracing::instrument(level = "debug", skip(self))]
+    async fn write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::Writer)> {
+        self.inner.write(path, args).await
     }
 
     #[tracing::instrument(level = "debug", skip(self))]
@@ -199,41 +198,8 @@ impl<A: Accessor> LayeredAccessor for TracingAccessor<A> {
     }
 
     #[tracing::instrument(level = "debug", skip(self))]
-    async fn create_multipart(
-        &self,
-        path: &str,
-        args: OpCreateMultipart,
-    ) -> Result<RpCreateMultipart> {
-        self.inner.create_multipart(path, args).await
-    }
-
-    #[tracing::instrument(level = "debug", skip(self, r))]
-    async fn write_multipart(
-        &self,
-        path: &str,
-        args: OpWriteMultipart,
-        r: input::Reader,
-    ) -> Result<RpWriteMultipart> {
-        let r = Box::new(TracingWrapper::new(Span::current(), r));
-        self.inner.write_multipart(path, args, r).await
-    }
-
-    #[tracing::instrument(level = "debug", skip(self))]
-    async fn complete_multipart(
-        &self,
-        path: &str,
-        args: OpCompleteMultipart,
-    ) -> Result<RpCompleteMultipart> {
-        self.inner.complete_multipart(path, args).await
-    }
-
-    #[tracing::instrument(level = "debug", skip(self))]
-    async fn abort_multipart(
-        &self,
-        path: &str,
-        args: OpAbortMultipart,
-    ) -> Result<RpAbortMultipart> {
-        self.inner.abort_multipart(path, args).await
+    async fn batch(&self, args: OpBatch) -> Result<RpBatch> {
+        self.inner.batch(args).await
     }
 
     #[tracing::instrument(level = "debug", skip(self))]
@@ -248,14 +214,9 @@ impl<A: Accessor> LayeredAccessor for TracingAccessor<A> {
             .map(|(rp, r)| (rp, TracingWrapper::new(Span::current(), r)))
     }
 
-    #[tracing::instrument(level = "debug", skip(self, r))]
-    fn blocking_write(
-        &self,
-        path: &str,
-        args: OpWrite,
-        r: input::BlockingReader,
-    ) -> Result<RpWrite> {
-        self.inner.blocking_write(path, args, r)
+    #[tracing::instrument(level = "debug", skip(self))]
+    fn blocking_write(&self, path: &str, args: OpWrite) -> Result<(RpWrite, Self::BlockingWriter)> {
+        self.inner.blocking_write(path, args)
     }
 
     #[tracing::instrument(level = "debug", skip(self))]
@@ -294,12 +255,12 @@ impl<R> TracingWrapper<R> {
     }
 }
 
-impl<R: output::Read> output::Read for TracingWrapper<R> {
+impl<R: oio::Read> oio::Read for TracingWrapper<R> {
     #[tracing::instrument(
         parent = &self.span,
         level = "trace",
         skip_all)]
-    fn poll_read(&mut self, cx: &mut Context<'_>, buf: &mut [u8]) -> Poll<io::Result<usize>> {
+    fn poll_read(&mut self, cx: &mut Context<'_>, buf: &mut [u8]) -> Poll<Result<usize>> {
         self.inner.poll_read(cx, buf)
     }
 
@@ -307,7 +268,7 @@ impl<R: output::Read> output::Read for TracingWrapper<R> {
         parent = &self.span,
         level = "trace",
         skip_all)]
-    fn poll_seek(&mut self, cx: &mut Context<'_>, pos: io::SeekFrom) -> Poll<io::Result<u64>> {
+    fn poll_seek(&mut self, cx: &mut Context<'_>, pos: io::SeekFrom) -> Poll<Result<u64>> {
         self.inner.poll_seek(cx, pos)
     }
 
@@ -315,57 +276,36 @@ impl<R: output::Read> output::Read for TracingWrapper<R> {
         parent = &self.span,
         level = "trace",
         skip_all)]
-    fn poll_next(&mut self, cx: &mut Context<'_>) -> Poll<Option<io::Result<Bytes>>> {
+    fn poll_next(&mut self, cx: &mut Context<'_>) -> Poll<Option<Result<Bytes>>> {
         self.inner.poll_next(cx)
     }
 }
 
-impl<R: input::Read> AsyncRead for TracingWrapper<R> {
-    #[tracing::instrument(
-        parent = &self.span,
-        level = "trace",
-        fields(size = buf.len())
-        skip_all)]
-    fn poll_read(
-        mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-        buf: &mut [u8],
-    ) -> Poll<io::Result<usize>> {
-        Pin::new(&mut self.inner).poll_read(cx, buf)
-    }
-}
-
-impl<R: output::BlockingRead> output::BlockingRead for TracingWrapper<R> {
-    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+impl<R: oio::BlockingRead> oio::BlockingRead for TracingWrapper<R> {
+    fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
         self.inner.read(buf)
     }
 
-    fn seek(&mut self, pos: io::SeekFrom) -> io::Result<u64> {
+    fn seek(&mut self, pos: io::SeekFrom) -> Result<u64> {
         self.inner.seek(pos)
     }
 
-    fn next(&mut self) -> Option<io::Result<Bytes>> {
+    fn next(&mut self) -> Option<Result<Bytes>> {
         self.inner.next()
     }
 }
 
-impl<R: input::BlockingRead> Read for TracingWrapper<R> {
-    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        self.inner.read(buf)
-    }
-}
-
 #[async_trait]
-impl<R: output::Page> output::Page for TracingWrapper<R> {
+impl<R: oio::Page> oio::Page for TracingWrapper<R> {
     #[tracing::instrument(parent = &self.span, level = "debug", skip_all)]
-    async fn next_page(&mut self) -> Result<Option<Vec<output::Entry>>> {
-        self.inner.next_page().await
+    async fn next(&mut self) -> Result<Option<Vec<oio::Entry>>> {
+        self.inner.next().await
     }
 }
 
-impl<R: output::BlockingPage> output::BlockingPage for TracingWrapper<R> {
+impl<R: oio::BlockingPage> oio::BlockingPage for TracingWrapper<R> {
     #[tracing::instrument(parent = &self.span, level = "debug", skip_all)]
-    fn next_page(&mut self) -> Result<Option<Vec<output::Entry>>> {
-        self.inner.next_page()
+    fn next(&mut self) -> Result<Option<Vec<oio::Entry>>> {
+        self.inner.next()
     }
 }
