@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":[["kv","Providing Key Value Adapter for OpenDAL."]]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["by_range","Convert given reader into [`oio::Reader`] by range."],["from_fd","Convert given fd into [`oio::Reader`]."]],"struct":[["FdReader","FdReader is a wrapper of input fd to implement [`oio::Read`]."],["RangeReader","RangeReader that can do seek on non-seekable reader."]]};
