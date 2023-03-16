@@ -519,7 +519,7 @@
     </span><span class="kw">fn </span>test_presigned_request_convert() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>pr = PresignedRequest {
             method: Method::PATCH,
-            uri: Uri::from_static(<span class="string">&quot;https://opendal.databend.rs/path/to/file&quot;</span>),
+            uri: Uri::from_static(<span class="string">&quot;https://opendal.apache.org/path/to/file&quot;</span>),
             headers: {
                 <span class="kw">let </span><span class="kw-2">mut </span>headers = HeaderMap::new();
                 headers.insert(CONTENT_LENGTH, <span class="string">&quot;123&quot;</span>.parse()<span class="question-mark">?</span>);
@@ -532,7 +532,7 @@
         <span class="kw">let </span>req: Request&lt;AsyncBody&gt; = pr.clone().into();
         <span class="macro">assert_eq!</span>(Method::PATCH, req.method());
         <span class="macro">assert_eq!</span>(
-            <span class="string">&quot;https://opendal.databend.rs/path/to/file&quot;</span>,
+            <span class="string">&quot;https://opendal.apache.org/path/to/file&quot;</span>,
             req.uri().to_string()
         );
         <span class="macro">assert_eq!</span>(<span class="string">&quot;123&quot;</span>, req.headers().get(CONTENT_LENGTH).unwrap());
@@ -541,7 +541,7 @@
         <span class="kw">let </span>req: Request&lt;Body&gt; = pr.into();
         <span class="macro">assert_eq!</span>(Method::PATCH, req.method());
         <span class="macro">assert_eq!</span>(
-            <span class="string">&quot;https://opendal.databend.rs/path/to/file&quot;</span>,
+            <span class="string">&quot;https://opendal.apache.org/path/to/file&quot;</span>,
             req.uri().to_string()
         );
         <span class="macro">assert_eq!</span>(<span class="string">&quot;123&quot;</span>, req.headers().get(CONTENT_LENGTH).unwrap());

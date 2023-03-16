@@ -1872,6 +1872,7 @@
 <a href="#1872" id="1872">1872</a>
 <a href="#1873" id="1873">1873</a>
 <a href="#1874" id="1874">1874</a>
+<a href="#1875" id="1875">1875</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2995,6 +2996,7 @@
         am.set_scheme(Scheme::S3)
             .set_root(<span class="kw-2">&amp;</span><span class="self">self</span>.root)
             .set_name(<span class="kw-2">&amp;</span><span class="self">self</span>.bucket)
+            .set_max_batch_operations(<span class="number">1000</span>)
             .set_capabilities(Read | Write | List | Scan | Presign | Batch)
             .set_hints(ReadStreamable);
 

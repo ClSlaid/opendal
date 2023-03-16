@@ -157,8 +157,8 @@ w.close()</code></pre></div>
 <p>v0.21 is an internal refactor version of OpenDAL. In this version, we refactored our error handling and our <code>Accessor</code> APIs. Thanks to those internal changes, we added an object-level metadata cache, making it nearly zero cost to reuse existing metadata continuously.</p>
 <p>Let’s start with our errors.</p>
 <h3 id="error-handling"><a href="#error-handling">Error Handling</a></h3>
-<p>As described in <a href="https://opendal.databend.rs/rfcs/0977-refactor-error.html">RFC-0977: Refactor Error</a>, we refactor opendal error by a new error
-called <a href="https://opendal.databend.rs/opendal/struct.Error.html"><code>opendal::Error</code></a>.</p>
+<p>As described in <a href="https://opendal.apache.org/rfcs/0977-refactor-error.html">RFC-0977: Refactor Error</a>, we refactor opendal error by a new error
+called <a href="https://opendal.apache.org/opendal/struct.Error.html"><code>opendal::Error</code></a>.</p>
 <p>This change will affect all APIs that are used to return <code>io::Error</code>.</p>
 <p>To migrate this, please replace <code>std::io::Error</code> with <code>opendal::Error</code>:</p>
 <div class="example-wrap"><pre class="language-diff"><code>- use std::io::Result;
@@ -199,7 +199,7 @@ called <a href="https://opendal.databend.rs/opendal/struct.Error.html"><code>ope
 <p>Sorry for introducing too much breaking change in a single version. This version can be a solid version for preparing OpenDAL v1.0.</p>
 <h2 id="upgrade-to-v020"><a href="#upgrade-to-v020">Upgrade to v0.20</a></h2>
 <p>v0.20 is a big release that we introduce a lot of performance related changes.</p>
-<p>To make the best of information from <code>read</code> operation, we propose and implemented <a href="https://opendal.databend.rs/rfcs/0926-object-reader.html">RFC-0926: Object Reader</a>. By this RFC, we can fetch content length from <code>ObjectReader</code> now!</p>
+<p>To make the best of information from <code>read</code> operation, we propose and implemented <a href="https://opendal.apache.org/rfcs/0926-object-reader.html">RFC-0926: Object Reader</a>. By this RFC, we can fetch content length from <code>ObjectReader</code> now!</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">pub struct </span>ObjectReader {
     inner: BytesReader
@@ -260,7 +260,7 @@ called <a href="https://opendal.databend.rs/opendal/struct.Error.html"><code>ope
 <div class="example-wrap"><pre class="language-diff"><code>- async fn read(&amp;self, args: OpRead) -&gt; Result&lt;BytesReader&gt;
 + async fn read(&amp;self, path: &amp;str, args: OpRead) -&gt; Result&lt;BytesReader&gt;
 </code></pre></div>
-<p>For more information about this change, please refer to <a href="https://opendal.databend.rs/rfcs/0661-path-in-accessor.html">RFC-0661: Path In Accessor</a>.</p>
+<p>For more information about this change, please refer to <a href="https://opendal.apache.org/rfcs/0661-path-in-accessor.html">RFC-0661: Path In Accessor</a>.</p>
 <p>And since OpenDAL v0.17, we will use <code>rustls</code> as default tls engine for our underlying http client. Since this release, we will not depend on <code>openssl</code> anymore.</p>
 <h2 id="upgrade-to-v016"><a href="#upgrade-to-v016">Upgrade to v0.16</a></h2>
 <p>OpenDAL v0.16 refactor the internal implementation of <code>http</code> service. Since v0.16, http service can be used directly without enabling <code>services-http</code> feature. Accompany by these changes, http service has the following breaking changes:</p>
@@ -283,7 +283,7 @@ called <a href="https://opendal.databend.rs/opendal/struct.Error.html"><code>ope
 
     <span class="kw">let </span>op = Operator::from_env(Scheme::Http)<span class="question-mark">?</span>.layer(iil);
 }</code></pre></div>
-<p>For more information about this change, please refer to <a href="https://opendal.databend.rs/rfcs/0627-split-capabilities.html">RFC-0627: Split Capabilities</a>.</p>
+<p>For more information about this change, please refer to <a href="https://opendal.apache.org/rfcs/0627-split-capabilities.html">RFC-0627: Split Capabilities</a>.</p>
 <h2 id="upgrade-to-v014"><a href="#upgrade-to-v014">Upgrade to v0.14</a></h2>
 <p>OpenDAL v0.14 removed all deprecated APIs in previous versions, including:</p>
 <ul>
@@ -305,10 +305,10 @@ called <a href="https://opendal.databend.rs/opendal/struct.Error.html"><code>ope
 <li><code>Object::write_from</code> has been added to support write from a reader.</li>
 <li>All layers should be refactored to adapt new <code>Accessor</code> trait.</li>
 </ul>
-<p>For more information about this change, please refer to <a href="https://opendal.databend.rs/rfcs/0554-write-refactor.html">RFC-0554: Write Refactor</a>.</p>
+<p>For more information about this change, please refer to <a href="https://opendal.apache.org/rfcs/0554-write-refactor.html">RFC-0554: Write Refactor</a>.</p>
 <h2 id="upgrade-to-v013"><a href="#upgrade-to-v013">Upgrade to v0.13</a></h2>
 <p>OpenDAL deprecate <code>Operator::with_backoff</code> since v0.13.</p>
-<p>Please use <a href="https://opendal.databend.rs/opendal/layers/struct.RetryLayer.html"><code>RetryLayer</code></a> instead:</p>
+<p>Please use <a href="https://opendal.apache.org/opendal/layers/struct.RetryLayer.html"><code>RetryLayer</code></a> instead:</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>backon::ExponentialBackoff;
@@ -331,7 +331,7 @@ called <a href="https://opendal.databend.rs/opendal/struct.Error.html"><code>ope
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span><span class="kw-2">mut </span>builder = fs::Builder::default();
 <span class="kw">let </span>op: Operator = Operator::new(builder.build()<span class="question-mark">?</span>);</code></pre></div>
 <p>Along with these changes, <code>Operator::from_iter</code> and <code>Operator::from_env</code> now is a blocking API too.</p>
-<p>For more information about this change, please refer to <a href="https://opendal.databend.rs/rfcs/0501-new-builder.html">RFC-0501: New Builder</a>.</p>
+<p>For more information about this change, please refer to <a href="https://opendal.apache.org/rfcs/0501-new-builder.html">RFC-0501: New Builder</a>.</p>
 <p>The following APIs have been deprecated:</p>
 <ul>
 <li>All services <code>Builder::finish()</code> (replaced by <code>Builder::build()</code>)</li>
