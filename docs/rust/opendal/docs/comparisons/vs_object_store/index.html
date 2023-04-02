@@ -13,10 +13,21 @@ object_store’s maintainers. So it could not be very objective.</p>
 <p>Yes, of course. Both <code>opendal</code> and <code>object_store</code> are developed in <a href="https://www.rust-lang.org/">Rust</a>, a language empowering everyone to build reliable and efficient software.</p>
 <h4 id="license"><a href="#license">License</a></h4>
 <p>Both <code>opendal</code> and <code>object_store</code> are licensed under <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.</p>
+<h4 id="owner"><a href="#owner">Owner</a></h4>
+<p><code>object_store</code> is a part of <code>Apache Arrow</code> which means it’s hosted and maintained by <a href="https://www.apache.org/">Apache Software Foundation</a>.</p>
+<p><code>opendal</code> is now hosted by <a href="https://incubator.apache.org/projects/opendal.html">Apache Incubator</a>.</p>
 <h4 id="domain"><a href="#domain">Domain</a></h4>
 <p>Both <code>opendal</code> and <code>object_store</code> can be used to access data stored on object storage services. The primary users of those projects are both cloud-native databases too:</p>
 <ul>
-<li><code>opendal</code> is mainly used by <a href="https://github.com/datafuselabs/databend">databend</a>: A modern Elasticity and Performance cloud data warehouse</li>
+<li><code>opendal</code> is mainly used by:
+<ul>
+<li><a href="https://github.com/datafuselabs/databend">databend</a>: A modern Elasticity and Performance cloud data warehouse</li>
+<li><a href="https://github.com/GreptimeTeam/greptimedb">GreptimeDB</a>: An open-source, cloud-native, distributed time-series database.</li>
+<li><a href="https://github.com/mozilla/sccache/">mozilla/sccache</a>: sccache is ccache with cloud storage</li>
+<li><a href="https://github.com/risingwavelabs/risingwave">risingwave</a>: A Distributed SQL Database for Stream Processing</li>
+<li><a href="https://github.com/vectordotdev/vector">Vector</a>: A high-performance observability data pipeline.</li>
+</ul>
+</li>
 <li><code>object_store</code> is mainly used by:
 <ul>
 <li><a href="https://github.com/apache/arrow-datafusion">datafusion</a>: Apache Arrow DataFusion SQL Query Engine</li>
@@ -24,10 +35,7 @@ object_store’s maintainers. So it could not be very objective.</p>
 </ul>
 </li>
 </ul>
-<h3 id="differences"><a href="#differences">Differences</a></h3><h4 id="owner"><a href="#owner">Owner</a></h4>
-<p><code>object_store</code> is a part of <code>Apache Arrow</code> which means it’s hosted and maintained by <a href="https://www.apache.org/">Apache Software Foundation</a>.</p>
-<p><code>opendal</code> is now hosted and maintained by <a href="https://www.apache.org/">Apache Software Foundation</a>.</p>
-<h4 id="vision"><a href="#vision">Vision</a></h4>
+<h3 id="differences"><a href="#differences">Differences</a></h3><h4 id="vision"><a href="#vision">Vision</a></h4>
 <p><code>opendal</code> is Open Data Access Layer that accesses data freely, painlessly, and efficiently. <code>object_store</code> is more focused on async object store support.</p>
 <p>You will see the different visions lead to very different routes.</p>
 <h4 id="design"><a href="#design">Design</a></h4>
@@ -115,7 +123,7 @@ builder.bucket(&quot;example&quot;);
 builder.access_key_id(&quot;access_key_id&quot;);
 builder.secret_access_key(&quot;secret_access_key&quot;);
 
-let store = Operator::create(builder)?.finish();
+let store = Operator::new(builder)?.finish();
 let r = store.reader(&quot;data.parquet&quot;).await?;
 </code></pre></div>
 <p><code>object_store</code></p>
@@ -127,4 +135,4 @@ let r = store.reader(&quot;data.parquet&quot;).await?;
 let store = Arc::new(builder.build()?);
 let path: Path = &quot;data.parquet&quot;.try_into().unwrap();
 let stream = store.get(&amp;path).await()?.into_stream();
-</code></pre></div></div></details></section></div></main><div id="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.0 (2c8cc3432 2023-03-06)" data-search-js="search-98d53477a794af0b.js" data-settings-js="settings-c3c521c753752a1a.js" data-settings-css="settings-08ddfdda51b8ee2e.css" ></div></body></html>
+</code></pre></div></div></details></section></div></main><div id="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.2 (9eb3afe9e 2023-03-27)" data-search-js="search-98d53477a794af0b.js" data-settings-js="settings-c3c521c753752a1a.js" data-settings-css="settings-08ddfdda51b8ee2e.css" ></div></body></html>
