@@ -367,16 +367,6 @@
 <a href="#367" id="367">367</a>
 <a href="#368" id="368">368</a>
 <a href="#369" id="369">369</a>
-<a href="#370" id="370">370</a>
-<a href="#371" id="371">371</a>
-<a href="#372" id="372">372</a>
-<a href="#373" id="373">373</a>
-<a href="#374" id="374">374</a>
-<a href="#375" id="375">375</a>
-<a href="#376" id="376">376</a>
-<a href="#377" id="377">377</a>
-<a href="#378" id="378">378</a>
-<a href="#379" id="379">379</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -551,22 +541,22 @@
 <span class="doccomment">/// Args for `batch` operation.
 </span><span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>OpBatch {
-    ops: BatchOperations,
+    ops: Vec&lt;(String, BatchOperation)&gt;,
 }
 
 <span class="kw">impl </span>OpBatch {
     <span class="doccomment">/// Create a new batch options.
-    </span><span class="kw">pub fn </span>new(ops: BatchOperations) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(ops: Vec&lt;(String, BatchOperation)&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ ops }
     }
 
     <span class="doccomment">/// Get operation from op.
-    </span><span class="kw">pub fn </span>operation(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>BatchOperations {
+    </span><span class="kw">pub fn </span>operation(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[(String, BatchOperation)] {
         <span class="kw-2">&amp;</span><span class="self">self</span>.ops
     }
 
     <span class="doccomment">/// Consume OpBatch into BatchOperation
-    </span><span class="kw">pub fn </span>into_operation(<span class="self">self</span>) -&gt; BatchOperations {
+    </span><span class="kw">pub fn </span>into_operation(<span class="self">self</span>) -&gt; Vec&lt;(String, BatchOperation)&gt; {
         <span class="self">self</span>.ops
     }
 }
@@ -574,33 +564,23 @@
 <span class="doccomment">/// Batch operation used for batch.
 </span><span class="attr">#[derive(Debug, Clone)]
 #[non_exhaustive]
-</span><span class="kw">pub enum </span>BatchOperations {
-    <span class="doccomment">/// Batch delete operations.
-    </span>Delete(Vec&lt;(String, OpDelete)&gt;),
+</span><span class="kw">pub enum </span>BatchOperation {
+    <span class="doccomment">/// Batch delete operation.
+    </span>Delete(OpDelete),
 }
 
-<span class="kw">impl </span>BatchOperations {
+<span class="kw">impl </span>From&lt;OpDelete&gt; <span class="kw">for </span>BatchOperation {
+    <span class="kw">fn </span>from(op: OpDelete) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::Delete(op)
+    }
+}
+
+<span class="kw">impl </span>BatchOperation {
     <span class="doccomment">/// Return the operation of this batch.
     </span><span class="kw">pub fn </span>operation(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Operation {
-        <span class="kw">use </span>BatchOperations::<span class="kw-2">*</span>;
+        <span class="kw">use </span>BatchOperation::<span class="kw-2">*</span>;
         <span class="kw">match </span><span class="self">self </span>{
             Delete(<span class="kw">_</span>) =&gt; Operation::Delete,
-        }
-    }
-
-    <span class="doccomment">/// Return the length of given operations.
-    </span><span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="kw">use </span>BatchOperations::<span class="kw-2">*</span>;
-        <span class="kw">match </span><span class="self">self </span>{
-            Delete(v) =&gt; v.len(),
-        }
-    }
-
-    <span class="doccomment">/// Return if given operations is empty.
-    </span><span class="kw">pub fn </span>is_empty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">use </span>BatchOperations::<span class="kw-2">*</span>;
-        <span class="kw">match </span><span class="self">self </span>{
-            Delete(v) =&gt; v.is_empty(),
         }
     }
 }

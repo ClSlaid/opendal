@@ -246,34 +246,6 @@
 <a href="#246" id="246">246</a>
 <a href="#247" id="247">247</a>
 <a href="#248" id="248">248</a>
-<a href="#249" id="249">249</a>
-<a href="#250" id="250">250</a>
-<a href="#251" id="251">251</a>
-<a href="#252" id="252">252</a>
-<a href="#253" id="253">253</a>
-<a href="#254" id="254">254</a>
-<a href="#255" id="255">255</a>
-<a href="#256" id="256">256</a>
-<a href="#257" id="257">257</a>
-<a href="#258" id="258">258</a>
-<a href="#259" id="259">259</a>
-<a href="#260" id="260">260</a>
-<a href="#261" id="261">261</a>
-<a href="#262" id="262">262</a>
-<a href="#263" id="263">263</a>
-<a href="#264" id="264">264</a>
-<a href="#265" id="265">265</a>
-<a href="#266" id="266">266</a>
-<a href="#267" id="267">267</a>
-<a href="#268" id="268">268</a>
-<a href="#269" id="269">269</a>
-<a href="#270" id="270">270</a>
-<a href="#271" id="271">271</a>
-<a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
-<a href="#276" id="276">276</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -408,63 +380,35 @@
 
 <span class="doccomment">/// Reply for `batch` operation.
 </span><span class="kw">pub struct </span>RpBatch {
-    results: BatchedResults,
+    results: Vec&lt;(String, <span class="prelude-ty">Result</span>&lt;BatchedReply&gt;)&gt;,
 }
 
 <span class="kw">impl </span>RpBatch {
     <span class="doccomment">/// Create a new RpBatch.
-    </span><span class="kw">pub fn </span>new(results: BatchedResults) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(results: Vec&lt;(String, <span class="prelude-ty">Result</span>&lt;BatchedReply&gt;)&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ results }
     }
 
     <span class="doccomment">/// Get the results from RpBatch.
-    </span><span class="kw">pub fn </span>results(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>BatchedResults {
+    </span><span class="kw">pub fn </span>results(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[(String, <span class="prelude-ty">Result</span>&lt;BatchedReply&gt;)] {
         <span class="kw-2">&amp;</span><span class="self">self</span>.results
     }
 
     <span class="doccomment">/// Consume RpBatch to get the batched results.
-    </span><span class="kw">pub fn </span>into_results(<span class="self">self</span>) -&gt; BatchedResults {
+    </span><span class="kw">pub fn </span>into_results(<span class="self">self</span>) -&gt; Vec&lt;(String, <span class="prelude-ty">Result</span>&lt;BatchedReply&gt;)&gt; {
         <span class="self">self</span>.results
     }
 }
 
 <span class="doccomment">/// Batch results of `batch` operations.
-</span><span class="kw">pub enum </span>BatchedResults {
+</span><span class="kw">pub enum </span>BatchedReply {
     <span class="doccomment">/// results of delete batch operation
-    </span>Delete(Vec&lt;(String, <span class="prelude-ty">Result</span>&lt;RpDelete&gt;)&gt;),
+    </span>Delete(RpDelete),
 }
 
-<span class="kw">impl </span>BatchedResults {
-    <span class="doccomment">/// Return the length of given results.
-    </span><span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="kw">use </span>BatchedResults::<span class="kw-2">*</span>;
-        <span class="kw">match </span><span class="self">self </span>{
-            Delete(v) =&gt; v.len(),
-        }
-    }
-
-    <span class="doccomment">/// Return if given results is empty.
-    </span><span class="kw">pub fn </span>is_empty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">use </span>BatchedResults::<span class="kw-2">*</span>;
-        <span class="kw">match </span><span class="self">self </span>{
-            Delete(v) =&gt; v.is_empty(),
-        }
-    }
-
-    <span class="doccomment">/// Return the length of ok results.
-    </span><span class="kw">pub fn </span>len_ok(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="kw">use </span>BatchedResults::<span class="kw-2">*</span>;
-        <span class="kw">match </span><span class="self">self </span>{
-            Delete(v) =&gt; v.iter().filter(|v| v.<span class="number">1</span>.is_ok()).count(),
-        }
-    }
-
-    <span class="doccomment">/// Return the length of error results.
-    </span><span class="kw">pub fn </span>len_err(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="kw">use </span>BatchedResults::<span class="kw-2">*</span>;
-        <span class="kw">match </span><span class="self">self </span>{
-            Delete(v) =&gt; v.iter().filter(|v| v.<span class="number">1</span>.is_err()).count(),
-        }
+<span class="kw">impl </span>From&lt;RpDelete&gt; <span class="kw">for </span>BatchedReply {
+    <span class="kw">fn </span>from(rp: RpDelete) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::Delete(rp)
     }
 }
 

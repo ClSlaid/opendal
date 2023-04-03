@@ -1015,7 +1015,6 @@
 <a href="#1015" id="1015">1015</a>
 <a href="#1016" id="1016">1016</a>
 <a href="#1017" id="1017">1017</a>
-<a href="#1018" id="1018">1018</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1616,59 +1615,58 @@
 
     <span class="kw">async fn </span>batch(<span class="kw-2">&amp;</span><span class="self">self</span>, args: OpBatch) -&gt; <span class="prelude-ty">Result</span>&lt;RpBatch&gt; {
         <span class="kw">let </span>ops = args.into_operation();
-        <span class="kw">match </span>ops {
-            BatchOperations::Delete(ops) =&gt; {
-                <span class="kw">let </span>paths = ops.into_iter().map(|(p, <span class="kw">_</span>)| p).collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
-                <span class="kw">if </span>paths.len() &gt; AZBLOB_BATCH_LIMIT {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                        ErrorKind::Unsupported,
-                        <span class="string">&quot;batch delete limit exceeded&quot;</span>,
-                    ));
-                }
-                <span class="comment">// construct and complete batch request
-                </span><span class="kw">let </span>resp = <span class="self">self</span>.azblob_batch_delete(<span class="kw-2">&amp;</span>paths).<span class="kw">await</span><span class="question-mark">?</span>;
-
-                <span class="comment">// check response status
-                </span><span class="kw">if </span>resp.status() != StatusCode::ACCEPTED {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
-                }
-
-                <span class="comment">// get boundary from response header
-                </span><span class="kw">let </span>content_type = resp.headers().get(CONTENT_TYPE).ok_or_else(|| {
-                    Error::new(
-                        ErrorKind::Unexpected,
-                        <span class="string">&quot;response data should have CONTENT_TYPE header&quot;</span>,
-                    )
-                })<span class="question-mark">?</span>;
-                <span class="kw">let </span>content_type = content_type
-                    .to_str()
-                    .map(|ty| ty.to_string())
-                    .map_err(|e| {
-                        Error::new(
-                            ErrorKind::Unexpected,
-                            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;get invalid CONTENT_TYPE header in response: {:?}&quot;</span>, e),
-                        )
-                    })<span class="question-mark">?</span>;
-                <span class="kw">let </span>splits = content_type.split(<span class="string">&quot;boundary=&quot;</span>).collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>str&gt;&gt;();
-                <span class="kw">let </span>boundary = splits.get(<span class="number">1</span>).to_owned().ok_or_else(|| {
-                    Error::new(
-                        ErrorKind::Unexpected,
-                        <span class="string">&quot;No boundary message provided in CONTENT_TYPE&quot;</span>,
-                    )
-                })<span class="question-mark">?</span>;
-
-                <span class="kw">let </span>body = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>body = String::from_utf8(body.to_vec()).map_err(|e| {
-                    Error::new(
-                        ErrorKind::Unexpected,
-                        <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;get invalid batch response {e:?}&quot;</span>),
-                    )
-                })<span class="question-mark">?</span>;
-
-                <span class="kw">let </span>results = parse_batch_delete_response(boundary, body, paths)<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(RpBatch::new(BatchedResults::Delete(results)))
-            }
+        <span class="kw">let </span>paths = ops.into_iter().map(|(p, <span class="kw">_</span>)| p).collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+        <span class="kw">if </span>paths.len() &gt; AZBLOB_BATCH_LIMIT {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                ErrorKind::Unsupported,
+                <span class="string">&quot;batch delete limit exceeded&quot;</span>,
+            ));
         }
+        <span class="comment">// construct and complete batch request
+        </span><span class="kw">let </span>resp = <span class="self">self</span>.azblob_batch_delete(<span class="kw-2">&amp;</span>paths).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="comment">// check response status
+        </span><span class="kw">if </span>resp.status() != StatusCode::ACCEPTED {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+        }
+
+        <span class="comment">// get boundary from response header
+        </span><span class="kw">let </span>content_type = resp.headers().get(CONTENT_TYPE).ok_or_else(|| {
+            Error::new(
+                ErrorKind::Unexpected,
+                <span class="string">&quot;response data should have CONTENT_TYPE header&quot;</span>,
+            )
+        })<span class="question-mark">?</span>;
+        <span class="kw">let </span>content_type = content_type
+            .to_str()
+            .map(|ty| ty.to_string())
+            .map_err(|e| {
+                Error::new(
+                    ErrorKind::Unexpected,
+                    <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;get invalid CONTENT_TYPE header in response: {:?}&quot;</span>, e),
+                )
+            })<span class="question-mark">?</span>;
+        <span class="kw">let </span>splits = content_type.split(<span class="string">&quot;boundary=&quot;</span>).collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>str&gt;&gt;();
+        <span class="kw">let </span>boundary = splits.get(<span class="number">1</span>).to_owned().ok_or_else(|| {
+            Error::new(
+                ErrorKind::Unexpected,
+                <span class="string">&quot;No boundary message provided in CONTENT_TYPE&quot;</span>,
+            )
+        })<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>body = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>body = String::from_utf8(body.to_vec()).map_err(|e| {
+            Error::new(
+                ErrorKind::Unexpected,
+                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;get invalid batch response {e:?}&quot;</span>),
+            )
+        })<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>results = parse_batch_delete_response(boundary, body, paths)<span class="question-mark">?
+            </span>.into_iter()
+            .map(|(path, rp)| (path, rp.map(|v| v.into())))
+            .collect();
+        <span class="prelude-val">Ok</span>(RpBatch::new(results))
     }
 }
 

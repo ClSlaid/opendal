@@ -474,7 +474,6 @@
 <a href="#474" id="474">474</a>
 <a href="#475" id="475">475</a>
 <a href="#476" id="476">476</a>
-<a href="#477" id="477">477</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -691,9 +690,8 @@
         <span class="self">self</span>.inner
             .batch(args)
             .map_ok(|v| {
-                <span class="kw">let </span>BatchedResults::Delete(res) = v.into_results();
-
-                <span class="kw">let </span>res = res
+                <span class="kw">let </span>res = v
+                    .into_results()
                     .into_iter()
                     .map(|(path, res)| {
                         <span class="kw">let </span>res = res.map_err(|err| {
@@ -705,7 +703,7 @@
                     })
                     .collect();
 
-                RpBatch::new(BatchedResults::Delete(res))
+                RpBatch::new(res)
             })
             .map_err(|err| {
                 err.with_operation(Operation::Batch)

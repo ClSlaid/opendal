@@ -2055,7 +2055,7 @@
     }
 
     <span class="kw">async fn </span>batch(<span class="kw-2">&amp;</span><span class="self">self</span>, args: OpBatch) -&gt; <span class="prelude-ty">Result</span>&lt;RpBatch&gt; {
-        <span class="kw">let </span>(op, count) = (args.operation().operation(), args.operation().len());
+        <span class="kw">let </span>(op, count) = (args.operation()[<span class="number">0</span>].<span class="number">1</span>.operation(), args.operation().len());
 
         <span class="macro">debug!</span>(
             target: LOGGING_TARGET,
@@ -2073,8 +2073,8 @@
                     <span class="self">self</span>.scheme,
                     Operation::Batch,
                     v.results().len(),
-                    v.results().len_ok(),
-                    v.results().len_err(),
+                    v.results().iter().filter(|(<span class="kw">_</span>, v)|v.is_ok()).count(),
+                    v.results().iter().filter(|(<span class="kw">_</span>, v)|v.is_err()).count(),
                 );
                 v
             })

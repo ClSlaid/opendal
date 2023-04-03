@@ -1837,15 +1837,16 @@
     /// ```
     </span><span class="kw">pub async fn </span>remove_via(<span class="kw-2">&amp;</span><span class="self">self</span>, input: <span class="kw">impl </span>Stream&lt;Item = String&gt; + Unpin) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">if </span><span class="self">self</span>.info().can_batch() {
-            <span class="kw">let </span><span class="kw-2">mut </span>input = input.map(|v| (v, OpDelete::default())).chunks(<span class="self">self</span>.limit());
+            <span class="kw">let </span><span class="kw-2">mut </span>input = input
+                .map(|v| (v, OpDelete::default().into()))
+                .chunks(<span class="self">self</span>.limit());
 
             <span class="kw">while let </span><span class="prelude-val">Some</span>(batches) = input.next().<span class="kw">await </span>{
                 <span class="kw">let </span>results = <span class="self">self
                     </span>.inner()
-                    .batch(OpBatch::new(BatchOperations::Delete(batches)))
-                    .<span class="kw">await</span><span class="question-mark">?</span>;
-
-                <span class="kw">let </span>BatchedResults::Delete(results) = results.into_results();
+                    .batch(OpBatch::new(batches))
+                    .<span class="kw">await</span><span class="question-mark">?
+                    </span>.into_results();
 
                 <span class="comment">// TODO: return error here directly seems not a good idea?
                 </span><span class="kw">for </span>(<span class="kw">_</span>, result) <span class="kw">in </span>results {
@@ -1910,15 +1911,14 @@
                 <span class="kw">let </span>batches = batches
                     .map_err(|err| err.<span class="number">1</span>)<span class="question-mark">?
                     </span>.into_iter()
-                    .map(|v| (v.path().to_string(), OpDelete::default()))
+                    .map(|v| (v.path().to_string(), OpDelete::default().into()))
                     .collect();
 
                 <span class="kw">let </span>results = <span class="self">self
                     </span>.inner()
-                    .batch(OpBatch::new(BatchOperations::Delete(batches)))
-                    .<span class="kw">await</span><span class="question-mark">?</span>;
-
-                <span class="kw">let </span>BatchedResults::Delete(results) = results.into_results();
+                    .batch(OpBatch::new(batches))
+                    .<span class="kw">await</span><span class="question-mark">?
+                    </span>.into_results();
 
                 <span class="comment">// TODO: return error here directly seems not a good idea?
                 </span><span class="kw">for </span>(<span class="kw">_</span>, result) <span class="kw">in </span>results {
