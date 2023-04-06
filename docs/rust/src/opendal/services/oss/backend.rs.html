@@ -1599,8 +1599,6 @@
                     <span class="kw">let </span>result: InitiateMultipartUploadResult =
                         quick_xml::de::from_reader(bs.reader())
                             .map_err(new_xml_deserialize_error)<span class="question-mark">?</span>;
-                    <span class="kw">let _ </span>= result.bucket;
-                    <span class="kw">let _ </span>= result.key;
                     <span class="prelude-val">Some</span>(result.upload_id)
                 }
                 <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
@@ -2088,8 +2086,10 @@
 <span class="attr">#[derive(Default, Debug, Deserialize)]
 #[serde(rename_all = <span class="string">&quot;PascalCase&quot;</span>)]
 </span><span class="kw">struct </span>InitiateMultipartUploadResult {
-    bucket: String,
-    key: String,
+    <span class="attr">#[cfg(test)]
+    </span>bucket: String,
+    <span class="attr">#[cfg(test)]
+    </span>key: String,
     upload_id: String,
 }
 

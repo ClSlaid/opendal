@@ -82,6 +82,11 @@
 <a href="#82" id="82">82</a>
 <a href="#83" id="83">83</a>
 <a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -139,6 +144,11 @@
     <span class="doccomment">/// Check if current backend supports [`Accessor::write`] or not.
     </span><span class="kw">pub fn </span>can_write(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.<span class="number">0</span>.capabilities().contains(AccessorCapability::Write)
+    }
+
+    <span class="doccomment">/// Check if current backend supports [`Accessor::copy`] or not.
+    </span><span class="kw">pub fn </span>can_copy(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.<span class="number">0</span>.capabilities().contains(AccessorCapability::Copy)
     }
 
     <span class="doccomment">/// Check if current backend supports [`Accessor::list`] or not.

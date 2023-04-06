@@ -267,6 +267,11 @@
 <a href="#267" id="267">267</a>
 <a href="#268" id="268">268</a>
 <a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -287,8 +292,6 @@
 </span><span class="kw">use </span>std::cmp::min;
 <span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::io;
-<span class="kw">use </span>std::io::Read;
-<span class="kw">use </span>std::io::Write;
 <span class="kw">use </span>std::task::Context;
 <span class="kw">use </span>std::task::Poll;
 
@@ -310,8 +313,6 @@
     </span>Empty,
     <span class="doccomment">/// Body with bytes.
     </span>Bytes(Bytes),
-    <span class="doccomment">/// Body with a Reader.
-    </span>Reader(Box&lt;<span class="kw">dyn </span>Read + Send&gt;),
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>Body {
@@ -323,32 +324,41 @@
 <span class="kw">impl </span>Body {
     <span class="doccomment">/// Consume the entire body.
     </span><span class="kw">pub fn </span>consume(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">if let </span>Body::Reader(<span class="kw-2">mut </span>r) = <span class="self">self </span>{
-            std::io::copy(<span class="kw-2">&amp;mut </span>r, <span class="kw-2">&amp;mut </span>std::io::sink()).map_err(|err| {
-                Error::new(ErrorKind::Unexpected, <span class="string">&quot;consuming response&quot;</span>)
-                    .with_operation(<span class="string">&quot;http_util::Body::consume&quot;</span>)
-                    .set_source(err)
-            })<span class="question-mark">?</span>;
-        }
-
         <span class="prelude-val">Ok</span>(())
     }
 }
 
-<span class="kw">impl </span>Read <span class="kw">for </span>Body {
-    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; io::Result&lt;usize&gt; {
-        <span class="kw">match </span><span class="self">self </span>{
-            Body::Empty =&gt; <span class="prelude-val">Ok</span>(<span class="number">0</span>),
-            Body::Bytes(bs) =&gt; {
-                <span class="kw">let </span>size = min(bs.len(), buf.len());
-                <span class="kw">let </span>rbs = bs.split_to(size);
-                bs.advance(size);
-
-                buf.write_all(<span class="kw-2">&amp;</span>rbs).expect(<span class="string">&quot;write all must succeed&quot;</span>);
-                <span class="prelude-val">Ok</span>(size)
-            }
-            Body::Reader(r) =&gt; r.read(buf),
+<span class="kw">impl </span>From&lt;Body&gt; <span class="kw">for </span>reqwest::blocking::Body {
+    <span class="kw">fn </span>from(v: Body) -&gt; <span class="self">Self </span>{
+        <span class="kw">match </span>v {
+            Body::Empty =&gt; reqwest::blocking::Body::from(<span class="string">&quot;&quot;</span>),
+            Body::Bytes(bs) =&gt; reqwest::blocking::Body::from(bs),
         }
+    }
+}
+
+<span class="doccomment">/// IncomingBody carries the content returned by remote servers.
+///
+/// # Notes
+///
+/// Client SHOULD NEVER construct this body.
+</span><span class="kw">pub struct </span>IncomingBody {
+    <span class="doccomment">/// # TODO
+    ///
+    /// hyper returns `impl Stream&lt;Item = crate::Result&lt;Bytes&gt;&gt;` but we can&#39;t
+    /// write the types in stable. So we will box here.
+    ///
+    /// After [TAIT](https://rust-lang.github.io/rfcs/2515-type_alias_impl_trait.html)
+    /// has been stable, we can change `IncomingAsyncBody` into `IncomingAsyncBody&lt;S&gt;`.
+    </span><span class="attr">#[allow(unused)]
+    </span>inner: reqwest::blocking::Response,
+    <span class="attr">#[allow(unused)]
+    </span>size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
+}
+
+<span class="kw">impl </span>IncomingBody {
+    <span class="kw">pub fn </span>new(resp: reqwest::blocking::Response, size: <span class="prelude-ty">Option</span>&lt;u64&gt;) -&gt; <span class="self">Self </span>{
+        IncomingBody { inner: resp, size }
     }
 }
 

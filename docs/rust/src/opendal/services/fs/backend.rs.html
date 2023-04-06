@@ -716,6 +716,34 @@
 <a href="#716" id="716">716</a>
 <a href="#717" id="717">717</a>
 <a href="#718" id="718">718</a>
+<a href="#719" id="719">719</a>
+<a href="#720" id="720">720</a>
+<a href="#721" id="721">721</a>
+<a href="#722" id="722">722</a>
+<a href="#723" id="723">723</a>
+<a href="#724" id="724">724</a>
+<a href="#725" id="725">725</a>
+<a href="#726" id="726">726</a>
+<a href="#727" id="727">727</a>
+<a href="#728" id="728">728</a>
+<a href="#729" id="729">729</a>
+<a href="#730" id="730">730</a>
+<a href="#731" id="731">731</a>
+<a href="#732" id="732">732</a>
+<a href="#733" id="733">733</a>
+<a href="#734" id="734">734</a>
+<a href="#735" id="735">735</a>
+<a href="#736" id="736">736</a>
+<a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -762,6 +790,7 @@
 ///
 /// - [x] read
 /// - [x] write
+/// - [x] copy
 /// - [x] list
 /// - [ ] ~~scan~~
 /// - [ ] ~~presign~~
@@ -1019,6 +1048,7 @@
             .set_capabilities(
                 AccessorCapability::Read
                     | AccessorCapability::Write
+                    | AccessorCapability::Copy
                     | AccessorCapability::List
                     | AccessorCapability::Blocking,
             )
@@ -1157,6 +1187,19 @@
             </span>.map_err(parse_io_error)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>((RpWrite::new(), FsWriter::new(target_path, tmp_path, f)))
+    }
+
+    <span class="kw">async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, _args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
+        <span class="kw">let </span>from = <span class="self">self</span>.root.join(from.trim_end_matches(<span class="string">&#39;/&#39;</span>));
+
+        <span class="comment">// try to get the metadata of the source file to ensure it exists
+        </span>tokio::fs::metadata(<span class="kw-2">&amp;</span>from).<span class="kw">await</span>.map_err(parse_io_error)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>to = <span class="self">Self</span>::ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to.trim_end_matches(<span class="string">&#39;/&#39;</span>)).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        tokio::fs::copy(from, to).<span class="kw">await</span>.map_err(parse_io_error)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(RpCopy::default())
     }
 
     <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
@@ -1343,6 +1386,19 @@
             .map_err(parse_io_error)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>((RpWrite::new(), FsWriter::new(target_path, tmp_path, f)))
+    }
+
+    <span class="kw">fn </span>blocking_copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, _args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
+        <span class="kw">let </span>from = <span class="self">self</span>.root.join(from.trim_end_matches(<span class="string">&#39;/&#39;</span>));
+
+        <span class="comment">// try to get the metadata of the source file to ensure it exists
+        </span>std::fs::metadata(<span class="kw-2">&amp;</span>from).map_err(parse_io_error)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>to = <span class="self">Self</span>::blocking_ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to.trim_end_matches(<span class="string">&#39;/&#39;</span>))<span class="question-mark">?</span>;
+
+        std::fs::copy(from, to).map_err(parse_io_error)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(RpCopy::default())
     }
 
     <span class="kw">fn </span>blocking_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {

@@ -270,13 +270,6 @@
 <a href="#270" id="270">270</a>
 <a href="#271" id="271">271</a>
 <a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
-<a href="#276" id="276">276</a>
-<a href="#277" id="277">277</a>
-<a href="#278" id="278">278</a>
-<a href="#279" id="279">279</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -294,22 +287,19 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::env;
-<span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::str::FromStr;
-<span class="kw">use </span>std::sync::Arc;
+<span class="kw">use </span>std::thread;
 
 <span class="kw">use </span>futures::TryStreamExt;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::Response;
-<span class="kw">use </span>log::debug;
 <span class="kw">use </span>reqwest::redirect::Policy;
-<span class="kw">use </span>reqwest::ClientBuilder;
 <span class="kw">use </span>reqwest::Url;
 
 <span class="kw">use </span><span class="kw">super</span>::body::IncomingAsyncBody;
-<span class="kw">use </span><span class="kw">super</span>::dns::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">super</span>::body::IncomingBody;
 <span class="kw">use </span><span class="kw">super</span>::parse_content_length;
 <span class="kw">use </span><span class="kw">super</span>::AsyncBody;
 <span class="kw">use </span><span class="kw">super</span>::Body;
@@ -321,7 +311,7 @@
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>HttpClient {
     async_client: reqwest::Client,
-    sync_client: ureq::Agent,
+    blocking_client: reqwest::blocking::Client,
 }
 
 <span class="doccomment">/// We don&#39;t want users to know details about our clients.
@@ -332,148 +322,144 @@
 }
 
 <span class="kw">impl </span>HttpClient {
-    <span class="doccomment">/// Create a new http client.
+    <span class="doccomment">/// Create a new http client in async context.
     </span><span class="kw">pub fn </span>new() -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>async_client = {
-            <span class="kw">let </span><span class="kw-2">mut </span>builder = ClientBuilder::new();
+        <span class="self">Self</span>::build(
+            reqwest::ClientBuilder::new(),
+            reqwest::blocking::ClientBuilder::new(),
+        )
+    }
 
-            <span class="comment">// Make sure we don&#39;t enable auto gzip decompress.
-            </span>builder = builder.no_gzip();
-            <span class="comment">// Make sure we don&#39;t enable auto brotli decompress.
-            </span>builder = builder.no_brotli();
-            <span class="comment">// Make sure we don&#39;t enable auto deflate decompress.
-            </span>builder = builder.no_deflate();
-            <span class="comment">// Redirect will be handled by ourselves.
-            </span>builder = builder.redirect(Policy::none());
-
-            <span class="attr">#[cfg(feature = <span class="string">&quot;trust-dns&quot;</span>)]
-            </span><span class="kw">let </span>builder = builder.dns_resolver(Arc::new(AsyncTrustDnsResolver::new().unwrap()));
-            <span class="attr">#[cfg(not(feature = <span class="string">&quot;trust-dns&quot;</span>))]
-            </span><span class="kw">let </span>builder = builder.dns_resolver(Arc::new(AsyncStdDnsResolver::default()));
-
-            builder.build().map_err(|err| {
-                Error::new(ErrorKind::Unexpected, <span class="string">&quot;async client build failed&quot;</span>).set_source(err)
-            })<span class="question-mark">?
-        </span>};
-
-        <span class="kw">let </span>sync_client = {
-            <span class="kw">let </span><span class="kw-2">mut </span>builder = ureq::AgentBuilder::new();
-
-            <span class="kw">for </span>key <span class="kw">in </span>[<span class="string">&quot;http_proxy&quot;</span>, <span class="string">&quot;https_proxy&quot;</span>, <span class="string">&quot;HTTP_PROXY&quot;</span>, <span class="string">&quot;HTTPS_PROXY&quot;</span>] {
-                <span class="kw">if let </span><span class="prelude-val">Ok</span>(proxy) = env::var(key) {
-                    <span class="comment">// Ignore proxy setting if proxy is invalid.
-                    </span><span class="kw">if let </span><span class="prelude-val">Ok</span>(proxy) = ureq::Proxy::new(proxy) {
-                        <span class="macro">debug!</span>(<span class="string">&quot;sync client: set proxy to {proxy:?}&quot;</span>);
-                        builder = builder.proxy(proxy);
-                    }
-                }
-            }
-
-            <span class="kw">let </span>builder = builder.resolver(StdDnsResolver::default());
-
-            builder.build()
-        };
-
+    <span class="doccomment">/// Build a new http client in async context.
+    </span><span class="kw">pub fn </span>build(
+        async_builder: reqwest::ClientBuilder,
+        blocking_builder: reqwest::blocking::ClientBuilder,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="prelude-val">Ok</span>(HttpClient {
-            async_client,
-            sync_client,
+            async_client: <span class="self">Self</span>::build_async_client(async_builder)<span class="question-mark">?</span>,
+            blocking_client: <span class="self">Self</span>::build_blocking_client(blocking_builder)<span class="question-mark">?</span>,
         })
     }
 
-    <span class="doccomment">/// Build a new http client from already built clients.
+    <span class="doccomment">/// Build a new blocking client with given builder.
+    </span><span class="kw">fn </span>build_async_client(<span class="kw-2">mut </span>builder: reqwest::ClientBuilder) -&gt; <span class="prelude-ty">Result</span>&lt;reqwest::Client&gt; {
+        <span class="comment">// Make sure we don&#39;t enable auto gzip decompress.
+        </span>builder = builder.no_gzip();
+        <span class="comment">// Make sure we don&#39;t enable auto brotli decompress.
+        </span>builder = builder.no_brotli();
+        <span class="comment">// Make sure we don&#39;t enable auto deflate decompress.
+        </span>builder = builder.no_deflate();
+        <span class="comment">// Redirect will be handled by ourselves.
+        </span>builder = builder.redirect(Policy::none());
+
+        <span class="attr">#[cfg(feature = <span class="string">&quot;trust-dns&quot;</span>)]
+        </span><span class="kw">let </span>builder = builder.trust_dns(<span class="bool-val">true</span>);
+
+        builder.build().map_err(|err| {
+            Error::new(ErrorKind::Unexpected, <span class="string">&quot;async client build failed&quot;</span>).set_source(err)
+        })
+    }
+
+    <span class="doccomment">/// Build a new blocking client with given builder.
     ///
     /// # Notes
     ///
-    /// By using this method, it&#39;s caller&#39;s duty to make sure everything
-    /// configured correctly. Like proxy, dns resolver and so on.
+    /// `reqwest::blocking::ClientBuilder::build` will panic if called
+    /// inside async context. So we need to spawn a thread to build it.
     ///
-    /// And this API is an internal API, OpenDAL could change it while bumping
-    /// minor versions.
-    ///
-    /// ## Reminders
-    /// ### no auto redirect
-    /// OpenDAL will handle all HTTP responses, including redirections.
-    /// Auto redirect may cause OpenDAL to fail.
-    ///
-    /// For reqwest client, please make sure your client&#39;s redirect policy is `Policy::none()`.
-    /// ```no_run
-    /// # use anyhow::Result;
-    /// # use reqwest::redirect::Policy;
-    /// # fn main() -&gt; Result&lt;()&gt; {
-    /// let _client = reqwest::ClientBuilder::new()
-    ///     .redirect(Policy::none())
-    ///     .build()?;
-    /// # Ok(())
-    /// # }
-    /// ```
-    /// For ureq client, please make sure your client&#39;s redirect count is `0`:
-    /// ```no_run
-    /// # fn main() {
-    /// let _client = ureq::AgentBuilder::new().redirects(0).build();
-    /// # }
-    /// ```
-    </span><span class="kw">pub fn </span>with_client(async_client: reqwest::Client, sync_client: ureq::Agent) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            async_client,
-            sync_client,
-        }
+    /// And users SHOULD never call blocking clients in async context.
+    </span><span class="kw">fn </span>build_blocking_client(
+        <span class="kw-2">mut </span>builder: reqwest::blocking::ClientBuilder,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reqwest::blocking::Client&gt; {
+        <span class="comment">// Make sure we don&#39;t enable auto gzip decompress.
+        </span>builder = builder.no_gzip();
+        <span class="comment">// Make sure we don&#39;t enable auto brotli decompress.
+        </span>builder = builder.no_brotli();
+        <span class="comment">// Make sure we don&#39;t enable auto deflate decompress.
+        </span>builder = builder.no_deflate();
+        <span class="comment">// Redirect will be handled by ourselves.
+        </span>builder = builder.redirect(Policy::none());
+
+        <span class="attr">#[cfg(feature = <span class="string">&quot;trust-dns&quot;</span>)]
+        </span><span class="kw">let </span>builder = builder.trust_dns(<span class="bool-val">true</span>);
+
+        thread::spawn(|| {
+            builder.build().map_err(|err| {
+                Error::new(ErrorKind::Unexpected, <span class="string">&quot;blocking client build failed&quot;</span>).set_source(err)
+            })
+        })
+        .join()
+        .expect(<span class="string">&quot;the thread of building blocking client join failed&quot;</span>)
     }
 
     <span class="doccomment">/// Get the async client from http client.
-    </span><span class="kw">pub fn </span>async_client(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; reqwest::Client {
+    </span><span class="kw">pub async fn </span>async_client(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; reqwest::Client {
         <span class="self">self</span>.async_client.clone()
     }
 
-    <span class="doccomment">/// Get the sync client from http client.
-    </span><span class="kw">pub fn </span>sync_client(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ureq::Agent {
-        <span class="self">self</span>.sync_client.clone()
+    <span class="doccomment">/// Get the blocking client from http client.
+    </span><span class="kw">pub fn </span>blocking_client(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; reqwest::blocking::Client {
+        <span class="self">self</span>.blocking_client.clone()
     }
 
     <span class="doccomment">/// Send a request in blocking way.
-    </span><span class="kw">pub fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;Body&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Body&gt;&gt; {
+    </span><span class="kw">pub fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;Body&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingBody&gt;&gt; {
+        <span class="kw">let </span>is_head = req.method() == http::Method::HEAD;
         <span class="kw">let </span>(parts, body) = req.into_parts();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>ur = <span class="self">self
-            </span>.sync_client
-            .request(parts.method.as_str(), <span class="kw-2">&amp;</span>parts.uri.to_string());
-        <span class="kw">for </span>(k, v) <span class="kw">in </span>parts.headers.iter() {
-            ur = ur.set(k.as_str(), v.to_str().expect(<span class="string">&quot;must be valid header&quot;</span>));
-        }
+        <span class="kw">let </span><span class="kw-2">mut </span>req_builder = <span class="self">self
+            </span>.blocking_client
+            .request(
+                parts.method,
+                Url::from_str(<span class="kw-2">&amp;</span>parts.uri.to_string()).expect(<span class="string">&quot;input request url must be valid&quot;</span>),
+            )
+            .version(parts.version)
+            .headers(parts.headers);
 
-        <span class="kw">let </span>resp = <span class="kw">match </span>ur.send(body) {
-            <span class="prelude-val">Ok</span>(resp) =&gt; resp,
-            <span class="prelude-val">Err</span>(err_resp) =&gt; <span class="kw">match </span>err_resp {
-                ureq::Error::Status(_code, resp) =&gt; resp,
-                ureq::Error::Transport(transport) =&gt; {
-                    <span class="kw">let </span>is_temporary = <span class="macro">matches!</span>(
-                        transport.kind(),
-                        ureq::ErrorKind::Dns
-                            | ureq::ErrorKind::ConnectionFailed
-                            | ureq::ErrorKind::Io
-                    );
+        req_builder = req_builder.body(body);
 
-                    <span class="kw">let </span><span class="kw-2">mut </span>err = Error::new(ErrorKind::Unexpected, <span class="string">&quot;send blocking request&quot;</span>)
-                        .with_operation(<span class="string">&quot;http_util::Client::send&quot;</span>)
-                        .set_source(transport);
-                    <span class="kw">if </span>is_temporary {
-                        err = err.set_temporary();
-                    }
+        <span class="kw">let </span>resp = req_builder.send().map_err(|err| {
+            <span class="kw">let </span>is_temporary = !(
+                <span class="comment">// Builder related error should not be retried.
+                </span>err.is_builder() ||
+                <span class="comment">// Error returned by RedirectPolicy.
+                //
+                // We don&#39;t set this by hand, just don&#39;t allow retry.
+                </span>err.is_redirect() ||
+                 <span class="comment">// We never use `Response::error_for_status`, just don&#39;t allow retry.
+                //
+                // Status should be checked by our services.
+                </span>err.is_status()
+            );
 
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(err);
-                }
-            },
+            <span class="kw">let </span><span class="kw-2">mut </span>oerr = Error::new(ErrorKind::Unexpected, <span class="string">&quot;send blocking request&quot;</span>)
+                .with_operation(<span class="string">&quot;http_util::Client::send&quot;</span>)
+                .set_source(err);
+            <span class="kw">if </span>is_temporary {
+                oerr = oerr.set_temporary();
+            }
+
+            oerr
+        })<span class="question-mark">?</span>;
+
+        <span class="comment">// Get content length from header so that we can check it.
+        // If the request method is HEAD, we will ignore this.
+        </span><span class="kw">let </span>content_length = <span class="kw">if </span>is_head {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            parse_content_length(resp.headers()).expect(<span class="string">&quot;response content length must be valid&quot;</span>)
         };
 
-        <span class="kw">let </span><span class="kw-2">mut </span>hr = Response::builder().status(resp.status());
-        <span class="kw">for </span>name <span class="kw">in </span>resp.headers_names() {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(value) = resp.header(<span class="kw-2">&amp;</span>name) {
-                hr = hr.header(name, value);
-            }
+        <span class="kw">let </span><span class="kw-2">mut </span>hr = Response::builder()
+            .version(resp.version())
+            .status(resp.status());
+        <span class="kw">for </span>(k, v) <span class="kw">in </span>resp.headers().iter() {
+            hr = hr.header(k, v);
         }
 
-        <span class="kw">let </span>resp = hr
-            .body(Body::Reader(Box::new(resp.into_reader())))
-            .expect(<span class="string">&quot;response must build succeed&quot;</span>);
+        <span class="kw">let </span>body = IncomingBody::new(resp, content_length);
+
+        <span class="kw">let </span>resp = hr.body(body).expect(<span class="string">&quot;response must build succeed&quot;</span>);
 
         <span class="prelude-val">Ok</span>(resp)
     }
