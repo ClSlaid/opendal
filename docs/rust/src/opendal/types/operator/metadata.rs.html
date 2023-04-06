@@ -87,6 +87,11 @@
 <a href="#87" id="87">87</a>
 <a href="#88" id="88">88</a>
 <a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -149,6 +154,11 @@
     <span class="doccomment">/// Check if current backend supports [`Accessor::copy`] or not.
     </span><span class="kw">pub fn </span>can_copy(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.<span class="number">0</span>.capabilities().contains(AccessorCapability::Copy)
+    }
+
+    <span class="doccomment">/// Check if current backend supports [`Accessor::rename`] or not.
+    </span><span class="kw">pub fn </span>can_rename(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.<span class="number">0</span>.capabilities().contains(AccessorCapability::Rename)
     }
 
     <span class="doccomment">/// Check if current backend supports [`Accessor::list`] or not.

@@ -744,6 +744,34 @@
 <a href="#744" id="744">744</a>
 <a href="#745" id="745">745</a>
 <a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -791,6 +819,7 @@
 /// - [x] read
 /// - [x] write
 /// - [x] copy
+/// - [x] rename
 /// - [x] list
 /// - [ ] ~~scan~~
 /// - [ ] ~~presign~~
@@ -1049,6 +1078,7 @@
                 AccessorCapability::Read
                     | AccessorCapability::Write
                     | AccessorCapability::Copy
+                    | AccessorCapability::Rename
                     | AccessorCapability::List
                     | AccessorCapability::Blocking,
             )
@@ -1200,6 +1230,19 @@
         tokio::fs::copy(from, to).<span class="kw">await</span>.map_err(parse_io_error)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(RpCopy::default())
+    }
+
+    <span class="kw">async fn </span>rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, _args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
+        <span class="kw">let </span>from = <span class="self">self</span>.root.join(from.trim_end_matches(<span class="string">&#39;/&#39;</span>));
+
+        <span class="comment">// try to get the metadata of the source file to ensure it exists
+        </span>tokio::fs::metadata(<span class="kw-2">&amp;</span>from).<span class="kw">await</span>.map_err(parse_io_error)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>to = <span class="self">Self</span>::ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to.trim_end_matches(<span class="string">&#39;/&#39;</span>)).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        tokio::fs::rename(from, to).<span class="kw">await</span>.map_err(parse_io_error)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(RpRename::default())
     }
 
     <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
@@ -1399,6 +1442,19 @@
         std::fs::copy(from, to).map_err(parse_io_error)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(RpCopy::default())
+    }
+
+    <span class="kw">fn </span>blocking_rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, _args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
+        <span class="kw">let </span>from = <span class="self">self</span>.root.join(from.trim_end_matches(<span class="string">&#39;/&#39;</span>));
+
+        <span class="comment">// try to get the metadata of the source file to ensure it exists
+        </span>std::fs::metadata(<span class="kw-2">&amp;</span>from).map_err(parse_io_error)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>to = <span class="self">Self</span>::blocking_ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to.trim_end_matches(<span class="string">&#39;/&#39;</span>))<span class="question-mark">?</span>;
+
+        std::fs::rename(from, to).map_err(parse_io_error)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(RpRename::default())
     }
 
     <span class="kw">fn </span>blocking_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
