@@ -1220,6 +1220,8 @@
 <a href="#1220" id="1220">1220</a>
 <a href="#1221" id="1221">1221</a>
 <a href="#1222" id="1222">1222</a>
+<a href="#1223" id="1223">1223</a>
+<a href="#1224" id="1224">1224</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1722,7 +1724,9 @@
     /// # use opendal::ops::OpRead;
     /// # #[tokio::main]
     /// # async fn test(op: Operator) -&gt; Result&lt;()&gt; {
-    /// let r = op.reader_with(&quot;path/to/file&quot;, OpRead::default().with_range((0..10).into())).await?;
+    /// let r = op
+    ///     .reader_with(&quot;path/to/file&quot;, OpRead::default().with_range((0..10).into()))
+    ///     .await?;
     /// # Ok(())
     /// # }
     /// ```

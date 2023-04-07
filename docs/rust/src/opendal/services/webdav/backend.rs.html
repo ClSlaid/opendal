@@ -599,20 +599,20 @@
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>bytes::Buf;
+<span class="kw">use </span>http::header;
+<span class="kw">use </span>http::HeaderMap;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::Response;
 <span class="kw">use </span>http::StatusCode;
-<span class="kw">use </span>http::{header, HeaderMap};
 <span class="kw">use </span>log::debug;
-
-<span class="kw">use </span><span class="kw">crate</span>::ops::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
-<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">super</span>::list_response::Multistatus;
 <span class="kw">use </span><span class="kw">super</span>::pager::WebdavPager;
 <span class="kw">use </span><span class="kw">super</span>::writer::WebdavWriter;
+<span class="kw">use </span><span class="kw">crate</span>::ops::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// [WebDAV](https://datatracker.ietf.org/doc/html/rfc4918) backend support.
 ///

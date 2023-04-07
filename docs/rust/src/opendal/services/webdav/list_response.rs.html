@@ -495,6 +495,10 @@
 <a href="#495" id="495">495</a>
 <a href="#496" id="496">496</a>
 <a href="#497" id="497">497</a>
+<a href="#498" id="498">498</a>
+<a href="#499" id="499">499</a>
+<a href="#500" id="500">500</a>
+<a href="#501" id="501">501</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -516,14 +520,18 @@
 <span class="kw">use </span>time::format_description::well_known::Rfc2822;
 <span class="kw">use </span>time::OffsetDateTime;
 
-<span class="kw">use crate</span>::{EntryMode, Error, ErrorKind, Metadata, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span><span class="kw">crate</span>::EntryMode;
+<span class="kw">use </span><span class="kw">crate</span>::Error;
+<span class="kw">use </span><span class="kw">crate</span>::ErrorKind;
+<span class="kw">use </span><span class="kw">crate</span>::Metadata;
+<span class="kw">use </span><span class="kw">crate</span>::Result;
 
-<span class="attr">#[derive(Deserialize, Debug, PartialEq)]
+<span class="attr">#[derive(Deserialize, Debug, PartialEq, Eq)]
 </span><span class="kw">pub struct </span>Multistatus {
     <span class="kw">pub </span>response: Vec&lt;ListOpResponse&gt;,
 }
 
-<span class="attr">#[derive(Deserialize, Debug, PartialEq)]
+<span class="attr">#[derive(Deserialize, Debug, PartialEq, Eq)]
 </span><span class="kw">pub struct </span>ListOpResponse {
     <span class="kw">pub </span>href: String,
     <span class="kw">pub </span>propstat: Propstat,
@@ -581,13 +589,13 @@
     }
 }
 
-<span class="attr">#[derive(Deserialize, Debug, PartialEq)]
+<span class="attr">#[derive(Deserialize, Debug, PartialEq, Eq)]
 </span><span class="kw">pub struct </span>Propstat {
     <span class="kw">pub </span>prop: Prop,
     <span class="kw">pub </span>status: String,
 }
 
-<span class="attr">#[derive(Deserialize, Debug, PartialEq)]
+<span class="attr">#[derive(Deserialize, Debug, PartialEq, Eq)]
 </span><span class="kw">pub struct </span>Prop {
     <span class="attr">#[serde(default)]
     </span><span class="kw">pub </span>displayname: String,
@@ -598,13 +606,13 @@
     <span class="kw">pub </span>resourcetype: ResourceTypeContainer,
 }
 
-<span class="attr">#[derive(Deserialize, Debug, PartialEq)]
+<span class="attr">#[derive(Deserialize, Debug, PartialEq, Eq)]
 </span><span class="kw">pub struct </span>ResourceTypeContainer {
     <span class="attr">#[serde(rename = <span class="string">&quot;$value&quot;</span>)]
     </span><span class="kw">pub </span>value: <span class="prelude-ty">Option</span>&lt;ResourceType&gt;,
 }
 
-<span class="attr">#[derive(Deserialize, Debug, PartialEq)]
+<span class="attr">#[derive(Deserialize, Debug, PartialEq, Eq)]
 #[serde(rename_all = <span class="string">&quot;lowercase&quot;</span>)]
 </span><span class="kw">pub enum </span>ResourceType {
     Collection,
