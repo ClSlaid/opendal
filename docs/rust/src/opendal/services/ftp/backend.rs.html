@@ -546,7 +546,6 @@
 <a href="#546" id="546">546</a>
 <a href="#547" id="547">547</a>
 <a href="#548" id="548">548</a>
-<a href="#549" id="549">549</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -585,7 +584,6 @@
 <span class="kw">use </span>suppaftp::FtpError;
 <span class="kw">use </span>suppaftp::FtpStream;
 <span class="kw">use </span>suppaftp::Status;
-<span class="kw">use </span>time::OffsetDateTime;
 <span class="kw">use </span>tokio::sync::OnceCell;
 
 <span class="kw">use </span><span class="kw">super</span>::pager::FtpPager;
@@ -968,7 +966,7 @@
         };
         <span class="kw">let </span><span class="kw-2">mut </span>meta = Metadata::new(mode);
         meta.set_content_length(file.size() <span class="kw">as </span>u64);
-        meta.set_last_modified(OffsetDateTime::from(file.modified()));
+        meta.set_last_modified(file.modified().into());
 
         <span class="prelude-val">Ok</span>(RpStat::new(meta))
     }

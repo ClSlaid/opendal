@@ -1222,6 +1222,13 @@
 <a href="#1222" id="1222">1222</a>
 <a href="#1223" id="1223">1223</a>
 <a href="#1224" id="1224">1224</a>
+<a href="#1225" id="1225">1225</a>
+<a href="#1226" id="1226">1226</a>
+<a href="#1227" id="1227">1227</a>
+<a href="#1228" id="1228">1228</a>
+<a href="#1229" id="1229">1229</a>
+<a href="#1230" id="1230">1230</a>
+<a href="#1231" id="1231">1231</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1240,6 +1247,7 @@
 // under the License.
 
 </span><span class="kw">use </span>std::ops::RangeBounds;
+<span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>flagset::FlagSet;
@@ -1248,7 +1256,6 @@
 <span class="kw">use </span>futures::Stream;
 <span class="kw">use </span>futures::StreamExt;
 <span class="kw">use </span>futures::TryStreamExt;
-<span class="kw">use </span>time::Duration;
 <span class="kw">use </span>tokio::io::ReadBuf;
 
 <span class="kw">use </span><span class="kw">super</span>::BlockingOperator;
@@ -2168,6 +2175,9 @@
                 .<span class="kw">await</span><span class="question-mark">?</span>;
         }
 
+        <span class="comment">// Remove the directory itself.
+        </span><span class="self">self</span>.delete(path).<span class="kw">await</span><span class="question-mark">?</span>;
+
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -2224,9 +2234,13 @@
 
     <span class="doccomment">/// List dir in flat way.
     ///
-    /// This function will create a new handle to list entries.
+    /// Also, this function can be used to list a prefix.
     ///
     /// An error will be returned if given path doesn&#39;t end with `/`.
+    ///
+    /// # Notes
+    ///
+    /// - `scan` will not return the prefix itself.
     ///
     /// # Examples
     ///
@@ -2285,11 +2299,11 @@
     /// use anyhow::Result;
     /// use futures::io;
     /// use opendal::Operator;
-    /// use time::Duration;
+    /// use std::time::Duration;
     ///
     /// #[tokio::main]
     /// async fn test(op: Operator) -&gt; Result&lt;()&gt; {
-    ///     let signed_req = op.presign_stat(&quot;test&quot;,Duration::hours(1))?;
+    ///     let signed_req = op.presign_stat(&quot;test&quot;,Duration::from_secs(3600)).await?;
     ///     let req = http::Request::builder()
     ///         .method(signed_req.method())
     ///         .uri(signed_req.uri())
@@ -2298,12 +2312,12 @@
     /// #    Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>presign_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, expire: Duration) -&gt; <span class="prelude-ty">Result</span>&lt;PresignedRequest&gt; {
+    </span><span class="kw">pub async fn </span>presign_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, expire: Duration) -&gt; <span class="prelude-ty">Result</span>&lt;PresignedRequest&gt; {
         <span class="kw">let </span>path = normalize_path(path);
 
         <span class="kw">let </span>op = OpPresign::new(OpStat::new(), expire);
 
-        <span class="kw">let </span>rp = <span class="self">self</span>.inner().presign(<span class="kw-2">&amp;</span>path, op)<span class="question-mark">?</span>;
+        <span class="kw">let </span>rp = <span class="self">self</span>.inner().presign(<span class="kw-2">&amp;</span>path, op).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(rp.into_presigned_request())
     }
 
@@ -2315,11 +2329,11 @@
     /// use anyhow::Result;
     /// use futures::io;
     /// use opendal::Operator;
-    /// use time::Duration;
+    /// use std::time::Duration;
     ///
     /// #[tokio::main]
     /// async fn test(op: Operator) -&gt; Result&lt;()&gt; {
-    ///     let signed_req = op.presign_read(&quot;test.txt&quot;, Duration::hours(1))?;
+    ///     let signed_req = op.presign_read(&quot;test.txt&quot;, Duration::from_secs(3600)).await?;
     /// #    Ok(())
     /// # }
     /// ```
@@ -2333,12 +2347,12 @@
     /// ```shell
     /// curl &quot;https://s3.amazonaws.com/examplebucket/test.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=access_key_id/20130721/us-east-1/s3/aws4_request&amp;X-Amz-Date=20130721T201207Z&amp;X-Amz-Expires=86400&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Signature=&lt;signature-value&gt;&quot; -O /tmp/test.txt
     /// ```
-    </span><span class="kw">pub fn </span>presign_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, expire: Duration) -&gt; <span class="prelude-ty">Result</span>&lt;PresignedRequest&gt; {
+    </span><span class="kw">pub async fn </span>presign_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, expire: Duration) -&gt; <span class="prelude-ty">Result</span>&lt;PresignedRequest&gt; {
         <span class="kw">let </span>path = normalize_path(path);
 
         <span class="kw">let </span>op = OpPresign::new(OpRead::new(), expire);
 
-        <span class="kw">let </span>rp = <span class="self">self</span>.inner().presign(<span class="kw-2">&amp;</span>path, op)<span class="question-mark">?</span>;
+        <span class="kw">let </span>rp = <span class="self">self</span>.inner().presign(<span class="kw-2">&amp;</span>path, op).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(rp.into_presigned_request())
     }
 
@@ -2352,18 +2366,18 @@
     /// use anyhow::Result;
     /// use futures::io;
     /// use opendal::Operator;
-    /// use time::Duration;
+    /// use std::time::Duration;
     /// use opendal::ops::OpRead;
     ///
     /// #[tokio::main]
     /// async fn test(op: Operator) -&gt; Result&lt;()&gt; {
     ///     let args = OpRead::new()
     ///         .with_override_content_disposition(&quot;attachment; filename=\&quot;othertext.txt\&quot;&quot;);
-    ///     let signed_req = op.presign_read_with(&quot;test.txt&quot;, args, Duration::hours(1))?;
+    ///     let signed_req = op.presign_read_with(&quot;test.txt&quot;, args, Duration::from_secs(3600)).await?;
     /// #    Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>presign_read_with(
+    </span><span class="kw">pub async fn </span>presign_read_with(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         op: OpRead,
@@ -2373,7 +2387,7 @@
 
         <span class="kw">let </span>op = OpPresign::new(op, expire);
 
-        <span class="kw">let </span>rp = <span class="self">self</span>.inner().presign(<span class="kw-2">&amp;</span>path, op)<span class="question-mark">?</span>;
+        <span class="kw">let </span>rp = <span class="self">self</span>.inner().presign(<span class="kw-2">&amp;</span>path, op).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(rp.into_presigned_request())
     }
 
@@ -2385,11 +2399,11 @@
     /// use anyhow::Result;
     /// use futures::io;
     /// use opendal::Operator;
-    /// use time::Duration;
+    /// use std::time::Duration;
     ///
     /// #[tokio::main]
     /// async fn test(op: Operator) -&gt; Result&lt;()&gt; {
-    ///     let signed_req = op.presign_write(&quot;test.txt&quot;, Duration::hours(1))?;
+    ///     let signed_req = op.presign_write(&quot;test.txt&quot;, Duration::from_secs(3600)).await?;
     /// #    Ok(())
     /// # }
     /// ```
@@ -2403,9 +2417,9 @@
     /// ```shell
     /// curl -X PUT &quot;https://s3.amazonaws.com/examplebucket/test.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=access_key_id/20130721/us-east-1/s3/aws4_request&amp;X-Amz-Date=20130721T201207Z&amp;X-Amz-Expires=86400&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Signature=&lt;signature-value&gt;&quot; -d &quot;Hello, World!&quot;
     /// ```
-    </span><span class="kw">pub fn </span>presign_write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, expire: Duration) -&gt; <span class="prelude-ty">Result</span>&lt;PresignedRequest&gt; {
-        <span class="self">self</span>.presign_write_with(path, OpWrite::new(), expire)
-    }
+    </span><span class="kw">pub async fn </span>presign_write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, expire: Duration) -&gt; <span class="prelude-ty">Result</span>&lt;PresignedRequest&gt; {
+        <span class="self">self</span>.presign_write_with(path, OpWrite::new(), expire).<span class="kw">await
+    </span>}
 
     <span class="doccomment">/// Presign an operation for write with option described in OpenDAL [rfc-0661](../../docs/rfcs/0661-path-in-accessor.md)
     ///
@@ -2418,12 +2432,12 @@
     /// use futures::io;
     /// use opendal::ops::OpWrite;
     /// use opendal::Operator;
-    /// use time::Duration;
+    /// use std::time::Duration;
     ///
     /// #[tokio::main]
     /// async fn test(op: Operator) -&gt; Result&lt;()&gt; {
     ///     let args = OpWrite::new().with_content_type(&quot;text/csv&quot;);
-    ///     let signed_req = op.presign_write_with(&quot;test&quot;, args, Duration::hours(1))?;
+    ///     let signed_req = op.presign_write_with(&quot;test&quot;, args, Duration::from_secs(3600)).await?;
     ///     let req = http::Request::builder()
     ///         .method(signed_req.method())
     ///         .uri(signed_req.uri())
@@ -2432,7 +2446,7 @@
     /// #    Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>presign_write_with(
+    </span><span class="kw">pub async fn </span>presign_write_with(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         op: OpWrite,
@@ -2442,7 +2456,7 @@
 
         <span class="kw">let </span>op = OpPresign::new(op, expire);
 
-        <span class="kw">let </span>rp = <span class="self">self</span>.inner().presign(<span class="kw-2">&amp;</span>path, op)<span class="question-mark">?</span>;
+        <span class="kw">let </span>rp = <span class="self">self</span>.inner().presign(<span class="kw-2">&amp;</span>path, op).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(rp.into_presigned_request())
     }
 }

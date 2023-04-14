@@ -171,33 +171,6 @@
 <a href="#171" id="171">171</a>
 <a href="#172" id="172">172</a>
 <a href="#173" id="173">173</a>
-<a href="#174" id="174">174</a>
-<a href="#175" id="175">175</a>
-<a href="#176" id="176">176</a>
-<a href="#177" id="177">177</a>
-<a href="#178" id="178">178</a>
-<a href="#179" id="179">179</a>
-<a href="#180" id="180">180</a>
-<a href="#181" id="181">181</a>
-<a href="#182" id="182">182</a>
-<a href="#183" id="183">183</a>
-<a href="#184" id="184">184</a>
-<a href="#185" id="185">185</a>
-<a href="#186" id="186">186</a>
-<a href="#187" id="187">187</a>
-<a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
-<a href="#194" id="194">194</a>
-<a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a>
-<a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
-<a href="#200" id="200">200</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -236,7 +209,6 @@
     <span class="doccomment">/// [azdfs][crate::services::Azdfs]: Azure Data Lake Storage Gen2.
     </span>Azdfs,
     <span class="doccomment">/// [dashmap][crate::services::Dashmap]: dashmap backend support.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;services-dashmap&quot;</span>)]
     </span>Dashmap,
     <span class="doccomment">/// [fs][crate::services::Fs]: POSIX alike file system.
     </span>Fs,
@@ -245,40 +217,32 @@
     <span class="doccomment">/// [ghac][crate::services::Ghac]: GitHub Action Cache services.
     </span>Ghac,
     <span class="doccomment">/// [hdfs][crate::services::Hdfs]: Hadoop Distributed File System.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;services-hdfs&quot;</span>)]
     </span>Hdfs,
     <span class="doccomment">/// [http][crate::services::Http]: HTTP backend.
     </span>Http,
     <span class="doccomment">/// [ftp][crate::services::Ftp]: FTP backend.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;services-ftp&quot;</span>)]
     </span>Ftp,
     <span class="doccomment">/// [ipmfs][crate::services::Ipfs]: IPFS HTTP Gateway
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;services-ipfs&quot;</span>)]
     </span>Ipfs,
     <span class="doccomment">/// [ipmfs][crate::services::Ipmfs]: IPFS mutable file system
     </span>Ipmfs,
     <span class="doccomment">/// [memcached][crate::services::Memcached]: Memcached service support.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;services-memcached&quot;</span>)]
     </span>Memcached,
     <span class="doccomment">/// [memory][crate::services::Memory]: In memory backend support.
     </span>Memory,
     <span class="doccomment">/// [moka][crate::services::Moka]: moka backend support.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;services-moka&quot;</span>)]
     </span>Moka,
     <span class="doccomment">/// [obs][crate::services::Obs]: Huawei Cloud OBS services.
     </span>Obs,
     <span class="doccomment">/// [oss][crate::services::Oss]: Aliyun Object Storage Services
     </span>Oss,
     <span class="doccomment">/// [redis][crate::services::Redis]: Redis services
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;services-redis&quot;</span>)]
     </span>Redis,
     <span class="doccomment">/// [rocksdb][crate::services::Rocksdb]: RocksDB services
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;services-rocksdb&quot;</span>)]
     </span>Rocksdb,
     <span class="doccomment">/// [s3][crate::services::S3]: AWS S3 alike services.
     </span>S3,
     <span class="doccomment">/// [sled][crate::services::Sled]: Sled services
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;services-sled&quot;</span>)]
     </span>Sled,
     <span class="doccomment">/// [webdav][crate::services::Webdav]: WebDAV support.
     </span>Webdav,
@@ -320,32 +284,23 @@
         <span class="kw">match </span>s.as_str() {
             <span class="string">&quot;azblob&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Azblob),
             <span class="string">&quot;azdfs&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Azdfs),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;services-dashmap&quot;</span>)]
-            </span><span class="string">&quot;dashmap&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Dashmap),
+            <span class="string">&quot;dashmap&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Dashmap),
             <span class="string">&quot;fs&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Fs),
             <span class="string">&quot;gcs&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Gcs),
             <span class="string">&quot;ghac&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Ghac),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;services-hdfs&quot;</span>)]
-            </span><span class="string">&quot;hdfs&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Hdfs),
+            <span class="string">&quot;hdfs&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Hdfs),
             <span class="string">&quot;http&quot; </span>| <span class="string">&quot;https&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Http),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;services-ftp&quot;</span>)]
-            </span><span class="string">&quot;ftp&quot; </span>| <span class="string">&quot;ftps&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Ftp),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;services-ipfs&quot;</span>)]
-            </span><span class="string">&quot;ipfs&quot; </span>| <span class="string">&quot;ipns&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Ipfs),
+            <span class="string">&quot;ftp&quot; </span>| <span class="string">&quot;ftps&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Ftp),
+            <span class="string">&quot;ipfs&quot; </span>| <span class="string">&quot;ipns&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Ipfs),
             <span class="string">&quot;ipmfs&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Ipmfs),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;services-memcached&quot;</span>)]
-            </span><span class="string">&quot;memcached&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Memcached),
+            <span class="string">&quot;memcached&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Memcached),
             <span class="string">&quot;memory&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Memory),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;services-moka&quot;</span>)]
-            </span><span class="string">&quot;moka&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Moka),
+            <span class="string">&quot;moka&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Moka),
             <span class="string">&quot;obs&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Obs),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;services-redis&quot;</span>)]
-            </span><span class="string">&quot;redis&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Redis),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;services-rocksdb&quot;</span>)]
-            </span><span class="string">&quot;rocksdb&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Rocksdb),
+            <span class="string">&quot;redis&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Redis),
+            <span class="string">&quot;rocksdb&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Rocksdb),
             <span class="string">&quot;s3&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::S3),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;services-sled&quot;</span>)]
-            </span><span class="string">&quot;sled&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Sled),
+            <span class="string">&quot;sled&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Sled),
             <span class="string">&quot;oss&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Oss),
             <span class="string">&quot;webdav&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Webdav),
             <span class="string">&quot;webhdfs&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Webhdfs),
@@ -359,32 +314,23 @@
         <span class="kw">match </span>v {
             Scheme::Azblob =&gt; <span class="string">&quot;azblob&quot;</span>,
             Scheme::Azdfs =&gt; <span class="string">&quot;azdfs&quot;</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;services-dashmap&quot;</span>)]
-            </span>Scheme::Dashmap =&gt; <span class="string">&quot;dashmap&quot;</span>,
+            Scheme::Dashmap =&gt; <span class="string">&quot;dashmap&quot;</span>,
             Scheme::Fs =&gt; <span class="string">&quot;fs&quot;</span>,
             Scheme::Gcs =&gt; <span class="string">&quot;gcs&quot;</span>,
             Scheme::Ghac =&gt; <span class="string">&quot;ghac&quot;</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;services-hdfs&quot;</span>)]
-            </span>Scheme::Hdfs =&gt; <span class="string">&quot;hdfs&quot;</span>,
+            Scheme::Hdfs =&gt; <span class="string">&quot;hdfs&quot;</span>,
             Scheme::Http =&gt; <span class="string">&quot;http&quot;</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;services-ftp&quot;</span>)]
-            </span>Scheme::Ftp =&gt; <span class="string">&quot;ftp&quot;</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;services-ipfs&quot;</span>)]
-            </span>Scheme::Ipfs =&gt; <span class="string">&quot;ipfs&quot;</span>,
+            Scheme::Ftp =&gt; <span class="string">&quot;ftp&quot;</span>,
+            Scheme::Ipfs =&gt; <span class="string">&quot;ipfs&quot;</span>,
             Scheme::Ipmfs =&gt; <span class="string">&quot;ipmfs&quot;</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;services-memcached&quot;</span>)]
-            </span>Scheme::Memcached =&gt; <span class="string">&quot;memcached&quot;</span>,
+            Scheme::Memcached =&gt; <span class="string">&quot;memcached&quot;</span>,
             Scheme::Memory =&gt; <span class="string">&quot;memory&quot;</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;services-moka&quot;</span>)]
-            </span>Scheme::Moka =&gt; <span class="string">&quot;moka&quot;</span>,
+            Scheme::Moka =&gt; <span class="string">&quot;moka&quot;</span>,
             Scheme::Obs =&gt; <span class="string">&quot;obs&quot;</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;services-redis&quot;</span>)]
-            </span>Scheme::Redis =&gt; <span class="string">&quot;redis&quot;</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;services-rocksdb&quot;</span>)]
-            </span>Scheme::Rocksdb =&gt; <span class="string">&quot;rocksdb&quot;</span>,
+            Scheme::Redis =&gt; <span class="string">&quot;redis&quot;</span>,
+            Scheme::Rocksdb =&gt; <span class="string">&quot;rocksdb&quot;</span>,
             Scheme::S3 =&gt; <span class="string">&quot;s3&quot;</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;services-sled&quot;</span>)]
-            </span>Scheme::Sled =&gt; <span class="string">&quot;sled&quot;</span>,
+            Scheme::Sled =&gt; <span class="string">&quot;sled&quot;</span>,
             Scheme::Oss =&gt; <span class="string">&quot;oss&quot;</span>,
             Scheme::Webdav =&gt; <span class="string">&quot;webdav&quot;</span>,
             Scheme::Webhdfs =&gt; <span class="string">&quot;webhdfs&quot;</span>,

@@ -798,8 +798,8 @@
 
 <span class="kw">use </span>async_compat::Compat;
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>chrono::DateTime;
 <span class="kw">use </span>log::debug;
-<span class="kw">use </span>time::OffsetDateTime;
 <span class="kw">use </span>tokio::fs;
 <span class="kw">use </span>uuid::Uuid;
 
@@ -1268,7 +1268,7 @@
             .with_content_length(meta.len())
             .with_last_modified(
                 meta.modified()
-                    .map(OffsetDateTime::from)
+                    .map(DateTime::from)
                     .map_err(parse_io_error)<span class="question-mark">?</span>,
             );
 
@@ -1480,7 +1480,7 @@
             .with_content_length(meta.len())
             .with_last_modified(
                 meta.modified()
-                    .map(OffsetDateTime::from)
+                    .map(DateTime::from)
                     .map_err(parse_io_error)<span class="question-mark">?</span>,
             );
 

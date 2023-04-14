@@ -381,6 +381,14 @@
 <a href="#381" id="381">381</a>
 <a href="#382" id="382">382</a>
 <a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -581,9 +589,9 @@
     </span>}
 
     <span class="attr">#[tracing::instrument(level = <span class="string">&quot;debug&quot;</span>, skip(<span class="self">self</span>))]
-    </span><span class="kw">fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
-        <span class="self">self</span>.inner.presign(path, args)
-    }
+    </span><span class="kw">async fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
+        <span class="self">self</span>.inner.presign(path, args).<span class="kw">await
+    </span>}
 
     <span class="attr">#[tracing::instrument(level = <span class="string">&quot;debug&quot;</span>, skip(<span class="self">self</span>))]
     </span><span class="kw">async fn </span>batch(<span class="kw-2">&amp;</span><span class="self">self</span>, args: OpBatch) -&gt; <span class="prelude-ty">Result</span>&lt;RpBatch&gt; {
@@ -713,6 +721,14 @@
         skip_all)]
     </span><span class="kw">async fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.inner.append(bs).<span class="kw">await
+    </span>}
+
+    <span class="attr">#[tracing::instrument(
+        parent = <span class="kw-2">&amp;</span><span class="self">self</span>.span,
+        level = <span class="string">&quot;trace&quot;</span>,
+        skip_all)]
+    </span><span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.inner.abort().<span class="kw">await
     </span>}
 
     <span class="attr">#[tracing::instrument(

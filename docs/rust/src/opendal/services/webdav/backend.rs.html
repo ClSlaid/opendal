@@ -576,6 +576,95 @@
 <a href="#576" id="576">576</a>
 <a href="#577" id="577">577</a>
 <a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a>
+<a href="#599" id="599">599</a>
+<a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
+<a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a>
+<a href="#624" id="624">624</a>
+<a href="#625" id="625">625</a>
+<a href="#626" id="626">626</a>
+<a href="#627" id="627">627</a>
+<a href="#628" id="628">628</a>
+<a href="#629" id="629">629</a>
+<a href="#630" id="630">630</a>
+<a href="#631" id="631">631</a>
+<a href="#632" id="632">632</a>
+<a href="#633" id="633">633</a>
+<a href="#634" id="634">634</a>
+<a href="#635" id="635">635</a>
+<a href="#636" id="636">636</a>
+<a href="#637" id="637">637</a>
+<a href="#638" id="638">638</a>
+<a href="#639" id="639">639</a>
+<a href="#640" id="640">640</a>
+<a href="#641" id="641">641</a>
+<a href="#642" id="642">642</a>
+<a href="#643" id="643">643</a>
+<a href="#644" id="644">644</a>
+<a href="#645" id="645">645</a>
+<a href="#646" id="646">646</a>
+<a href="#647" id="647">647</a>
+<a href="#648" id="648">648</a>
+<a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
+<a href="#656" id="656">656</a>
+<a href="#657" id="657">657</a>
+<a href="#658" id="658">658</a>
+<a href="#659" id="659">659</a>
+<a href="#660" id="660">660</a>
+<a href="#661" id="661">661</a>
+<a href="#662" id="662">662</a>
+<a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
+<a href="#665" id="665">665</a>
+<a href="#666" id="666">666</a>
+<a href="#667" id="667">667</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -622,6 +711,8 @@
 ///
 /// - [x] read
 /// - [x] write
+/// - [x] copy
+/// - [x] rename
 /// - [x] list
 /// - [ ] ~~scan~~
 /// - [ ] ~~presign~~
@@ -843,7 +934,11 @@
         ma.set_scheme(Scheme::Webdav)
             .set_root(<span class="kw-2">&amp;</span><span class="self">self</span>.root)
             .set_capabilities(
-                AccessorCapability::Read | AccessorCapability::Write | AccessorCapability::List,
+                AccessorCapability::Read
+                    | AccessorCapability::Write
+                    | AccessorCapability::Copy
+                    | AccessorCapability::Rename
+                    | AccessorCapability::List,
             )
             .set_hints(AccessorHint::ReadStreamable);
 
@@ -851,22 +946,10 @@
     }
 
     <span class="kw">async fn </span>create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
-        <span class="comment">// create dir recursively, split path by `/` and create each dir except the last one
-        </span><span class="kw">let </span>abs_path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
-        <span class="kw">let </span>abs_path = abs_path.as_str();
-        <span class="kw">let </span><span class="kw-2">mut </span>parts: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = abs_path.split(<span class="string">&#39;/&#39;</span>).filter(|x| !x.is_empty()).collect();
-        <span class="kw">if </span>!parts.is_empty() {
-            parts.pop();
-        }
+        <span class="self">self</span>.ensure_parent_path(path).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span><span class="kw-2">mut </span>sub_path = String::new();
-        <span class="kw">for </span>sub_part <span class="kw">in </span>parts {
-            <span class="kw">let </span>sub_path_with_slash = sub_part.to_owned() + <span class="string">&quot;/&quot;</span>;
-            sub_path.push_str(<span class="kw-2">&amp;</span>sub_path_with_slash);
-            <span class="self">self</span>.create_internal(<span class="kw-2">&amp;</span>sub_path).<span class="kw">await</span><span class="question-mark">?</span>;
-        }
-
-        <span class="self">self</span>.create_internal(abs_path).<span class="kw">await
+        <span class="kw">let </span>abs_path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
+        <span class="self">self</span>.create_internal(<span class="kw-2">&amp;</span>abs_path).<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
@@ -894,6 +977,32 @@
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="prelude-val">Ok</span>((RpWrite::default(), WebdavWriter::new(<span class="self">self</span>.clone(), args, p)))
+    }
+
+    <span class="kw">async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, _args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
+        <span class="self">self</span>.ensure_parent_path(to).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span>resp = <span class="self">self</span>.webdav_copy(from, to).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span>status = resp.status();
+
+        <span class="kw">match </span>status {
+            StatusCode::CREATED | StatusCode::NO_CONTENT =&gt; <span class="prelude-val">Ok</span>(RpCopy::default()),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+        }
+    }
+
+    <span class="kw">async fn </span>rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, _args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
+        <span class="self">self</span>.ensure_parent_path(to).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span>resp = <span class="self">self</span>.webdav_move(from, to).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span>status = resp.status();
+
+        <span class="kw">match </span>status {
+            StatusCode::CREATED | StatusCode::NO_CONTENT =&gt; <span class="prelude-val">Ok</span>(RpRename::default()),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+        }
     }
 
     <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
@@ -1006,7 +1115,7 @@
             .body(AsyncBody::Empty)
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.client.send_async(req).<span class="kw">await
+        <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
     <span class="kw">pub async fn </span>webdav_put(
@@ -1040,7 +1149,7 @@
         <span class="comment">// Set body
         </span><span class="kw">let </span>req = req.body(body).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.client.send_async(req).<span class="kw">await
+        <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>webdav_mkcol(
@@ -1067,7 +1176,7 @@
 
         <span class="kw">let </span>req = req.body(body).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.client.send_async(req).<span class="kw">await
+        <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>webdav_propfind(
@@ -1106,7 +1215,7 @@
 
         <span class="kw">let </span>req = req.body(body).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.client.send_async(req).<span class="kw">await
+        <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>webdav_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
@@ -1124,7 +1233,57 @@
             .body(AsyncBody::Empty)
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.client.send_async(req).<span class="kw">await
+        <span class="self">self</span>.client.send(req).<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>webdav_copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+        <span class="kw">let </span>source = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, from);
+        <span class="kw">let </span>target = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to);
+
+        <span class="kw">let </span>source = <span class="macro">format!</span>(<span class="string">&quot;{}/{}&quot;</span>, <span class="self">self</span>.endpoint, percent_encode_path(<span class="kw-2">&amp;</span>source));
+        <span class="kw">let </span>target = <span class="macro">format!</span>(<span class="string">&quot;{}/{}&quot;</span>, <span class="self">self</span>.endpoint, percent_encode_path(<span class="kw-2">&amp;</span>target));
+
+        <span class="kw">let </span><span class="kw-2">mut </span>req = Request::builder().method(<span class="string">&quot;COPY&quot;</span>).uri(<span class="kw-2">&amp;</span>source);
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(auth) = <span class="kw-2">&amp;</span><span class="self">self</span>.authorization {
+            req = req.header(header::AUTHORIZATION, auth);
+        }
+
+        req = req.header(<span class="string">&quot;Destination&quot;</span>, target);
+
+        <span class="comment">// We always specific &quot;T&quot; for keeping to overwrite the destination.
+        </span>req = req.header(<span class="string">&quot;Overwrite&quot;</span>, <span class="string">&quot;T&quot;</span>);
+
+        <span class="kw">let </span>req = req
+            .body(AsyncBody::Empty)
+            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+
+        <span class="self">self</span>.client.send(req).<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>webdav_move(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+        <span class="kw">let </span>source = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, from);
+        <span class="kw">let </span>target = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to);
+
+        <span class="kw">let </span>source = <span class="macro">format!</span>(<span class="string">&quot;{}/{}&quot;</span>, <span class="self">self</span>.endpoint, percent_encode_path(<span class="kw-2">&amp;</span>source));
+        <span class="kw">let </span>target = <span class="macro">format!</span>(<span class="string">&quot;{}/{}&quot;</span>, <span class="self">self</span>.endpoint, percent_encode_path(<span class="kw-2">&amp;</span>target));
+
+        <span class="kw">let </span><span class="kw-2">mut </span>req = Request::builder().method(<span class="string">&quot;MOVE&quot;</span>).uri(<span class="kw-2">&amp;</span>source);
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(auth) = <span class="kw-2">&amp;</span><span class="self">self</span>.authorization {
+            req = req.header(header::AUTHORIZATION, auth);
+        }
+
+        req = req.header(<span class="string">&quot;Destination&quot;</span>, target);
+
+        <span class="comment">// We always specific &quot;T&quot; for keeping to overwrite the destination.
+        </span>req = req.header(<span class="string">&quot;Overwrite&quot;</span>, <span class="string">&quot;T&quot;</span>);
+
+        <span class="kw">let </span>req = req
+            .body(AsyncBody::Empty)
+            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+
+        <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>create_internal(<span class="kw-2">&amp;</span><span class="self">self</span>, abs_path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
@@ -1152,6 +1311,25 @@
             }
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
         }
+    }
+
+    <span class="kw">async fn </span>ensure_parent_path(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="comment">// create dir recursively, split path by `/` and create each dir except the last one
+        </span><span class="kw">let </span>abs_path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
+        <span class="kw">let </span>abs_path = abs_path.as_str();
+        <span class="kw">let </span><span class="kw-2">mut </span>parts: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = abs_path.split(<span class="string">&#39;/&#39;</span>).filter(|x| !x.is_empty()).collect();
+        <span class="kw">if </span>!parts.is_empty() {
+            parts.pop();
+        }
+
+        <span class="kw">let </span><span class="kw-2">mut </span>sub_path = String::new();
+        <span class="kw">for </span>sub_part <span class="kw">in </span>parts {
+            <span class="kw">let </span>sub_path_with_slash = sub_part.to_owned() + <span class="string">&quot;/&quot;</span>;
+            sub_path.push_str(<span class="kw-2">&amp;</span>sub_path_with_slash);
+            <span class="self">self</span>.create_internal(<span class="kw-2">&amp;</span>sub_path).<span class="kw">await</span><span class="question-mark">?</span>;
+        }
+
+        <span class="prelude-val">Ok</span>(())
     }
 }
 </code></pre></div>

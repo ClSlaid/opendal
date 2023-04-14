@@ -965,7 +965,7 @@
 
         <span class="kw">let </span>req = <span class="self">self</span>.ghac_reserve(path).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span>resp = <span class="self">self</span>.client.send_async(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>cache_id = <span class="kw">if </span>resp.status().is_success() {
             <span class="kw">let </span>slc = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -986,7 +986,7 @@
             </span>.ghac_upload(cache_id, <span class="number">1</span>, AsyncBody::Bytes(Bytes::from_static(<span class="kw-2">&amp;</span>[<span class="number">0</span>])))
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span>resp = <span class="self">self</span>.client.send_async(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">if </span>resp.status().is_success() {
             resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -997,7 +997,7 @@
         }
 
         <span class="kw">let </span>req = <span class="self">self</span>.ghac_commit(cache_id, <span class="number">1</span>).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>resp = <span class="self">self</span>.client.send_async(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">if </span>resp.status().is_success() {
             resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1012,7 +1012,7 @@
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
         <span class="kw">let </span>req = <span class="self">self</span>.ghac_query(path).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span>resp = <span class="self">self</span>.client.send_async(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>location = <span class="kw">if </span>resp.status() == StatusCode::OK {
             <span class="kw">let </span>slc = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1024,7 +1024,7 @@
         };
 
         <span class="kw">let </span>req = <span class="self">self</span>.ghac_get_location(<span class="kw-2">&amp;</span>location, args.range()).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>resp = <span class="self">self</span>.client.send_async(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
@@ -1046,7 +1046,7 @@
 
         <span class="kw">let </span>req = <span class="self">self</span>.ghac_reserve(path).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span>resp = <span class="self">self</span>.client.send_async(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>cache_id = <span class="kw">if </span>resp.status().is_success() {
             <span class="kw">let </span>slc = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1070,7 +1070,7 @@
 
         <span class="kw">let </span>req = <span class="self">self</span>.ghac_query(path).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span>resp = <span class="self">self</span>.client.send_async(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>location = <span class="kw">if </span>resp.status() == StatusCode::OK {
             <span class="kw">let </span>slc = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1084,7 +1084,7 @@
         };
 
         <span class="kw">let </span>req = <span class="self">self</span>.ghac_head_location(<span class="kw-2">&amp;</span>location).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>resp = <span class="self">self</span>.client.send_async(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
@@ -1261,7 +1261,7 @@
             .body(AsyncBody::Empty)
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.client.send_async(req).<span class="kw">await
+        <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 }
 

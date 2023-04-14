@@ -160,7 +160,7 @@
             <span class="kw">let </span>d = <span class="kw">if </span>de.is_file() {
                 <span class="kw">let </span>meta = Metadata::new(EntryMode::FILE)
                     .with_content_length(de.len())
-                    .with_last_modified(time::OffsetDateTime::from(de.modified()));
+                    .with_last_modified(de.modified().into());
                 oio::Entry::new(<span class="kw-2">&amp;</span>path, meta)
             } <span class="kw">else if </span>de.is_dir() {
                 <span class="comment">// Make sure we are returning the correct path.
@@ -191,7 +191,7 @@
             <span class="kw">let </span>d = <span class="kw">if </span>de.is_file() {
                 <span class="kw">let </span>meta = Metadata::new(EntryMode::FILE)
                     .with_content_length(de.len())
-                    .with_last_modified(time::OffsetDateTime::from(de.modified()));
+                    .with_last_modified(de.modified().into());
                 oio::Entry::new(<span class="kw-2">&amp;</span>path, meta)
             } <span class="kw">else if </span>de.is_dir() {
                 <span class="comment">// Make sure we are returning the correct path.

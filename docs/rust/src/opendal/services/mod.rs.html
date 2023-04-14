@@ -102,6 +102,32 @@
 <a href="#102" id="102">102</a>
 <a href="#103" id="103">103</a>
 <a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -123,65 +149,85 @@
 //!
 //! More ongoing services support is tracked at [opendal#5](https://github.com/apache/incubator-opendal/issues/5). Please feel free to submit issues if there are services not covered.
 
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;services-azblob&quot;</span>)]
 </span><span class="kw">mod </span>azblob;
-<span class="kw">pub use </span>azblob::Azblob;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-azblob&quot;</span>)]
+</span><span class="kw">pub use </span>azblob::Azblob;
 
-<span class="kw">mod </span>azdfs;
-<span class="kw">pub use </span>azdfs::Azdfs;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-azdfs&quot;</span>)]
+</span><span class="kw">mod </span>azdfs;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-azdfs&quot;</span>)]
+</span><span class="kw">pub use </span>azdfs::Azdfs;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;services-dashmap&quot;</span>)]
 </span><span class="kw">mod </span>dashmap;
 <span class="attr">#[cfg(feature = <span class="string">&quot;services-dashmap&quot;</span>)]
 </span><span class="kw">pub use </span><span class="self">self</span>::dashmap::Dashmap;
 
-<span class="kw">mod </span>fs;
-<span class="kw">pub use </span>fs::Fs;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-fs&quot;</span>)]
+</span><span class="kw">mod </span>fs;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-fs&quot;</span>)]
+</span><span class="kw">pub use </span>fs::Fs;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;services-ftp&quot;</span>)]
 </span><span class="kw">mod </span>ftp;
 <span class="attr">#[cfg(feature = <span class="string">&quot;services-ftp&quot;</span>)]
 </span><span class="kw">pub use </span>ftp::Ftp;
 
-<span class="kw">mod </span>gcs;
-<span class="kw">pub use </span>gcs::Gcs;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-gcs&quot;</span>)]
+</span><span class="kw">mod </span>gcs;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-gcs&quot;</span>)]
+</span><span class="kw">pub use </span>gcs::Gcs;
 
-<span class="kw">mod </span>ghac;
-<span class="kw">pub use </span>ghac::Ghac;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-ghac&quot;</span>)]
+</span><span class="kw">mod </span>ghac;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-ghac&quot;</span>)]
+</span><span class="kw">pub use </span>ghac::Ghac;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;services-hdfs&quot;</span>)]
 </span><span class="kw">mod </span>hdfs;
 <span class="attr">#[cfg(feature = <span class="string">&quot;services-hdfs&quot;</span>)]
 </span><span class="kw">pub use </span>hdfs::Hdfs;
 
-<span class="kw">mod </span>http;
-<span class="kw">pub use </span><span class="self">self</span>::http::Http;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-http&quot;</span>)]
+</span><span class="kw">mod </span>http;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-http&quot;</span>)]
+</span><span class="kw">pub use </span><span class="self">self</span>::http::Http;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;services-ipfs&quot;</span>)]
 </span><span class="kw">mod </span>ipfs;
 <span class="attr">#[cfg(feature = <span class="string">&quot;services-ipfs&quot;</span>)]
 </span><span class="kw">pub use </span><span class="self">self</span>::ipfs::Ipfs;
 
-<span class="kw">mod </span>ipmfs;
-<span class="kw">pub use </span>ipmfs::Ipmfs;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-ipmfs&quot;</span>)]
+</span><span class="kw">mod </span>ipmfs;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-ipmfs&quot;</span>)]
+</span><span class="kw">pub use </span>ipmfs::Ipmfs;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;services-memcached&quot;</span>)]
 </span><span class="kw">mod </span>memcached;
 <span class="attr">#[cfg(feature = <span class="string">&quot;services-memcached&quot;</span>)]
 </span><span class="kw">pub use </span>memcached::Memcached;
 
-<span class="kw">mod </span>memory;
-<span class="kw">pub use </span>memory::Memory;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-memory&quot;</span>)]
+</span><span class="kw">mod </span>memory;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-memory&quot;</span>)]
+</span><span class="kw">pub use </span>memory::Memory;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;services-moka&quot;</span>)]
 </span><span class="kw">mod </span>moka;
 <span class="attr">#[cfg(feature = <span class="string">&quot;services-moka&quot;</span>)]
 </span><span class="kw">pub use </span><span class="self">self</span>::moka::Moka;
 
-<span class="kw">mod </span>obs;
-<span class="kw">pub use </span>obs::Obs;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-obs&quot;</span>)]
+</span><span class="kw">mod </span>obs;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-obs&quot;</span>)]
+</span><span class="kw">pub use </span>obs::Obs;
 
-<span class="kw">mod </span>oss;
-<span class="kw">pub use </span>oss::Oss;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-oss&quot;</span>)]
+</span><span class="kw">mod </span>oss;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-oss&quot;</span>)]
+</span><span class="kw">pub use </span>oss::Oss;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;services-redis&quot;</span>)]
 </span><span class="kw">mod </span>redis;
@@ -193,18 +239,24 @@
 <span class="attr">#[cfg(feature = <span class="string">&quot;services-rocksdb&quot;</span>)]
 </span><span class="kw">pub use </span><span class="self">self</span>::rocksdb::Rocksdb;
 
-<span class="kw">mod </span>s3;
-<span class="kw">pub use </span>s3::S3;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-s3&quot;</span>)]
+</span><span class="kw">mod </span>s3;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-s3&quot;</span>)]
+</span><span class="kw">pub use </span>s3::S3;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;services-sled&quot;</span>)]
 </span><span class="kw">mod </span>sled;
 <span class="attr">#[cfg(feature = <span class="string">&quot;services-sled&quot;</span>)]
 </span><span class="kw">pub use </span><span class="self">self</span>::sled::Sled;
 
-<span class="kw">mod </span>webdav;
-<span class="kw">pub use </span>webdav::Webdav;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-webdav&quot;</span>)]
+</span><span class="kw">mod </span>webdav;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-webdav&quot;</span>)]
+</span><span class="kw">pub use </span>webdav::Webdav;
 
-<span class="kw">mod </span>webhdfs;
-<span class="kw">pub use </span>webhdfs::Webhdfs;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-webhdfs&quot;</span>)]
+</span><span class="kw">mod </span>webhdfs;
+<span class="attr">#[cfg(feature = <span class="string">&quot;services-webhdfs&quot;</span>)]
+</span><span class="kw">pub use </span>webhdfs::Webhdfs;
 </code></pre></div>
 </section></main><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.2 (9eb3afe9e 2023-03-27)" data-search-js="search-98d53477a794af0b.js" data-settings-js="settings-c3c521c753752a1a.js" data-settings-css="settings-08ddfdda51b8ee2e.css" ></div></body></html>

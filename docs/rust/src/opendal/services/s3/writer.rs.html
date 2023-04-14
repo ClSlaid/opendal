@@ -153,6 +153,22 @@
 <a href="#153" id="153">153</a>
 <a href="#154" id="154">154</a>
 <a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -170,19 +186,20 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>async_trait::async_trait;
+</span><span class="kw">use </span>std::sync::Arc;
+
+<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>http::StatusCode;
 
-<span class="kw">use </span><span class="kw">super</span>::backend::CompleteMultipartUploadRequestPart;
-<span class="kw">use </span><span class="kw">super</span>::backend::S3Backend;
+<span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">crate</span>::ops::OpWrite;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">pub struct </span>S3Writer {
-    backend: S3Backend,
+    core: Arc&lt;S3Core&gt;,
 
     op: OpWrite,
     path: String,
@@ -192,9 +209,10 @@
 }
 
 <span class="kw">impl </span>S3Writer {
-    <span class="kw">pub fn </span>new(backend: S3Backend, op: OpWrite, path: String, upload_id: <span class="prelude-ty">Option</span>&lt;String&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(core: Arc&lt;S3Core&gt;, op: OpWrite, path: String, upload_id: <span class="prelude-ty">Option</span>&lt;String&gt;) -&gt; <span class="self">Self </span>{
         S3Writer {
-            backend,
+            core,
+
             op,
             path,
             upload_id,
@@ -211,7 +229,7 @@
             <span class="string">&quot;Writer initiated with upload id, but users trying to call write, must be buggy&quot;
         </span>);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.backend.s3_put_object_request(
+        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.core.s3_put_object_request(
             <span class="kw-2">&amp;</span><span class="self">self</span>.path,
             <span class="prelude-val">Some</span>(bs.len()),
             <span class="self">self</span>.op.content_type(),
@@ -220,12 +238,9 @@
             AsyncBody::Bytes(bs),
         )<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.backend
-            .signer
-            .sign(<span class="kw-2">&amp;mut </span>req)
-            .map_err(new_request_sign_error)<span class="question-mark">?</span>;
+        <span class="self">self</span>.core.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span>resp = <span class="self">self</span>.backend.client.send_async(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.core.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
 
@@ -245,7 +260,7 @@
         <span class="comment">// AWS S3 requires part number must between [1..=10000]
         </span><span class="kw">let </span>part_number = <span class="self">self</span>.parts.len() + <span class="number">1</span>;
 
-        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.backend.s3_upload_part_request(
+        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.core.s3_upload_part_request(
             <span class="kw-2">&amp;</span><span class="self">self</span>.path,
             upload_id,
             part_number,
@@ -253,12 +268,9 @@
             AsyncBody::Bytes(bs),
         )<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.backend
-            .signer
-            .sign(<span class="kw-2">&amp;mut </span>req)
-            .map_err(new_request_sign_error)<span class="question-mark">?</span>;
+        <span class="self">self</span>.core.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span>resp = <span class="self">self</span>.backend.client.send_async(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.core.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
 
@@ -284,6 +296,26 @@
         }
     }
 
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>upload_id = <span class="kw">if let </span><span class="prelude-val">Some</span>(upload_id) = <span class="kw-2">&amp;</span><span class="self">self</span>.upload_id {
+            upload_id
+        } <span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+        };
+
+        <span class="kw">let </span>resp = <span class="self">self
+            </span>.core
+            .s3_abort_multipart_upload(<span class="kw-2">&amp;</span><span class="self">self</span>.path, upload_id)
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">match </span>resp.status() {
+            StatusCode::OK =&gt; {
+                resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(())
+            }
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+        }
+    }
+
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>upload_id = <span class="kw">if let </span><span class="prelude-val">Some</span>(upload_id) = <span class="kw-2">&amp;</span><span class="self">self</span>.upload_id {
             upload_id
@@ -292,7 +324,7 @@
         };
 
         <span class="kw">let </span>resp = <span class="self">self
-            </span>.backend
+            </span>.core
             .s3_complete_multipart_upload(<span class="kw-2">&amp;</span><span class="self">self</span>.path, upload_id, <span class="kw-2">&amp;</span><span class="self">self</span>.parts)
             .<span class="kw">await</span><span class="question-mark">?</span>;
 

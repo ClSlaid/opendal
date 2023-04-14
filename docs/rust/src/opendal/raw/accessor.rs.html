@@ -872,7 +872,7 @@
     /// # Behavior
     ///
     /// - This API is optional, return [`std::io::ErrorKind::Unsupported`] if not supported.
-    </span><span class="kw">fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
+    </span><span class="kw">async fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
         <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>) = (path, args);
 
         <span class="prelude-val">Err</span>(Error::new(
@@ -1093,9 +1093,9 @@
         <span class="self">self</span>.as_ref().batch(args).<span class="kw">await
     </span>}
 
-    <span class="kw">fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
-        <span class="self">self</span>.as_ref().presign(path, args)
-    }
+    <span class="kw">async fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
+        <span class="self">self</span>.as_ref().presign(path, args).<span class="kw">await
+    </span>}
 
     <span class="kw">fn </span>blocking_create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
         <span class="self">self</span>.as_ref().blocking_create(path, args)

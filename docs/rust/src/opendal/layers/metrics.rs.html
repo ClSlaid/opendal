@@ -975,6 +975,13 @@
 <a href="#975" id="975">975</a>
 <a href="#976" id="976">976</a>
 <a href="#977" id="977">977</a>
+<a href="#978" id="978">978</a>
+<a href="#979" id="979">979</a>
+<a href="#980" id="980">980</a>
+<a href="#981" id="981">981</a>
+<a href="#982" id="982">982</a>
+<a href="#983" id="983">983</a>
+<a href="#984" id="984">984</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1607,11 +1614,11 @@
         })
     }
 
-    <span class="kw">fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
+    <span class="kw">async fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
         <span class="self">self</span>.handle.requests_total_presign.increment(<span class="number">1</span>);
 
         <span class="kw">let </span>start = Instant::now();
-        <span class="kw">let </span>result = <span class="self">self</span>.inner.presign(path, args);
+        <span class="kw">let </span>result = <span class="self">self</span>.inner.presign(path, args).<span class="kw">await</span>;
         <span class="kw">let </span>dur = start.elapsed().as_secs_f64();
 
         <span class="self">self</span>.handle.requests_duration_seconds_presign.record(dur);
@@ -1912,6 +1919,13 @@
                 <span class="self">self</span>.handle.increment_errors_total(<span class="self">self</span>.op, err.kind());
                 err
             })
+    }
+
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.inner.abort().<span class="kw">await</span>.map_err(|err| {
+            <span class="self">self</span>.handle.increment_errors_total(<span class="self">self</span>.op, err.kind());
+            err
+        })
     }
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {

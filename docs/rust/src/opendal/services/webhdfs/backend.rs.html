@@ -600,97 +600,6 @@
 <a href="#600" id="600">600</a>
 <a href="#601" id="601">601</a>
 <a href="#602" id="602">602</a>
-<a href="#603" id="603">603</a>
-<a href="#604" id="604">604</a>
-<a href="#605" id="605">605</a>
-<a href="#606" id="606">606</a>
-<a href="#607" id="607">607</a>
-<a href="#608" id="608">608</a>
-<a href="#609" id="609">609</a>
-<a href="#610" id="610">610</a>
-<a href="#611" id="611">611</a>
-<a href="#612" id="612">612</a>
-<a href="#613" id="613">613</a>
-<a href="#614" id="614">614</a>
-<a href="#615" id="615">615</a>
-<a href="#616" id="616">616</a>
-<a href="#617" id="617">617</a>
-<a href="#618" id="618">618</a>
-<a href="#619" id="619">619</a>
-<a href="#620" id="620">620</a>
-<a href="#621" id="621">621</a>
-<a href="#622" id="622">622</a>
-<a href="#623" id="623">623</a>
-<a href="#624" id="624">624</a>
-<a href="#625" id="625">625</a>
-<a href="#626" id="626">626</a>
-<a href="#627" id="627">627</a>
-<a href="#628" id="628">628</a>
-<a href="#629" id="629">629</a>
-<a href="#630" id="630">630</a>
-<a href="#631" id="631">631</a>
-<a href="#632" id="632">632</a>
-<a href="#633" id="633">633</a>
-<a href="#634" id="634">634</a>
-<a href="#635" id="635">635</a>
-<a href="#636" id="636">636</a>
-<a href="#637" id="637">637</a>
-<a href="#638" id="638">638</a>
-<a href="#639" id="639">639</a>
-<a href="#640" id="640">640</a>
-<a href="#641" id="641">641</a>
-<a href="#642" id="642">642</a>
-<a href="#643" id="643">643</a>
-<a href="#644" id="644">644</a>
-<a href="#645" id="645">645</a>
-<a href="#646" id="646">646</a>
-<a href="#647" id="647">647</a>
-<a href="#648" id="648">648</a>
-<a href="#649" id="649">649</a>
-<a href="#650" id="650">650</a>
-<a href="#651" id="651">651</a>
-<a href="#652" id="652">652</a>
-<a href="#653" id="653">653</a>
-<a href="#654" id="654">654</a>
-<a href="#655" id="655">655</a>
-<a href="#656" id="656">656</a>
-<a href="#657" id="657">657</a>
-<a href="#658" id="658">658</a>
-<a href="#659" id="659">659</a>
-<a href="#660" id="660">660</a>
-<a href="#661" id="661">661</a>
-<a href="#662" id="662">662</a>
-<a href="#663" id="663">663</a>
-<a href="#664" id="664">664</a>
-<a href="#665" id="665">665</a>
-<a href="#666" id="666">666</a>
-<a href="#667" id="667">667</a>
-<a href="#668" id="668">668</a>
-<a href="#669" id="669">669</a>
-<a href="#670" id="670">670</a>
-<a href="#671" id="671">671</a>
-<a href="#672" id="672">672</a>
-<a href="#673" id="673">673</a>
-<a href="#674" id="674">674</a>
-<a href="#675" id="675">675</a>
-<a href="#676" id="676">676</a>
-<a href="#677" id="677">677</a>
-<a href="#678" id="678">678</a>
-<a href="#679" id="679">679</a>
-<a href="#680" id="680">680</a>
-<a href="#681" id="681">681</a>
-<a href="#682" id="682">682</a>
-<a href="#683" id="683">683</a>
-<a href="#684" id="684">684</a>
-<a href="#685" id="685">685</a>
-<a href="#686" id="686">686</a>
-<a href="#687" id="687">687</a>
-<a href="#688" id="688">688</a>
-<a href="#689" id="689">689</a>
-<a href="#690" id="690">690</a>
-<a href="#691" id="691">691</a>
-<a href="#692" id="692">692</a>
-<a href="#693" id="693">693</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -712,15 +621,12 @@
 <span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>http::header::CONTENT_LENGTH;
 <span class="kw">use </span>http::header::CONTENT_TYPE;
-<span class="kw">use </span>http::response::Parts;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::Response;
 <span class="kw">use </span>http::StatusCode;
 <span class="kw">use </span>log::debug;
-<span class="kw">use </span>log::error;
 <span class="kw">use </span>tokio::sync::OnceCell;
 
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
@@ -769,6 +675,7 @@
 /// # Examples
 ///
 /// ## Via Builder
+///
 /// ```no_run
 /// use std::sync::Arc;
 ///
@@ -807,13 +714,10 @@
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>WebhdfsBuilder {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>ds = f.debug_struct(<span class="string">&quot;Builder&quot;</span>);
-        ds.field(<span class="string">&quot;root&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root)
-            .field(<span class="string">&quot;endpoint&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.endpoint);
-        <span class="kw">if </span><span class="self">self</span>.delegation.is_some() {
-            ds.field(<span class="string">&quot;delegation&quot;</span>, <span class="kw-2">&amp;</span><span class="string">&quot;&lt;redacted&gt;&quot;</span>);
-        }
-        ds.finish()
+        f.debug_struct(<span class="string">&quot;Builder&quot;</span>)
+            .field(<span class="string">&quot;root&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root)
+            .field(<span class="string">&quot;endpoint&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.endpoint)
+            .finish_non_exhaustive()
     }
 }
 
@@ -821,15 +725,14 @@
     <span class="doccomment">/// Set the working directory of this backend
     ///
     /// All operations will happen under this root
+    ///
     /// # Note
+    ///
     /// The root will be automatically created if not exists.
-    /// If the root is occupied by a file, building of directory will fail
     </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.root = <span class="kw">if </span>root.is_empty() {
-            <span class="prelude-val">None
-        </span>} <span class="kw">else </span>{
-            <span class="prelude-val">Some</span>(root.to_string())
-        };
+        <span class="kw">if </span>!root.is_empty() {
+            <span class="self">self</span>.root = <span class="prelude-val">Some</span>(root.to_string())
+        }
 
         <span class="self">self
     </span>}
@@ -854,6 +757,7 @@
 
     <span class="doccomment">/// Set the delegation token of this backend,
     /// used for authentication
+    ///
     /// # Note
     /// The builder prefers using delegation token over username.
     /// If both are set, delegation token will be used.
@@ -865,15 +769,6 @@
     </span>}
 }
 
-<span class="kw">impl </span>WebhdfsBuilder {
-    <span class="kw">fn </span>auth_str(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;String&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(dt) = <span class="self">self</span>.delegation.take() {
-            <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="macro">format!</span>(<span class="string">&quot;delegation_token={dt}&quot;</span>));
-        }
-        <span class="prelude-val">None
-    </span>}
-}
-
 <span class="kw">impl </span>Builder <span class="kw">for </span>WebhdfsBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Webhdfs;
     <span class="kw">type </span>Accessor = WebhdfsBackend;
@@ -881,28 +776,22 @@
     <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>builder = WebhdfsBuilder::default();
 
-        <span class="kw">for </span>(k, v) <span class="kw">in </span>map.iter() {
-            <span class="kw">let </span>v = v.as_str();
-            <span class="kw">match </span>k.as_str() {
-                <span class="string">&quot;root&quot; </span>=&gt; builder.root(v),
-                <span class="string">&quot;endpoint&quot; </span>=&gt; builder.endpoint(v),
-                <span class="string">&quot;delegation&quot; </span>=&gt; builder.delegation(v),
-                <span class="kw">_ </span>=&gt; <span class="kw">continue</span>,
-            };
-        }
+        map.get(<span class="string">&quot;root&quot;</span>).map(|v| builder.root(v));
+        map.get(<span class="string">&quot;endpoint&quot;</span>).map(|v| builder.endpoint(v));
+        map.get(<span class="string">&quot;delegation&quot;</span>).map(|v| builder.delegation(v));
 
         builder
     }
 
     <span class="doccomment">/// build the backend
     ///
-    /// # Note:
+    /// # Note
+    ///
     /// when building backend, the built backend will check if the root directory
     /// exits.
     /// if the directory does not exits, the directory will be automatically created
-    /// if the root path is occupied by a file, a failure will be returned
     </span><span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
-        <span class="macro">debug!</span>(<span class="string">&quot;building backend: {:?}&quot;</span>, <span class="self">self</span>);
+        <span class="macro">debug!</span>(<span class="string">&quot;start building backend: {:?}&quot;</span>, <span class="self">self</span>);
 
         <span class="kw">let </span>root = normalize_root(<span class="kw-2">&amp;</span><span class="self">self</span>.root.take().unwrap_or_default());
         <span class="macro">debug!</span>(<span class="string">&quot;backend use root {root}&quot;</span>);
@@ -920,18 +809,20 @@
         };
         <span class="macro">debug!</span>(<span class="string">&quot;backend use endpoint {}&quot;</span>, endpoint);
 
-        <span class="kw">let </span>auth = <span class="self">self</span>.auth_str();
+        <span class="kw">let </span>auth = <span class="self">self
+            </span>.delegation
+            .take()
+            .map(|dt| <span class="macro">format!</span>(<span class="string">&quot;delegation_token={dt}&quot;</span>));
+
         <span class="kw">let </span>client = HttpClient::new()<span class="question-mark">?</span>;
 
         <span class="kw">let </span>backend = WebhdfsBackend {
-            root: root.clone(),
+            root,
             endpoint,
             auth,
             client,
             root_checker: OnceCell::new(),
         };
-
-        <span class="macro">debug!</span>(<span class="string">&quot;checking working directory: {}&quot;</span>, root);
 
         <span class="prelude-val">Ok</span>(backend)
     }
@@ -942,14 +833,17 @@
 </span><span class="kw">pub struct </span>WebhdfsBackend {
     root: String,
     endpoint: String,
-    <span class="kw">pub </span>client: HttpClient,
     auth: <span class="prelude-ty">Option</span>&lt;String&gt;,
     root_checker: OnceCell&lt;()&gt;,
+
+    <span class="kw">pub </span>client: HttpClient,
 }
 
 <span class="kw">impl </span>WebhdfsBackend {
-    <span class="comment">// create object or make a directory
-    </span><span class="kw">pub async fn </span>webhdfs_create_object_req(
+    <span class="doccomment">/// create object or make a directory
+    ///
+    /// TODO: we should split it into mkdir and create
+    </span><span class="kw">pub async fn </span>webhdfs_create_object_request(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         size: <span class="prelude-ty">Option</span>&lt;usize&gt;,
@@ -981,7 +875,7 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(req);
         }
 
-        <span class="kw">let </span>resp = <span class="self">self</span>.client.send_async(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="comment">// should be a 307 TEMPORARY_REDIRECT
         </span><span class="kw">if </span>resp.status() != StatusCode::TEMPORARY_REDIRECT {
@@ -1000,7 +894,11 @@
         re_builder.body(body).map_err(new_request_build_error)
     }
 
-    <span class="kw">async fn </span>webhdfs_open_req(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, range: <span class="kw-2">&amp;</span>BytesRange) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+    <span class="kw">async fn </span>webhdfs_open_request(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        path: <span class="kw-2">&amp;</span>str,
+        range: <span class="kw-2">&amp;</span>BytesRange,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(
             <span class="string">&quot;{}/webhdfs/v1/{}?op=OPEN&quot;</span>,
@@ -1008,40 +906,23 @@
             percent_encode_path(<span class="kw-2">&amp;</span>p),
         );
         <span class="kw">if let </span><span class="prelude-val">Some</span>(auth) = <span class="kw-2">&amp;</span><span class="self">self</span>.auth {
-            url += <span class="macro">format!</span>(<span class="string">&quot;&amp;{auth}&quot;</span>).as_str();
+            url += <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;&amp;{auth}&quot;</span>);
         }
 
-        <span class="comment">// make a Webhdfs compatible bytes range
-        //
-        // Webhdfs does not support read from end
-        // have to solve manually
-        </span><span class="kw">let </span>range = <span class="kw">match </span>(range.offset(), range.size()) {
-            <span class="comment">// avoiding reading the whole file
-            </span>(<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(size)) =&gt; {
-                <span class="macro">debug!</span>(<span class="string">&quot;converting bytes range to webhdfs compatible&quot;</span>);
-                <span class="kw">let </span>status = <span class="self">self</span>.stat(path, OpStat::default()).<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>total_size = status.into_metadata().content_length();
-                <span class="kw">let </span>offset = total_size - size;
-                BytesRange::new(<span class="prelude-val">Some</span>(offset), <span class="prelude-val">Some</span>(size))
-            }
-            <span class="kw">_ </span>=&gt; <span class="kw-2">*</span>range,
-        };
+        <span class="kw">if </span>!range.is_full() {
+            <span class="comment">// Webhdfs does not support read from end
+            </span><span class="kw">if </span>range.offset().is_none() &amp;&amp; range.size().is_some() {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                    ErrorKind::Unsupported,
+                    <span class="string">&quot;webhdfs doesn&#39;t support read with suffix range&quot;</span>,
+                ));
+            };
 
-        <span class="kw">let </span>(offset, size) = (range.offset(), range.size());
-
-        <span class="kw">match </span>(offset, size) {
-            (<span class="prelude-val">Some</span>(offset), <span class="prelude-val">Some</span>(size)) =&gt; {
-                url += <span class="macro">format!</span>(<span class="string">&quot;&amp;offset={offset}&amp;length={size}&quot;</span>).as_str();
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(offset) = range.offset() {
+                url += <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;&amp;offset={offset}&quot;</span>);
             }
-            (<span class="prelude-val">Some</span>(offset), <span class="prelude-val">None</span>) =&gt; {
-                url += <span class="macro">format!</span>(<span class="string">&quot;&amp;offset={offset}&quot;</span>).as_str();
-            }
-            (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; {
-                <span class="comment">// read all, do nothing
-            </span>}
-            (<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="kw">_</span>)) =&gt; {
-                <span class="comment">// already handled
-                </span><span class="macro">unreachable!</span>()
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = range.size() {
+                url += <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;&amp;length={size}&quot;</span>)
             }
         }
 
@@ -1052,7 +933,7 @@
         <span class="prelude-val">Ok</span>(req)
     }
 
-    <span class="kw">fn </span>webhdfs_list_status_req(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+    <span class="kw">fn </span>webhdfs_list_status_request(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(
             <span class="string">&quot;{}/webhdfs/v1/{}?op=LISTSTATUS&quot;</span>,
@@ -1063,62 +944,52 @@
             url += <span class="macro">format!</span>(<span class="string">&quot;&amp;{auth}&quot;</span>).as_str();
         }
 
-        <span class="kw">let </span>req = Request::get(<span class="kw-2">&amp;</span>url);
-        <span class="kw">let </span>req = req
+        <span class="kw">let </span>req = Request::get(<span class="kw-2">&amp;</span>url)
             .body(AsyncBody::Empty)
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(req)
     }
-}
 
-<span class="kw">impl </span>WebhdfsBackend {
-    <span class="doccomment">/// get object from webhdfs
-    ///
-    /// # Notes
-    ///
-    /// looks like webhdfs doesn&#39;t support range request from file end.
-    /// so if we want to read the tail of object, the whole object should be transferred.
-    </span><span class="kw">async fn </span>webhdfs_get_object(
+    <span class="kw">async fn </span>webhdfs_read_file(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         range: BytesRange,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
-        <span class="kw">let </span>req = <span class="self">self</span>.webhdfs_open_req(path, <span class="kw-2">&amp;</span>range).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>resp = <span class="self">self</span>.client.send_async(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>req = <span class="self">self</span>.webhdfs_open_request(path, <span class="kw-2">&amp;</span>range).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="comment">// this should be a 307 redirect
+        <span class="comment">// webhdfs namenode will redirect us to datanode for data transfer.
         </span><span class="kw">if </span>resp.status() != StatusCode::TEMPORARY_REDIRECT {
             <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
         }
 
-        <span class="kw">let </span>re_url = <span class="self">self</span>.follow_redirect(resp)<span class="question-mark">?</span>;
-        <span class="kw">let </span>re_req = Request::get(<span class="kw-2">&amp;</span>re_url)
+        <span class="kw">let </span>location = <span class="self">self</span>.follow_redirect(resp)<span class="question-mark">?</span>;
+        <span class="kw">let </span>req = Request::get(<span class="kw-2">&amp;</span>location)
             .body(AsyncBody::Empty)
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
-        <span class="self">self</span>.client.send_async(re_req).<span class="kw">await
+        <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">async fn </span>webhdfs_status_object(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">async fn </span>webhdfs_get_file_status(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(
             <span class="string">&quot;{}/webhdfs/v1/{}?op=GETFILESTATUS&quot;</span>,
             <span class="self">self</span>.endpoint,
             percent_encode_path(<span class="kw-2">&amp;</span>p),
         );
-        <span class="macro">debug!</span>(<span class="string">&quot;webhdfs status url: {}&quot;</span>, url);
+
         <span class="kw">if let </span><span class="prelude-val">Some</span>(auth) = <span class="kw-2">&amp;</span><span class="self">self</span>.auth {
             url += <span class="macro">format!</span>(<span class="string">&quot;&amp;{auth}&quot;</span>).as_str();
         }
 
-        <span class="kw">let </span>req = Request::get(<span class="kw-2">&amp;</span>url);
-        <span class="kw">let </span>req = req
+        <span class="kw">let </span>req = Request::get(<span class="kw-2">&amp;</span>url)
             .body(AsyncBody::Empty)
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.client.send_async(req).<span class="kw">await
+        <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">async fn </span>webhdfs_delete_object(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">async fn </span>webhdfs_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(
             <span class="string">&quot;{}/webhdfs/v1/{}?op=DELETE&amp;recursive=false&quot;</span>,
@@ -1129,94 +1000,56 @@
             url += <span class="macro">format!</span>(<span class="string">&quot;&amp;{auth}&quot;</span>).as_str();
         }
 
-        <span class="kw">let </span>req = Request::delete(<span class="kw-2">&amp;</span>url);
-        <span class="kw">let </span>req = req
+        <span class="kw">let </span>req = Request::delete(<span class="kw-2">&amp;</span>url)
             .body(AsyncBody::Empty)
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.client.send_async(req).<span class="kw">await
+        <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
-}
 
-<span class="kw">impl </span>WebhdfsBackend {
     <span class="doccomment">/// get redirect destination from 307 TEMPORARY_REDIRECT http response
     </span><span class="kw">fn </span>follow_redirect(<span class="kw-2">&amp;</span><span class="self">self</span>, resp: Response&lt;IncomingAsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
-        <span class="kw">let </span>loc = <span class="kw">match </span>parse_location(resp.headers())<span class="question-mark">? </span>{
-            <span class="prelude-val">Some</span>(p) =&gt; {
-                <span class="kw">if </span>!p.starts_with(<span class="string">&#39;/&#39;</span>) {
-                    <span class="comment">// is not relative path
-                    </span>p.to_string()
-                } <span class="kw">else </span>{
-                    <span class="comment">// is relative path
-                    // prefix with endpoint url
-                    </span><span class="kw">let </span>url = <span class="self">self</span>.endpoint.clone();
-                    <span class="macro">format!</span>(<span class="string">&quot;{url}/{p}&quot;</span>)
-                }
-            }
-            <span class="prelude-val">None </span>=&gt; {
-                <span class="kw">let </span>err = Error::new(
-                    ErrorKind::Unexpected,
-                    <span class="string">&quot;redirection fail: no location header&quot;</span>,
-                );
-                <span class="kw">return </span><span class="prelude-val">Err</span>(err);
-            }
-        };
-        <span class="prelude-val">Ok</span>(loc)
-    }
-
-    <span class="kw">fn </span>consume_success_mkdir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, parts: Parts, body: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
-        <span class="kw">let </span>mkdir_rsp = serde_json::from_str::&lt;BooleanResp&gt;(body).map_err(|e| {
-            Error::new(ErrorKind::Unexpected, <span class="string">&quot;cannot parse mkdir response&quot;</span>)
-                .set_temporary()
-                .with_context(<span class="string">&quot;service&quot;</span>, Scheme::Webhdfs)
-                .with_context(<span class="string">&quot;response&quot;</span>, <span class="macro">format!</span>(<span class="string">&quot;{parts:?}&quot;</span>))
-                .set_source(e)
+        <span class="kw">let </span>location = parse_location(resp.headers())<span class="question-mark">?</span>.ok_or_else(|| {
+            Error::new(
+                ErrorKind::Unexpected,
+                <span class="string">&quot;webhdfs expect to have redirect location but got none&quot;</span>,
+            )
         })<span class="question-mark">?</span>;
 
-        <span class="kw">if </span>mkdir_rsp.boolean {
-            <span class="prelude-val">Ok</span>(RpCreate::default())
+        <span class="kw">let </span>location = <span class="kw">if </span>location.starts_with(<span class="string">&#39;/&#39;</span>) {
+            <span class="comment">// location starts with `/` means it&#39;s a relative path to current
+            // endpoint. We should prepend the endpoint to it so that we can
+            // send request to the correct location.
+            </span><span class="macro">format!</span>(<span class="string">&quot;{}/{location}&quot;</span>, <span class="self">self</span>.endpoint)
         } <span class="kw">else </span>{
-            <span class="prelude-val">Err</span>(Error::new(
-                ErrorKind::Unexpected,
-                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;mkdir failed: {path}&quot;</span>),
-            ))
-        }
+            location.to_string()
+        };
+
+        <span class="prelude-val">Ok</span>(location)
     }
 
     <span class="kw">async fn </span>check_root(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>resp = <span class="self">self</span>.webhdfs_status_object(<span class="string">&quot;/&quot;</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.webhdfs_get_file_status(<span class="string">&quot;/&quot;</span>).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">match </span>resp.status() {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>body_bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
 
-                <span class="kw">let </span>file_status = serde_json::from_reader::&lt;<span class="kw">_</span>, FileStatusWrapper&gt;(body_bs.reader())
-                    .map_err(|e| {
-                        Error::new(ErrorKind::Unexpected, <span class="string">&quot;cannot parse returned json&quot;</span>)
-                            .with_context(<span class="string">&quot;service&quot;</span>, Scheme::Webhdfs)
-                            .set_source(e)
-                    })<span class="question-mark">?
+                <span class="kw">let </span>file_status = serde_json::from_slice::&lt;FileStatusWrapper&gt;(<span class="kw-2">&amp;</span>bs)
+                    .map_err(new_json_deserialize_error)<span class="question-mark">?
                     </span>.file_status;
 
-                <span class="kw">match </span>file_status.ty {
-                    FileStatusType::File =&gt; {
-                        <span class="macro">error!</span>(<span class="string">&quot;working directory is occupied!&quot;</span>);
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::ConfigInvalid, <span class="string">&quot;root is occupied!&quot;</span>)
-                            .with_context(<span class="string">&quot;service&quot;</span>, Scheme::Webhdfs));
-                    }
-                    FileStatusType::Directory =&gt; {
-                        <span class="macro">debug!</span>(<span class="string">&quot;working directory exists, do nothing&quot;</span>);
-                    }
+                <span class="kw">if </span>file_status.ty == FileStatusType::File {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                        ErrorKind::ConfigInvalid,
+                        <span class="string">&quot;root path must be dir&quot;</span>,
+                    ));
                 }
             }
-
             StatusCode::NOT_FOUND =&gt; {
-                <span class="macro">debug!</span>(<span class="string">&quot;working directory does not exists, creating...&quot;</span>);
                 <span class="self">self</span>.create(<span class="string">&quot;/&quot;</span>, OpCreate::new(EntryMode::DIR)).<span class="kw">await</span><span class="question-mark">?</span>;
             }
-
             <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
         }
-        <span class="macro">debug!</span>(<span class="string">&quot;working directory is ready!&quot;</span>);
         <span class="prelude-val">Ok</span>(())
     }
 }
@@ -1242,22 +1075,12 @@
     }
 
     <span class="doccomment">/// Create a file or directory
-    </span><span class="kw">async fn </span>create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
-        <span class="comment">// if the path ends with &#39;/&#39;, it will be treated as a directory
-        // otherwise, it will be treated as a file
-        </span><span class="kw">let </span>path = <span class="kw">if </span>args.mode().is_file() &amp;&amp; path.ends_with(<span class="string">&#39;/&#39;</span>) {
-            path.trim_end_matches(<span class="string">&#39;/&#39;</span>).to_owned()
-        } <span class="kw">else if </span>args.mode().is_dir() &amp;&amp; !path.ends_with(<span class="string">&#39;/&#39;</span>) {
-            path.to_owned() + <span class="string">&quot;/&quot;
-        </span>} <span class="kw">else </span>{
-            path.to_owned()
-        };
-
+    </span><span class="kw">async fn </span>create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
         <span class="kw">let </span>req = <span class="self">self
-            </span>.webhdfs_create_object_req(<span class="kw-2">&amp;</span>path, <span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">None</span>, AsyncBody::Empty)
+            </span>.webhdfs_create_object_request(path, <span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">None</span>, AsyncBody::Empty)
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span>resp = <span class="self">self</span>.client.send_async(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
 
@@ -1267,15 +1090,19 @@
         // the redirection should be done automatically.
         </span><span class="kw">match </span>status {
             StatusCode::CREATED | StatusCode::OK =&gt; {
-                <span class="kw">if </span>!path.ends_with(<span class="string">&#39;/&#39;</span>) {
-                    <span class="comment">// create file&#39;s http resp could be ignored
-                    </span>resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-                    <span class="kw">return </span><span class="prelude-val">Ok</span>(RpCreate::default());
+                <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+
+                <span class="kw">let </span>resp = serde_json::from_slice::&lt;BooleanResp&gt;(<span class="kw-2">&amp;</span>bs)
+                    .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+
+                <span class="kw">if </span>resp.boolean {
+                    <span class="prelude-val">Ok</span>(RpCreate::default())
+                } <span class="kw">else </span>{
+                    <span class="prelude-val">Err</span>(Error::new(
+                        ErrorKind::Unexpected,
+                        <span class="string">&quot;webhdfs create dir failed&quot;</span>,
+                    ))
                 }
-                <span class="kw">let </span>(parts, body) = resp.into_parts();
-                <span class="kw">let </span>bs = body.bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>s = String::from_utf8_lossy(<span class="kw-2">&amp;</span>bs);
-                <span class="self">self</span>.consume_success_mkdir(<span class="kw-2">&amp;</span>path, parts, <span class="kw-2">&amp;</span>s)
             }
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
         }
@@ -1283,14 +1110,12 @@
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
         <span class="kw">let </span>range = args.range();
-        <span class="kw">let </span>resp = <span class="self">self</span>.webhdfs_get_object(path, range).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.webhdfs_read_file(path, range).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">match </span>resp.status() {
             StatusCode::OK | StatusCode::PARTIAL_CONTENT =&gt; {
                 <span class="kw">let </span>meta = parse_into_metadata(path, resp.headers())<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>((RpRead::with_metadata(meta), resp.into_body()))
             }
-            StatusCode::NOT_FOUND =&gt; <span class="prelude-val">Err</span>(Error::new(ErrorKind::NotFound, <span class="string">&quot;object not found&quot;</span>)
-                .with_context(<span class="string">&quot;service&quot;</span>, Scheme::Webhdfs)),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
         }
     }
@@ -1315,28 +1140,25 @@
             .get_or_try_init(|| <span class="kw">async </span>{ <span class="self">self</span>.check_root().<span class="kw">await </span>})
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span>resp = <span class="self">self</span>.webhdfs_status_object(path).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.webhdfs_get_file_status(path).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="macro">debug!</span>(<span class="string">&quot;stat object: {} ok&quot;</span>, path);
-                <span class="kw">let </span><span class="kw-2">mut </span>meta = parse_into_metadata(path, resp.headers())<span class="question-mark">?</span>;
-                <span class="kw">let </span>body_bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
 
-                <span class="kw">let </span>file_status = serde_json::from_reader::&lt;<span class="kw">_</span>, FileStatusWrapper&gt;(body_bs.reader())
-                    .map_err(|e| {
-                        Error::new(ErrorKind::Unexpected, <span class="string">&quot;cannot parse returned json&quot;</span>)
-                            .with_context(<span class="string">&quot;service&quot;</span>, Scheme::Webhdfs)
-                            .set_source(e)
-                    })<span class="question-mark">?
+                <span class="kw">let </span>file_status = serde_json::from_slice::&lt;FileStatusWrapper&gt;(<span class="kw-2">&amp;</span>bs)
+                    .map_err(new_json_deserialize_error)<span class="question-mark">?
                     </span>.file_status;
-                <span class="macro">debug!</span>(<span class="string">&quot;file status: {:?}&quot;</span>, file_status);
-                <span class="kw">let </span>status_meta: Metadata = file_status.try_into()<span class="question-mark">?</span>;
 
-                <span class="comment">// is ok to unwrap here
-                // all metadata field of status meta is present and checked by `TryFrom`
-                </span>meta.set_last_modified(status_meta.last_modified().unwrap())
-                    .set_content_length(status_meta.content_length());
+                <span class="kw">let </span>meta = <span class="kw">match </span>file_status.ty {
+                    FileStatusType::Directory =&gt; Metadata::new(EntryMode::DIR),
+                    FileStatusType::File =&gt; Metadata::new(EntryMode::FILE)
+                        .with_content_length(file_status.length)
+                        .with_last_modified(parse_datetime_from_from_timestamp_millis(
+                            file_status.modification_time,
+                        )<span class="question-mark">?</span>),
+                };
+
                 <span class="prelude-val">Ok</span>(RpStat::new(meta))
             }
 
@@ -1345,7 +1167,8 @@
     }
 
     <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
-        <span class="kw">let </span>resp = <span class="self">self</span>.webhdfs_delete_object(path).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.webhdfs_delete(path).<span class="kw">await</span><span class="question-mark">?</span>;
+
         <span class="kw">match </span>resp.status() {
             StatusCode::OK =&gt; {
                 resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1357,21 +1180,16 @@
 
     <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Pager)&gt; {
         <span class="kw">let </span>path = path.trim_end_matches(<span class="string">&#39;/&#39;</span>);
-        <span class="kw">let </span>req = <span class="self">self</span>.webhdfs_list_status_req(path)<span class="question-mark">?</span>;
+        <span class="kw">let </span>req = <span class="self">self</span>.webhdfs_list_status_request(path)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>resp = <span class="self">self</span>.client.send_async(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">match </span>resp.status() {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>body_bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>file_statuses =
-                    serde_json::from_reader::&lt;<span class="kw">_</span>, FileStatusesWrapper&gt;(body_bs.reader())
-                        .map_err(|e| {
-                            Error::new(ErrorKind::Unexpected, <span class="string">&quot;cannot parse returned json&quot;</span>)
-                                .with_context(<span class="string">&quot;service&quot;</span>, Scheme::Webhdfs)
-                                .set_source(e)
-                        })<span class="question-mark">?
-                        </span>.file_statuses
-                        .file_status;
+                <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>file_statuses = serde_json::from_slice::&lt;FileStatusesWrapper&gt;(<span class="kw-2">&amp;</span>bs)
+                    .map_err(new_json_deserialize_error)<span class="question-mark">?
+                    </span>.file_statuses
+                    .file_status;
 
                 <span class="kw">let </span>objects = WebhdfsPager::new(path, file_statuses);
                 <span class="prelude-val">Ok</span>((RpList::default(), objects))

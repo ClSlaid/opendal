@@ -439,9 +439,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>flagset::flags;
+</span><span class="kw">use </span>chrono::prelude::<span class="kw-2">*</span>;
+<span class="kw">use </span>flagset::flags;
 <span class="kw">use </span>flagset::FlagSet;
-<span class="kw">use </span>time::OffsetDateTime;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
@@ -466,7 +466,7 @@
     content_range: <span class="prelude-ty">Option</span>&lt;BytesContentRange&gt;,
     content_type: <span class="prelude-ty">Option</span>&lt;String&gt;,
     etag: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    last_modified: <span class="prelude-ty">Option</span>&lt;OffsetDateTime&gt;,
+    last_modified: <span class="prelude-ty">Option</span>&lt;DateTime&lt;Utc&gt;&gt;,
 }
 
 <span class="kw">impl </span>Metadata {
@@ -670,8 +670,8 @@
     /// `Last-Modified` is defined by [RFC 7232](https://httpwg.org/specs/rfc7232.html#header.last-modified)
     /// Refer to [MDN Last-Modified](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified) for more information.
     ///
-    /// OpenDAL parse the raw value into [`OffsetDateTime`] for convenient.
-    </span><span class="kw">pub fn </span>last_modified(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;OffsetDateTime&gt; {
+    /// OpenDAL parse the raw value into [`DateTime`] for convenient.
+    </span><span class="kw">pub fn </span>last_modified(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;DateTime&lt;Utc&gt;&gt; {
         <span class="macro">debug_assert!</span>(
             <span class="self">self</span>.bit.contains(Metakey::LastModified) || <span class="self">self</span>.bit.contains(Metakey::Complete),
             <span class="string">&quot;visiting not set metadata: last_modified, maybe a bug&quot;
@@ -684,7 +684,7 @@
     ///
     /// `Last-Modified` is defined by [RFC 7232](https://httpwg.org/specs/rfc7232.html#header.last-modified)
     /// Refer to [MDN Last-Modified](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified) for more information.
-    </span><span class="kw">pub fn </span>set_last_modified(<span class="kw-2">&amp;mut </span><span class="self">self</span>, last_modified: OffsetDateTime) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>set_last_modified(<span class="kw-2">&amp;mut </span><span class="self">self</span>, last_modified: DateTime&lt;Utc&gt;) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="self">self</span>.last_modified = <span class="prelude-val">Some</span>(last_modified);
         <span class="self">self</span>.bit |= Metakey::LastModified;
         <span class="self">self
@@ -694,7 +694,7 @@
     ///
     /// `Last-Modified` is defined by [RFC 7232](https://httpwg.org/specs/rfc7232.html#header.last-modified)
     /// Refer to [MDN Last-Modified](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified) for more information.
-    </span><span class="kw">pub fn </span>with_last_modified(<span class="kw-2">mut </span><span class="self">self</span>, last_modified: OffsetDateTime) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>with_last_modified(<span class="kw-2">mut </span><span class="self">self</span>, last_modified: DateTime&lt;Utc&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.last_modified = <span class="prelude-val">Some</span>(last_modified);
         <span class="self">self</span>.bit |= Metakey::LastModified;
         <span class="self">self

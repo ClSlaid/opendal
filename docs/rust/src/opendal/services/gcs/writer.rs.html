@@ -79,6 +79,9 @@
 <a href="#79" id="79">79</a>
 <a href="#80" id="80">80</a>
 <a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -96,45 +99,44 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>async_trait::async_trait;
+</span><span class="kw">use </span>std::sync::Arc;
+
+<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>http::StatusCode;
 
-<span class="kw">use </span><span class="kw">super</span>::backend::GcsBackend;
+<span class="kw">use </span><span class="kw">super</span>::core::GcsCore;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">crate</span>::ops::OpWrite;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">pub struct </span>GcsWriter {
-    backend: GcsBackend,
+    core: Arc&lt;GcsCore&gt;,
 
     op: OpWrite,
     path: String,
 }
 
 <span class="kw">impl </span>GcsWriter {
-    <span class="kw">pub fn </span>new(backend: GcsBackend, op: OpWrite, path: String) -&gt; <span class="self">Self </span>{
-        GcsWriter { backend, op, path }
+    <span class="kw">pub fn </span>new(core: Arc&lt;GcsCore&gt;, op: OpWrite, path: String) -&gt; <span class="self">Self </span>{
+        GcsWriter { core, op, path }
     }
 }
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>oio::Write <span class="kw">for </span>GcsWriter {
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.backend.gcs_insert_object_request(
-            <span class="kw-2">&amp;</span><span class="self">self</span>.path,
+        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.core.gcs_insert_object_request(
+            <span class="kw-2">&amp;</span>percent_encode_path(<span class="kw-2">&amp;</span><span class="self">self</span>.path),
             <span class="prelude-val">Some</span>(bs.len()),
             <span class="self">self</span>.op.content_type(),
             AsyncBody::Bytes(bs),
         )<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.backend
-            .signer
-            .sign(<span class="kw-2">&amp;mut </span>req)
-            .map_err(new_request_sign_error)<span class="question-mark">?</span>;
+        <span class="self">self</span>.core.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span>resp = <span class="self">self</span>.backend.client.send_async(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.core.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
 
@@ -154,6 +156,10 @@
             ErrorKind::Unsupported,
             <span class="string">&quot;output writer doesn&#39;t support append&quot;</span>,
         ))
+    }
+
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {

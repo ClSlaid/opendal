@@ -175,22 +175,6 @@
 <a href="#175" id="175">175</a>
 <a href="#176" id="176">176</a>
 <a href="#177" id="177">177</a>
-<a href="#178" id="178">178</a>
-<a href="#179" id="179">179</a>
-<a href="#180" id="180">180</a>
-<a href="#181" id="181">181</a>
-<a href="#182" id="182">182</a>
-<a href="#183" id="183">183</a>
-<a href="#184" id="184">184</a>
-<a href="#185" id="185">185</a>
-<a href="#186" id="186">186</a>
-<a href="#187" id="187">187</a>
-<a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -213,17 +197,15 @@
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>serde::Deserialize;
 <span class="kw">use </span>serde_json::de;
-<span class="kw">use </span>time::format_description::well_known::Rfc2822;
-<span class="kw">use </span>time::OffsetDateTime;
 
-<span class="kw">use </span><span class="kw">super</span>::backend::AzdfsBackend;
+<span class="kw">use </span><span class="kw">super</span>::core::AzdfsCore;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">pub struct </span>AzdfsPager {
-    backend: Arc&lt;AzdfsBackend&gt;,
-    root: String,
+    core: Arc&lt;AzdfsCore&gt;,
+
     path: String,
     limit: <span class="prelude-ty">Option</span>&lt;usize&gt;,
 
@@ -232,15 +214,9 @@
 }
 
 <span class="kw">impl </span>AzdfsPager {
-    <span class="kw">pub fn </span>new(
-        backend: Arc&lt;AzdfsBackend&gt;,
-        root: String,
-        path: String,
-        limit: <span class="prelude-ty">Option</span>&lt;usize&gt;,
-    ) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(core: Arc&lt;AzdfsCore&gt;, path: String, limit: <span class="prelude-ty">Option</span>&lt;usize&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            backend,
-            root,
+            core,
             path,
             limit,
 
@@ -258,7 +234,7 @@
         }
 
         <span class="kw">let </span>resp = <span class="self">self
-            </span>.backend
+            </span>.core
             .azdfs_list(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="kw-2">&amp;</span><span class="self">self</span>.continuation, <span class="self">self</span>.limit)
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -306,17 +282,9 @@
                     Error::new(ErrorKind::Unexpected, <span class="string">&quot;content length is not valid integer&quot;</span>)
                         .set_source(err)
                 })<span class="question-mark">?</span>)
-                .with_last_modified(
-                    OffsetDateTime::parse(<span class="kw-2">&amp;</span>object.last_modified, <span class="kw-2">&amp;</span>Rfc2822).map_err(|e| {
-                        Error::new(
-                            ErrorKind::Unexpected,
-                            <span class="string">&quot;last modified is not valid RFC2822 datetime&quot;</span>,
-                        )
-                        .set_source(e)
-                    })<span class="question-mark">?</span>,
-                );
+                .with_last_modified(parse_datetime_from_rfc2822(<span class="kw-2">&amp;</span>object.last_modified)<span class="question-mark">?</span>);
 
-            <span class="kw">let </span><span class="kw-2">mut </span>path = build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, <span class="kw-2">&amp;</span>object.name);
+            <span class="kw">let </span><span class="kw-2">mut </span>path = build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, <span class="kw-2">&amp;</span>object.name);
             <span class="kw">if </span>mode == EntryMode::DIR {
                 path += <span class="string">&quot;/&quot;
             </span>};

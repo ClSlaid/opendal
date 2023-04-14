@@ -565,9 +565,9 @@
         <span class="self">self</span>.inner().batch(args).<span class="kw">await
     </span>}
 
-    <span class="kw">fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
-        <span class="self">self</span>.inner().presign(path, args)
-    }
+    <span class="kw">async fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
+        <span class="self">self</span>.inner().presign(path, args).<span class="kw">await
+    </span>}
 
     <span class="kw">fn </span>blocking_create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
         <span class="self">self</span>.inner().blocking_create(path, args)
@@ -651,9 +651,9 @@
         (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span>L).batch(args).<span class="kw">await
     </span>}
 
-    <span class="kw">fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span>L).presign(path, args)
-    }
+    <span class="kw">async fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span>L).presign(path, args).<span class="kw">await
+    </span>}
 
     <span class="kw">fn </span>blocking_create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
         (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span>L).blocking_create(path, args)

@@ -323,6 +323,13 @@
 <a href="#323" id="323">323</a>
 <a href="#324" id="324">324</a>
 <a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -534,14 +541,8 @@
 
 <span class="kw">impl </span>KvPager {
     <span class="kw">fn </span>new(root: <span class="kw-2">&amp;</span>str, inner: Vec&lt;String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>root = <span class="kw">if </span>root == <span class="string">&quot;/&quot; </span>{
-            <span class="string">&quot;&quot;</span>.to_string()
-        } <span class="kw">else </span>{
-            root.to_string()
-        };
-
         <span class="self">Self </span>{
-            root,
+            root: root.to_string(),
             inner: <span class="prelude-val">Some</span>(inner),
         }
     }
@@ -558,11 +559,7 @@
                     EntryMode::FILE
                 };
 
-                oio::Entry::new(
-                    v.strip_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>.root)
-                        .expect(<span class="string">&quot;key must start with root&quot;</span>),
-                    Metadata::new(mode),
-                )
+                oio::Entry::new(<span class="kw-2">&amp;</span>build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, <span class="kw-2">&amp;</span>v), Metadata::new(mode))
             })
             .collect();
 
@@ -588,7 +585,7 @@
     path: String,
 
     <span class="doccomment">/// TODO: if kv supports append, we can use them directly.
-    </span>buf: Vec&lt;u8&gt;,
+    </span>buf: <span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;,
 }
 
 <span class="kw">impl</span>&lt;S&gt; KvWriter&lt;S&gt; {
@@ -596,7 +593,15 @@
         KvWriter {
             kv,
             path,
-            buf: Vec::new(),
+            buf: <span class="prelude-val">None</span>,
+        }
+    }
+
+    <span class="kw">fn </span>extend_buf(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(buf) = <span class="self">self</span>.buf.as_mut() {
+            buf.extend(bs);
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.buf = <span class="prelude-val">Some</span>(bs.into())
         }
     }
 }
@@ -604,7 +609,7 @@
 <span class="attr">#[async_trait]
 </span><span class="kw">impl</span>&lt;S: Adapter&gt; oio::Write <span class="kw">for </span>KvWriter&lt;S&gt; {
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.buf = bs.into();
+        <span class="self">self</span>.buf = <span class="prelude-val">Some</span>(bs.into());
 
         <span class="prelude-val">Ok</span>(())
     }
@@ -612,7 +617,7 @@
     <span class="kw">async fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = <span class="self">self</span>.kv.append(<span class="kw-2">&amp;</span><span class="self">self</span>.path, bs.to_vec().as_slice()).<span class="kw">await </span>{
             <span class="kw">if </span>e.kind() == ErrorKind::Unsupported {
-                <span class="self">self</span>.buf.extend(bs);
+                <span class="self">self</span>.extend_buf(bs);
             } <span class="kw">else </span>{
                 <span class="kw">return </span><span class="prelude-val">Err</span>(e);
             }
@@ -620,9 +625,16 @@
         <span class="prelude-val">Ok</span>(())
     }
 
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="prelude-val">Err</span>(Error::new(
+            ErrorKind::Unsupported,
+            <span class="string">&quot;output writer doesn&#39;t support abort&quot;</span>,
+        ))
+    }
+
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">if </span>!<span class="self">self</span>.buf.is_empty() {
-            <span class="self">self</span>.kv.set(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="kw-2">&amp;</span><span class="self">self</span>.buf).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(buf) = <span class="self">self</span>.buf.as_deref() {
+            <span class="self">self</span>.kv.set(<span class="kw-2">&amp;</span><span class="self">self</span>.path, buf).<span class="kw">await</span><span class="question-mark">?</span>;
         }
 
         <span class="prelude-val">Ok</span>(())
@@ -631,19 +643,21 @@
 
 <span class="kw">impl</span>&lt;S: Adapter&gt; oio::BlockingWrite <span class="kw">for </span>KvWriter&lt;S&gt; {
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.buf = bs.into();
+        <span class="self">self</span>.buf = <span class="prelude-val">Some</span>(bs.into());
 
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.buf.extend(bs);
+        <span class="self">self</span>.extend_buf(bs);
 
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.kv.blocking_set(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="kw-2">&amp;</span><span class="self">self</span>.buf)<span class="question-mark">?</span>;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(buf) = <span class="self">self</span>.buf.as_deref() {
+            <span class="self">self</span>.kv.blocking_set(<span class="kw-2">&amp;</span><span class="self">self</span>.path, buf)<span class="question-mark">?</span>;
+        }
 
         <span class="prelude-val">Ok</span>(())
     }

@@ -52,6 +52,16 @@
 <a href="#52" id="52">52</a>
 <a href="#53" id="53">53</a>
 <a href="#54" id="54">54</a>
+<a href="#55" id="55">55</a>
+<a href="#56" id="56">56</a>
+<a href="#57" id="57">57</a>
+<a href="#58" id="58">58</a>
+<a href="#59" id="59">59</a>
+<a href="#60" id="60">60</a>
+<a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a>
+<a href="#64" id="64">64</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -90,6 +100,11 @@
 <span class="attr">#[cfg(feature = <span class="string">&quot;layers-metrics&quot;</span>)]
 </span><span class="kw">pub use </span><span class="self">self</span>::metrics::MetricsLayer;
 
+<span class="attr">#[cfg(feature = <span class="string">&quot;layers-prometheus&quot;</span>)]
+</span><span class="kw">mod </span>prometheus;
+<span class="attr">#[cfg(feature = <span class="string">&quot;layers-prometheus&quot;</span>)]
+</span><span class="kw">pub use </span><span class="self">self</span>::prometheus::PrometheusLayer;
+
 <span class="kw">mod </span>retry;
 <span class="kw">pub use </span><span class="self">self</span>::retry::RetryLayer;
 
@@ -97,6 +112,11 @@
 </span><span class="kw">mod </span>tracing;
 <span class="attr">#[cfg(feature = <span class="string">&quot;layers-tracing&quot;</span>)]
 </span><span class="kw">pub use </span><span class="self">self</span>::tracing::TracingLayer;
+
+<span class="attr">#[cfg(feature = <span class="string">&quot;layers-minitrace&quot;</span>)]
+</span><span class="kw">mod </span>minitrace;
+<span class="attr">#[cfg(feature = <span class="string">&quot;layers-minitrace&quot;</span>)]
+</span><span class="kw">pub use </span><span class="self">self</span>::minitrace::MinitraceLayer;
 
 <span class="kw">mod </span>type_eraser;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>type_eraser::TypeEraseLayer;

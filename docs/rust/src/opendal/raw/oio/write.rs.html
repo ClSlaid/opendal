@@ -187,6 +187,25 @@
 <a href="#187" id="187">187</a>
 <a href="#188" id="188">188</a>
 <a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -220,6 +239,8 @@
     </span>Write,
     <span class="doccomment">/// Operation for [`Write::append`]
     </span>Append,
+    <span class="doccomment">/// Operation for [`Write::abort`]
+    </span>Abort,
     <span class="doccomment">/// Operation for [`Write::close`]
     </span>Close,
     <span class="doccomment">/// Operation for [`BlockingWrite::write`]
@@ -250,6 +271,7 @@
         <span class="kw">match </span>v {
             Write =&gt; <span class="string">&quot;Writer::write&quot;</span>,
             Append =&gt; <span class="string">&quot;Writer::append&quot;</span>,
+            Abort =&gt; <span class="string">&quot;Writer::abort&quot;</span>,
             Close =&gt; <span class="string">&quot;Writer::close&quot;</span>,
             BlockingWrite =&gt; <span class="string">&quot;BlockingWriter::write&quot;</span>,
             BlockingAppend =&gt; <span class="string">&quot;BlockingWriter::append&quot;</span>,
@@ -276,6 +298,11 @@
     /// and compatibility.
     </span><span class="kw">async fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 
+    <span class="doccomment">/// Abort the pending appendable writer.
+    /// #note
+    /// This method is only applicable to writers opened in append mode.
+    </span><span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
+
     <span class="doccomment">/// Close the writer and make sure all data has been flushed.
     </span><span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 }
@@ -297,6 +324,13 @@
         ))
     }
 
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="prelude-val">Err</span>(Error::new(
+            ErrorKind::Unsupported,
+            <span class="string">&quot;output writer doesn&#39;t support abort&quot;</span>,
+        ))
+    }
+
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="prelude-val">Err</span>(Error::new(
             ErrorKind::Unsupported,
@@ -315,6 +349,10 @@
 
     <span class="kw">async fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         (<span class="kw-2">**</span><span class="self">self</span>).append(bs).<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        (<span class="kw-2">**</span><span class="self">self</span>).abort().<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {

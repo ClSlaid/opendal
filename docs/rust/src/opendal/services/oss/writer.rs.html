@@ -136,6 +136,12 @@
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
 <a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -153,19 +159,21 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>async_trait::async_trait;
+</span><span class="kw">use </span>std::sync::Arc;
+
+<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>http::StatusCode;
 
-<span class="kw">use </span><span class="kw">super</span>::backend::MultipartUploadPart;
-<span class="kw">use </span><span class="kw">super</span>::backend::OssBackend;
+<span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">crate</span>::ops::OpWrite;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">pub struct </span>OssWriter {
-    backend: OssBackend,
+    core: Arc&lt;OssCore&gt;,
+
     op: OpWrite,
     path: String,
     upload_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
@@ -173,9 +181,9 @@
 }
 
 <span class="kw">impl </span>OssWriter {
-    <span class="kw">pub fn </span>new(backend: OssBackend, op: OpWrite, path: String, upload_id: <span class="prelude-ty">Option</span>&lt;String&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(core: Arc&lt;OssCore&gt;, op: OpWrite, path: String, upload_id: <span class="prelude-ty">Option</span>&lt;String&gt;) -&gt; <span class="self">Self </span>{
         OssWriter {
-            backend,
+            core,
             op,
             path,
             upload_id,
@@ -187,7 +195,7 @@
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>oio::Write <span class="kw">for </span>OssWriter {
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.backend.oss_put_object_request(
+        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.core.oss_put_object_request(
             <span class="kw-2">&amp;</span><span class="self">self</span>.path,
             <span class="prelude-val">Some</span>(bs.len()),
             <span class="self">self</span>.op.content_type(),
@@ -196,12 +204,9 @@
             <span class="bool-val">false</span>,
         )<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.backend
-            .signer
-            .sign(<span class="kw-2">&amp;mut </span>req)
-            .map_err(new_request_sign_error)<span class="question-mark">?</span>;
+        <span class="self">self</span>.core.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span>resp = <span class="self">self</span>.backend.client.send_async(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.core.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
 
@@ -220,21 +225,21 @@
         );
         <span class="comment">// Aliyun OSS requires part number must between [1..=10000]
         </span><span class="kw">let </span>part_number = <span class="self">self</span>.parts.len() + <span class="number">1</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.backend.oss_upload_part_request(
-            <span class="kw-2">&amp;</span><span class="self">self</span>.path,
-            upload_id,
-            part_number,
-            <span class="bool-val">false</span>,
-            <span class="prelude-val">Some</span>(bs.len() <span class="kw">as </span>u64),
-            AsyncBody::Bytes(bs),
-        )<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self
+            </span>.core
+            .oss_upload_part_request(
+                <span class="kw-2">&amp;</span><span class="self">self</span>.path,
+                upload_id,
+                part_number,
+                <span class="bool-val">false</span>,
+                <span class="prelude-val">Some</span>(bs.len() <span class="kw">as </span>u64),
+                AsyncBody::Bytes(bs),
+            )
+            .<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="self">self</span>.backend
-            .signer
-            .sign(<span class="kw-2">&amp;mut </span>req)
-            .map_err(new_request_sign_error)<span class="question-mark">?</span>;
+        <span class="self">self</span>.core.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span>resp = <span class="self">self</span>.backend.client.send_async(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.core.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">match </span>resp.status() {
             StatusCode::OK =&gt; {
                 <span class="kw">let </span>etag = parse_etag(resp.headers())<span class="question-mark">?
@@ -253,6 +258,13 @@
         }
     }
 
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="prelude-val">Err</span>(Error::new(
+            ErrorKind::Unsupported,
+            <span class="string">&quot;output writer doesn&#39;t support abort&quot;</span>,
+        ))
+    }
+
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>upload_id = <span class="kw">if let </span><span class="prelude-val">Some</span>(upload_id) = <span class="kw-2">&amp;</span><span class="self">self</span>.upload_id {
             upload_id
@@ -261,7 +273,7 @@
         };
 
         <span class="kw">let </span>resp = <span class="self">self
-            </span>.backend
+            </span>.core
             .oss_complete_multipart_upload_request(<span class="kw-2">&amp;</span><span class="self">self</span>.path, upload_id, <span class="bool-val">false</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.parts)
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">match </span>resp.status() {

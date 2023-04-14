@@ -58,6 +58,7 @@
 <a href="#58" id="58">58</a>
 <a href="#59" id="59">59</a>
 <a href="#60" id="60">60</a>
+<a href="#61" id="61">61</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -87,10 +88,10 @@
 
 <span class="kw">mod </span>body;
 <span class="kw">pub use </span>body::AsyncBody;
-<span class="kw">pub use </span>body::Body;
 <span class="kw">pub use </span>body::IncomingAsyncBody;
 
 <span class="kw">mod </span>header;
+<span class="kw">pub use </span>header::build_header_value;
 <span class="kw">pub use </span>header::format_authorization_by_basic;
 <span class="kw">pub use </span>header::format_authorization_by_bearer;
 <span class="kw">pub use </span>header::format_content_md5;
@@ -109,6 +110,7 @@
 
 <span class="kw">mod </span>error;
 <span class="kw">pub use </span>error::new_request_build_error;
+<span class="kw">pub use </span>error::new_request_credential_error;
 <span class="kw">pub use </span>error::new_request_sign_error;
 <span class="kw">pub use </span>error::parse_error_response;
 <span class="kw">pub use </span>error::ErrorResponse;

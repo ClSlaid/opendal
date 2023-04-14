@@ -353,17 +353,6 @@
 <a href="#353" id="353">353</a>
 <a href="#354" id="354">354</a>
 <a href="#355" id="355">355</a>
-<a href="#356" id="356">356</a>
-<a href="#357" id="357">357</a>
-<a href="#358" id="358">358</a>
-<a href="#359" id="359">359</a>
-<a href="#360" id="360">360</a>
-<a href="#361" id="361">361</a>
-<a href="#362" id="362">362</a>
-<a href="#363" id="363">363</a>
-<a href="#364" id="364">364</a>
-<a href="#365" id="365">365</a>
-<a href="#366" id="366">366</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -387,17 +376,15 @@
 <span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>quick_xml::de;
 <span class="kw">use </span>serde::Deserialize;
-<span class="kw">use </span>time::format_description::well_known::Rfc2822;
-<span class="kw">use </span>time::OffsetDateTime;
 
-<span class="kw">use </span><span class="kw">super</span>::backend::AzblobBackend;
+<span class="kw">use </span><span class="kw">super</span>::core::AzblobCore;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">pub struct </span>AzblobPager {
-    backend: Arc&lt;AzblobBackend&gt;,
-    root: String,
+    core: Arc&lt;AzblobCore&gt;,
+
     path: String,
     delimiter: String,
     limit: <span class="prelude-ty">Option</span>&lt;usize&gt;,
@@ -408,15 +395,13 @@
 
 <span class="kw">impl </span>AzblobPager {
     <span class="kw">pub fn </span>new(
-        backend: Arc&lt;AzblobBackend&gt;,
-        root: String,
+        core: Arc&lt;AzblobCore&gt;,
         path: String,
         delimiter: String,
         limit: <span class="prelude-ty">Option</span>&lt;usize&gt;,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            backend,
-            root,
+            core,
             path,
             delimiter,
             limit,
@@ -435,7 +420,7 @@
         }
 
         <span class="kw">let </span>resp = <span class="self">self
-            </span>.backend
+            </span>.core
             .azblob_list_blobs(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="kw-2">&amp;</span><span class="self">self</span>.next_marker, <span class="kw-2">&amp;</span><span class="self">self</span>.delimiter, <span class="self">self</span>.limit)
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -462,7 +447,7 @@
 
         <span class="kw">for </span>prefix <span class="kw">in </span>prefixes {
             <span class="kw">let </span>de = oio::Entry::new(
-                <span class="kw-2">&amp;</span>build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, <span class="kw-2">&amp;</span>prefix.name),
+                <span class="kw-2">&amp;</span>build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, <span class="kw-2">&amp;</span>prefix.name),
                 Metadata::new(EntryMode::DIR),
             );
 
@@ -483,18 +468,11 @@
                 .with_content_length(object.properties.content_length)
                 .with_content_md5(object.properties.content_md5)
                 .with_content_type(object.properties.content_type)
-                .with_last_modified(
-                    OffsetDateTime::parse(object.properties.last_modified.as_str(), <span class="kw-2">&amp;</span>Rfc2822)
-                        .map_err(|e| {
-                            Error::new(
-                                ErrorKind::Unexpected,
-                                <span class="string">&quot;parse last modified RFC2822 datetime&quot;</span>,
-                            )
-                            .set_source(e)
-                        })<span class="question-mark">?</span>,
-                );
+                .with_last_modified(parse_datetime_from_rfc2822(
+                    object.properties.last_modified.as_str(),
+                )<span class="question-mark">?</span>);
 
-            <span class="kw">let </span>de = oio::Entry::new(<span class="kw-2">&amp;</span>build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, <span class="kw-2">&amp;</span>object.name), meta);
+            <span class="kw">let </span>de = oio::Entry::new(<span class="kw-2">&amp;</span>build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, <span class="kw-2">&amp;</span>object.name), meta);
 
             entries.push(de);
         }

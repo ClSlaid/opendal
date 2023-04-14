@@ -163,25 +163,6 @@
 <a href="#163" id="163">163</a>
 <a href="#164" id="164">164</a>
 <a href="#165" id="165">165</a>
-<a href="#166" id="166">166</a>
-<a href="#167" id="167">167</a>
-<a href="#168" id="168">168</a>
-<a href="#169" id="169">169</a>
-<a href="#170" id="170">170</a>
-<a href="#171" id="171">171</a>
-<a href="#172" id="172">172</a>
-<a href="#173" id="173">173</a>
-<a href="#174" id="174">174</a>
-<a href="#175" id="175">175</a>
-<a href="#176" id="176">176</a>
-<a href="#177" id="177">177</a>
-<a href="#178" id="178">178</a>
-<a href="#179" id="179">179</a>
-<a href="#180" id="180">180</a>
-<a href="#181" id="181">181</a>
-<a href="#182" id="182">182</a>
-<a href="#183" id="183">183</a>
-<a href="#184" id="184">184</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -199,11 +180,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="doccomment">//! HTTP response messages
+</span><span class="doccomment">//! WebHDFS response messages
 
 </span><span class="kw">use </span>serde::Deserialize;
-
-<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="attr">#[derive(Debug, Deserialize)]
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>BooleanResp {
@@ -237,23 +216,6 @@
     <span class="kw">pub </span>path_suffix: String,
     <span class="attr">#[serde(rename = <span class="string">&quot;type&quot;</span>)]
     </span><span class="kw">pub </span>ty: FileStatusType,
-}
-
-<span class="kw">impl </span>TryFrom&lt;FileStatus&gt; <span class="kw">for </span>Metadata {
-    <span class="kw">type </span>Error = Error;
-    <span class="kw">fn </span>try_from(value: FileStatus) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>meta = <span class="kw">match </span>value.ty {
-            FileStatusType::Directory =&gt; Metadata::new(EntryMode::DIR),
-            FileStatusType::File =&gt; Metadata::new(EntryMode::FILE),
-        };
-        <span class="kw">let </span>till_now = time::Duration::milliseconds(value.modification_time);
-        <span class="kw">let </span>last_modified = time::OffsetDateTime::UNIX_EPOCH
-            .checked_add(till_now)
-            .ok_or_else(|| Error::new(ErrorKind::Unexpected, <span class="string">&quot;last modification overflowed!&quot;</span>))<span class="question-mark">?</span>;
-        meta.set_last_modified(last_modified)
-            .set_content_length(value.length);
-        <span class="prelude-val">Ok</span>(meta)
-    }
 }
 
 <span class="attr">#[derive(Debug, Deserialize, PartialEq, Eq)]
