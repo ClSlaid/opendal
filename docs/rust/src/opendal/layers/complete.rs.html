@@ -509,6 +509,119 @@
 <a href="#509" id="509">509</a>
 <a href="#510" id="510">510</a>
 <a href="#511" id="511">511</a>
+<a href="#512" id="512">512</a>
+<a href="#513" id="513">513</a>
+<a href="#514" id="514">514</a>
+<a href="#515" id="515">515</a>
+<a href="#516" id="516">516</a>
+<a href="#517" id="517">517</a>
+<a href="#518" id="518">518</a>
+<a href="#519" id="519">519</a>
+<a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
+<a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
+<a href="#534" id="534">534</a>
+<a href="#535" id="535">535</a>
+<a href="#536" id="536">536</a>
+<a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
+<a href="#545" id="545">545</a>
+<a href="#546" id="546">546</a>
+<a href="#547" id="547">547</a>
+<a href="#548" id="548">548</a>
+<a href="#549" id="549">549</a>
+<a href="#550" id="550">550</a>
+<a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a>
+<a href="#599" id="599">599</a>
+<a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
+<a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a>
+<a href="#624" id="624">624</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -534,6 +647,7 @@
 <span class="kw">use </span>std::task::Poll;
 
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Bytes;
 
 <span class="kw">use </span><span class="kw">crate</span>::ops::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::into_reader::RangeReader;
@@ -840,8 +954,8 @@
     <span class="kw">type </span>Inner = A;
     <span class="kw">type </span>Reader = CompleteReader&lt;A, A::Reader&gt;;
     <span class="kw">type </span>BlockingReader = CompleteReader&lt;A, A::BlockingReader&gt;;
-    <span class="kw">type </span>Writer = A::Writer;
-    <span class="kw">type </span>BlockingWriter = A::BlockingWriter;
+    <span class="kw">type </span>Writer = CompleteWriter&lt;A::Writer&gt;;
+    <span class="kw">type </span>BlockingWriter = CompleteWriter&lt;A::BlockingWriter&gt;;
     <span class="kw">type </span>Pager = CompletePager&lt;A, A::Pager&gt;;
     <span class="kw">type </span>BlockingPager = CompletePager&lt;A, A::BlockingPager&gt;;
 
@@ -876,11 +990,18 @@
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
-        <span class="self">self</span>.inner.write(path, args).<span class="kw">await
-    </span>}
+        <span class="kw">let </span>size = args.content_length();
+        <span class="self">self</span>.inner
+            .write(path, args)
+            .<span class="kw">await
+            </span>.map(|(rp, w)| (rp, CompleteWriter::new(w, size)))
+    }
 
     <span class="kw">fn </span>blocking_write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::BlockingWriter)&gt; {
-        <span class="self">self</span>.inner.blocking_write(path, args)
+        <span class="kw">let </span>size = args.content_length();
+        <span class="self">self</span>.inner
+            .blocking_write(path, args)
+            .map(|(rp, w)| (rp, CompleteWriter::new(w, size)))
     }
 
     <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Pager)&gt; {
@@ -934,7 +1055,7 @@
         }
     }
 
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;bytes::Bytes&gt;&gt;&gt; {
+    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;&gt; {
         <span class="kw">use </span>CompleteReader::<span class="kw-2">*</span>;
 
         <span class="kw">match </span><span class="self">self </span>{
@@ -971,7 +1092,7 @@
         }
     }
 
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;bytes::Bytes&gt;&gt; {
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt; {
         <span class="kw">use </span>CompleteReader::<span class="kw-2">*</span>;
 
         <span class="kw">match </span><span class="self">self </span>{
@@ -1018,6 +1139,111 @@
             NeedFlat(p) =&gt; p.next(),
             NeedHierarchy(p) =&gt; p.next(),
         }
+    }
+}
+
+<span class="kw">pub struct </span>CompleteWriter&lt;W&gt; {
+    inner: W,
+    size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
+    written: u64,
+}
+
+<span class="kw">impl</span>&lt;W&gt; CompleteWriter&lt;W&gt; {
+    <span class="kw">pub fn </span>new(inner: W, size: <span class="prelude-ty">Option</span>&lt;u64&gt;) -&gt; CompleteWriter&lt;W&gt; {
+        CompleteWriter {
+            inner,
+            size,
+            written: <span class="number">0</span>,
+        }
+    }
+}
+
+<span class="attr">#[async_trait]
+</span><span class="kw">impl</span>&lt;W&gt; oio::Write <span class="kw">for </span>CompleteWriter&lt;W&gt;
+<span class="kw">where
+    </span>W: oio::Write,
+{
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>n = bs.len();
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = <span class="self">self</span>.size {
+            <span class="kw">if </span><span class="self">self</span>.written + n <span class="kw">as </span>u64 &gt; size {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                    ErrorKind::ContentTruncated,
+                    <span class="kw-2">&amp;</span><span class="macro">format!</span>(
+                        <span class="string">&quot;writer got too much data, expect: {size}, actual: {}&quot;</span>,
+                        <span class="self">self</span>.written + n <span class="kw">as </span>u64
+                    ),
+                ));
+            }
+        }
+
+        <span class="self">self</span>.inner.write(bs).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.written += n <span class="kw">as </span>u64;
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.inner.abort().<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = <span class="self">self</span>.size {
+            <span class="kw">if </span><span class="self">self</span>.written &lt; size {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                    ErrorKind::ContentIncomplete,
+                    <span class="kw-2">&amp;</span><span class="macro">format!</span>(
+                        <span class="string">&quot;writer got too less data, expect: {size}, actual: {}&quot;</span>,
+                        <span class="self">self</span>.written
+                    ),
+                ));
+            }
+        }
+
+        <span class="self">self</span>.inner.close().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
+    }
+}
+
+<span class="kw">impl</span>&lt;W&gt; oio::BlockingWrite <span class="kw">for </span>CompleteWriter&lt;W&gt;
+<span class="kw">where
+    </span>W: oio::BlockingWrite,
+{
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>n = bs.len();
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = <span class="self">self</span>.size {
+            <span class="kw">if </span><span class="self">self</span>.written + n <span class="kw">as </span>u64 &gt; size {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                    ErrorKind::ContentTruncated,
+                    <span class="kw-2">&amp;</span><span class="macro">format!</span>(
+                        <span class="string">&quot;writer got too much data, expect: {size}, actual: {}&quot;</span>,
+                        <span class="self">self</span>.written + n <span class="kw">as </span>u64
+                    ),
+                ));
+            }
+        }
+
+        <span class="self">self</span>.inner.write(bs)<span class="question-mark">?</span>;
+        <span class="self">self</span>.written += n <span class="kw">as </span>u64;
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = <span class="self">self</span>.size {
+            <span class="kw">if </span><span class="self">self</span>.written &lt; size {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                    ErrorKind::ContentIncomplete,
+                    <span class="kw-2">&amp;</span><span class="macro">format!</span>(
+                        <span class="string">&quot;writer got too less data, expect: {size}, actual: {}&quot;</span>,
+                        <span class="self">self</span>.written
+                    ),
+                ));
+            }
+        }
+
+        <span class="self">self</span>.inner.close()<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
     }
 }
 </code></pre></div>

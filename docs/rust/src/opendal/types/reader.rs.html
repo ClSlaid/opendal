@@ -396,7 +396,7 @@
     ///
     /// We don&#39;t want to expose those details to users so keep this function
     /// in crate only.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>create(acc: FusedAccessor, path: <span class="kw-2">&amp;</span>str, op: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>create_dir(acc: FusedAccessor, path: <span class="kw-2">&amp;</span>str, op: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>(<span class="kw">_</span>, r) = acc.read(path, op).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(Reader {
@@ -521,7 +521,7 @@
     ///
     /// We don&#39;t want to expose those details to users so keep this function
     /// in crate only.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>create(acc: FusedAccessor, path: <span class="kw-2">&amp;</span>str, op: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>create_dir(acc: FusedAccessor, path: <span class="kw-2">&amp;</span>str, op: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>acc_meta = acc.info();
 
         <span class="kw">let </span>r = <span class="kw">if </span>acc_meta.hints().contains(AccessorHint::ReadSeekable) {

@@ -951,7 +951,7 @@
         am
     }
 
-    <span class="kw">async fn </span>create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
+    <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
         <span class="comment">// ignore creation of dir.
         </span><span class="kw">if </span>path.ends_with(<span class="string">&#39;/&#39;</span>) {
             <span class="kw">return </span><span class="prelude-val">Ok</span>(RpCreate::default());
@@ -1037,10 +1037,10 @@
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
-        <span class="kw">if </span>args.append() {
+        <span class="kw">if </span>args.content_length().is_none() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::Unsupported,
-                <span class="string">&quot;append write is not supported&quot;</span>,
+                <span class="string">&quot;write without content length is not supported&quot;</span>,
             ));
         }
 

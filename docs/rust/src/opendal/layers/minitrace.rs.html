@@ -385,6 +385,12 @@
 <a href="#385" id="385">385</a>
 <a href="#386" id="386">386</a>
 <a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -413,7 +419,9 @@
 <span class="kw">use </span>minitrace::prelude::<span class="kw-2">*</span>;
 
 <span class="kw">use </span><span class="kw">crate</span>::ops::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::{PageOperation, ReadOperation, WriteOperation};
+<span class="kw">use </span><span class="kw">crate</span>::raw::oio::PageOperation;
+<span class="kw">use </span><span class="kw">crate</span>::raw::oio::ReadOperation;
+<span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteOperation;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -533,8 +541,8 @@
     }
 
     <span class="attr">#[trace(<span class="string">&quot;create&quot;</span>, enter_on_poll = <span class="bool-val">true</span>)]
-    </span><span class="kw">async fn </span>create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
-        <span class="self">self</span>.inner.create(path, args).<span class="kw">await
+    </span><span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
+        <span class="self">self</span>.inner.create_dir(path, args).<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
@@ -551,6 +559,16 @@
             .write(path, args)
             .map(|v| v.map(|(rp, r)| (rp, MinitraceWrapper::new(span, r))))
             .<span class="kw">await
+    </span>}
+
+    <span class="attr">#[trace(<span class="string">&quot;copy&quot;</span>, enter_on_poll = <span class="bool-val">true</span>)]
+    </span><span class="kw">async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
+        <span class="self">self</span>.inner().copy(from, to, args).<span class="kw">await
+    </span>}
+
+    <span class="attr">#[trace(<span class="string">&quot;rename&quot;</span>, enter_on_poll = <span class="bool-val">true</span>)]
+    </span><span class="kw">async fn </span>rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
+        <span class="self">self</span>.inner().rename(from, to, args).<span class="kw">await
     </span>}
 
     <span class="attr">#[trace(<span class="string">&quot;stat&quot;</span>, enter_on_poll = <span class="bool-val">true</span>)]
@@ -590,8 +608,8 @@
     </span>}
 
     <span class="attr">#[trace(<span class="string">&quot;blocking_create&quot;</span>)]
-    </span><span class="kw">fn </span>blocking_create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
-        <span class="self">self</span>.inner.blocking_create(path, args)
+    </span><span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
+        <span class="self">self</span>.inner.blocking_create_dir(path, args)
     }
 
     <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
@@ -612,6 +630,16 @@
                 MinitraceWrapper::new(Span::enter_with_parent(<span class="string">&quot;WriteOperation&quot;</span>, <span class="kw-2">&amp;</span>span), r),
             )
         })
+    }
+
+    <span class="attr">#[trace(<span class="string">&quot;blocking_copy&quot;</span>)]
+    </span><span class="kw">fn </span>blocking_copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
+        <span class="self">self</span>.inner().blocking_copy(from, to, args)
+    }
+
+    <span class="attr">#[trace(<span class="string">&quot;blocking_rename&quot;</span>)]
+    </span><span class="kw">fn </span>blocking_rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
+        <span class="self">self</span>.inner().blocking_rename(from, to, args)
     }
 
     <span class="attr">#[trace(<span class="string">&quot;blocking_stat&quot;</span>)]
@@ -702,16 +730,6 @@
             .<span class="kw">await
     </span>}
 
-    <span class="kw">async fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.inner
-            .append(bs)
-            .in_span(Span::enter_with_parent(
-                WriteOperation::Append.into_static(),
-                <span class="kw-2">&amp;</span><span class="self">self</span>.span,
-            ))
-            .<span class="kw">await
-    </span>}
-
     <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.inner
             .abort()
@@ -738,12 +756,6 @@
         <span class="kw">let </span>_span =
             Span::enter_with_parent(WriteOperation::BlockingWrite.into_static(), <span class="kw-2">&amp;</span><span class="self">self</span>.span);
         <span class="self">self</span>.inner.write(bs)
-    }
-
-    <span class="kw">fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>_span =
-            Span::enter_with_parent(WriteOperation::BlockingAppend.into_static(), <span class="kw-2">&amp;</span><span class="self">self</span>.span);
-        <span class="self">self</span>.inner.append(bs)
     }
 
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {

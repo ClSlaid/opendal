@@ -959,29 +959,6 @@
 <a href="#959" id="959">959</a>
 <a href="#960" id="960">960</a>
 <a href="#961" id="961">961</a>
-<a href="#962" id="962">962</a>
-<a href="#963" id="963">963</a>
-<a href="#964" id="964">964</a>
-<a href="#965" id="965">965</a>
-<a href="#966" id="966">966</a>
-<a href="#967" id="967">967</a>
-<a href="#968" id="968">968</a>
-<a href="#969" id="969">969</a>
-<a href="#970" id="970">970</a>
-<a href="#971" id="971">971</a>
-<a href="#972" id="972">972</a>
-<a href="#973" id="973">973</a>
-<a href="#974" id="974">974</a>
-<a href="#975" id="975">975</a>
-<a href="#976" id="976">976</a>
-<a href="#977" id="977">977</a>
-<a href="#978" id="978">978</a>
-<a href="#979" id="979">979</a>
-<a href="#980" id="980">980</a>
-<a href="#981" id="981">981</a>
-<a href="#982" id="982">982</a>
-<a href="#983" id="983">983</a>
-<a href="#984" id="984">984</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1197,12 +1174,12 @@
             requests_total_create: <span class="macro">register_counter!</span>(
                 METRIC_REQUESTS_TOTAL,
                 LABEL_SERVICE =&gt; service,
-                LABEL_OPERATION =&gt; Operation::Create.into_static(),
+                LABEL_OPERATION =&gt; Operation::CreateDir.into_static(),
             ),
             requests_duration_seconds_create: <span class="macro">register_histogram!</span>(
                 METRIC_REQUESTS_DURATION_SECONDS,
                 LABEL_SERVICE =&gt; service,
-                LABEL_OPERATION =&gt; Operation::Create.into_static(),
+                LABEL_OPERATION =&gt; Operation::CreateDir.into_static(),
             ),
 
             requests_total_read: <span class="macro">register_counter!</span>(
@@ -1306,12 +1283,12 @@
             requests_total_blocking_create: <span class="macro">register_counter!</span>(
                 METRIC_REQUESTS_TOTAL,
                 LABEL_SERVICE =&gt; service,
-                LABEL_OPERATION =&gt; Operation::BlockingCreate.into_static(),
+                LABEL_OPERATION =&gt; Operation::BlockingCreateDir.into_static(),
             ),
             requests_duration_seconds_blocking_create: <span class="macro">register_histogram!</span>(
                 METRIC_REQUESTS_DURATION_SECONDS,
                 LABEL_SERVICE =&gt; service,
-                LABEL_OPERATION =&gt; Operation::BlockingCreate.into_static(),
+                LABEL_OPERATION =&gt; Operation::BlockingCreateDir.into_static(),
             ),
 
             requests_total_blocking_read: <span class="macro">register_counter!</span>(
@@ -1444,13 +1421,13 @@
         result
     }
 
-    <span class="kw">async fn </span>create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
+    <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
         <span class="self">self</span>.handle.requests_total_create.increment(<span class="number">1</span>);
 
         <span class="kw">let </span>start = Instant::now();
 
         <span class="self">self</span>.inner
-            .create(path, args)
+            .create_dir(path, args)
             .map(|v| {
                 <span class="kw">let </span>dur = start.elapsed().as_secs_f64();
 
@@ -1458,7 +1435,7 @@
 
                 v.map_err(|e| {
                     <span class="self">self</span>.handle
-                        .increment_errors_total(Operation::Create, e.kind());
+                        .increment_errors_total(Operation::CreateDir, e.kind());
                     e
                 })
             })
@@ -1630,11 +1607,11 @@
         })
     }
 
-    <span class="kw">fn </span>blocking_create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
+    <span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
         <span class="self">self</span>.handle.requests_total_blocking_create.increment(<span class="number">1</span>);
 
         <span class="kw">let </span>start = Instant::now();
-        <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_create(path, args);
+        <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_create_dir(path, args);
         <span class="kw">let </span>dur = start.elapsed().as_secs_f64();
 
         <span class="self">self</span>.handle
@@ -1643,7 +1620,7 @@
 
         result.map_err(|e| {
             <span class="self">self</span>.handle
-                .increment_errors_total(Operation::BlockingCreate, e.kind());
+                .increment_errors_total(Operation::BlockingCreateDir, e.kind());
             e
         })
     }
@@ -1909,18 +1886,6 @@
             })
     }
 
-    <span class="kw">async fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>size = bs.len();
-        <span class="self">self</span>.inner
-            .append(bs)
-            .<span class="kw">await
-            </span>.map(|<span class="kw">_</span>| <span class="self">self</span>.bytes += size <span class="kw">as </span>u64)
-            .map_err(|err| {
-                <span class="self">self</span>.handle.increment_errors_total(<span class="self">self</span>.op, err.kind());
-                err
-            })
-    }
-
     <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.inner.abort().<span class="kw">await</span>.map_err(|err| {
             <span class="self">self</span>.handle.increment_errors_total(<span class="self">self</span>.op, err.kind());
@@ -1941,17 +1906,6 @@
         <span class="kw">let </span>size = bs.len();
         <span class="self">self</span>.inner
             .write(bs)
-            .map(|<span class="kw">_</span>| <span class="self">self</span>.bytes += size <span class="kw">as </span>u64)
-            .map_err(|err| {
-                <span class="self">self</span>.handle.increment_errors_total(<span class="self">self</span>.op, err.kind());
-                err
-            })
-    }
-
-    <span class="kw">fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>size = bs.len();
-        <span class="self">self</span>.inner
-            .append(bs)
             .map(|<span class="kw">_</span>| <span class="self">self</span>.bytes += size <span class="kw">as </span>u64)
             .map_err(|err| {
                 <span class="self">self</span>.handle.increment_errors_total(<span class="self">self</span>.op, err.kind());

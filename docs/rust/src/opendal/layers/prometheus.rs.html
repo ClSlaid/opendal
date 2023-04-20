@@ -759,40 +759,6 @@
 <a href="#759" id="759">759</a>
 <a href="#760" id="760">760</a>
 <a href="#761" id="761">761</a>
-<a href="#762" id="762">762</a>
-<a href="#763" id="763">763</a>
-<a href="#764" id="764">764</a>
-<a href="#765" id="765">765</a>
-<a href="#766" id="766">766</a>
-<a href="#767" id="767">767</a>
-<a href="#768" id="768">768</a>
-<a href="#769" id="769">769</a>
-<a href="#770" id="770">770</a>
-<a href="#771" id="771">771</a>
-<a href="#772" id="772">772</a>
-<a href="#773" id="773">773</a>
-<a href="#774" id="774">774</a>
-<a href="#775" id="775">775</a>
-<a href="#776" id="776">776</a>
-<a href="#777" id="777">777</a>
-<a href="#778" id="778">778</a>
-<a href="#779" id="779">779</a>
-<a href="#780" id="780">780</a>
-<a href="#781" id="781">781</a>
-<a href="#782" id="782">782</a>
-<a href="#783" id="783">783</a>
-<a href="#784" id="784">784</a>
-<a href="#785" id="785">785</a>
-<a href="#786" id="786">786</a>
-<a href="#787" id="787">787</a>
-<a href="#788" id="788">788</a>
-<a href="#789" id="789">789</a>
-<a href="#790" id="790">790</a>
-<a href="#791" id="791">791</a>
-<a href="#792" id="792">792</a>
-<a href="#793" id="793">793</a>
-<a href="#794" id="794">794</a>
-<a href="#795" id="795">795</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -822,14 +788,14 @@
 <span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>futures::TryFutureExt;
 <span class="kw">use </span>log::debug;
-
+<span class="kw">use </span>prometheus::core::AtomicU64;
 <span class="kw">use </span>prometheus::core::GenericCounterVec;
 <span class="kw">use </span>prometheus::exponential_buckets;
 <span class="kw">use </span>prometheus::histogram_opts;
 <span class="kw">use </span>prometheus::register_histogram_vec_with_registry;
 <span class="kw">use </span>prometheus::register_int_counter_vec_with_registry;
+<span class="kw">use </span>prometheus::HistogramVec;
 <span class="kw">use </span>prometheus::Registry;
-<span class="kw">use </span>prometheus::{core::AtomicU64, HistogramVec};
 
 <span class="kw">use </span><span class="kw">crate</span>::ops::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::raw::Accessor;
@@ -842,11 +808,10 @@
 /// ```
 /// use log::debug;
 /// use log::info;
+/// use opendal::layers::PrometheusLayer;
 /// use opendal::services;
 /// use opendal::Operator;
 /// use opendal::Result;
-///
-/// use opendal::layers::PrometheusLayer;
 /// use prometheus::Encoder;
 ///
 /// /// Visit [`opendal::services`] for more service related config.
@@ -996,7 +961,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.inner
     }
 
-    <span class="kw">async fn </span>create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
+    <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
         <span class="self">self</span>.stats
             .requests_total
             .with_label_values(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="self">self</span>.scheme])
@@ -1005,14 +970,14 @@
         <span class="kw">let </span>timer = <span class="self">self
             </span>.stats
             .requests_duration_seconds
-            .with_label_values(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="self">self</span>.scheme, Operation::Create.into_static()])
+            .with_label_values(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="self">self</span>.scheme, Operation::CreateDir.into_static()])
             .start_timer();
-        <span class="kw">let </span>create_res = <span class="self">self</span>.inner.create(path, args).<span class="kw">await</span>;
+        <span class="kw">let </span>create_res = <span class="self">self</span>.inner.create_dir(path, args).<span class="kw">await</span>;
 
         timer.observe_duration();
         create_res.map_err(|e| {
             <span class="self">self</span>.stats
-                .increment_errors_total(Operation::Create, e.kind());
+                .increment_errors_total(Operation::CreateDir, e.kind());
             e
         })
     }
@@ -1223,24 +1188,24 @@
         })
     }
 
-    <span class="kw">fn </span>blocking_create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
+    <span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
         <span class="self">self</span>.stats
             .requests_total
-            .with_label_values(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="self">self</span>.scheme, Operation::BlockingCreate.into_static()])
+            .with_label_values(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="self">self</span>.scheme, Operation::BlockingCreateDir.into_static()])
             .inc();
 
         <span class="kw">let </span>timer = <span class="self">self
             </span>.stats
             .requests_duration_seconds
-            .with_label_values(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="self">self</span>.scheme, Operation::BlockingCreate.into_static()])
+            .with_label_values(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="self">self</span>.scheme, Operation::BlockingCreateDir.into_static()])
             .start_timer();
-        <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_create(path, args);
+        <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_create_dir(path, args);
 
         timer.observe_duration();
 
         result.map_err(|e| {
             <span class="self">self</span>.stats
-                .increment_errors_total(Operation::BlockingCreate, e.kind());
+                .increment_errors_total(Operation::BlockingCreateDir, e.kind());
             e
         })
     }
@@ -1516,23 +1481,6 @@
             })
     }
 
-    <span class="kw">async fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>size = bs.len();
-        <span class="self">self</span>.inner
-            .append(bs)
-            .<span class="kw">await
-            </span>.map(|<span class="kw">_</span>| {
-                <span class="self">self</span>.stats
-                    .bytes_total
-                    .with_label_values(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="self">self</span>.scheme, Operation::Write.into_static()])
-                    .observe(size <span class="kw">as </span>f64)
-            })
-            .map_err(|err| {
-                <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, err.kind());
-                err
-            })
-    }
-
     <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.inner.abort().<span class="kw">await</span>.map_err(|err| {
             <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, err.kind());
@@ -1553,22 +1501,6 @@
         <span class="kw">let </span>size = bs.len();
         <span class="self">self</span>.inner
             .write(bs)
-            .map(|<span class="kw">_</span>| {
-                <span class="self">self</span>.stats
-                    .bytes_total
-                    .with_label_values(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="self">self</span>.scheme, Operation::BlockingWrite.into_static()])
-                    .observe(size <span class="kw">as </span>f64)
-            })
-            .map_err(|err| {
-                <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, err.kind());
-                err
-            })
-    }
-
-    <span class="kw">fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>size = bs.len();
-        <span class="self">self</span>.inner
-            .append(bs)
             .map(|<span class="kw">_</span>| {
                 <span class="self">self</span>.stats
                     .bytes_total

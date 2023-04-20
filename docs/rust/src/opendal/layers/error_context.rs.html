@@ -482,6 +482,32 @@
 <a href="#482" id="482">482</a>
 <a href="#483" id="483">483</a>
 <a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
+<a href="#493" id="493">493</a>
+<a href="#494" id="494">494</a>
+<a href="#495" id="495">495</a>
+<a href="#496" id="496">496</a>
+<a href="#497" id="497">497</a>
+<a href="#498" id="498">498</a>
+<a href="#499" id="499">499</a>
+<a href="#500" id="500">500</a>
+<a href="#501" id="501">501</a>
+<a href="#502" id="502">502</a>
+<a href="#503" id="503">503</a>
+<a href="#504" id="504">504</a>
+<a href="#505" id="505">505</a>
+<a href="#506" id="506">506</a>
+<a href="#507" id="507">507</a>
+<a href="#508" id="508">508</a>
+<a href="#509" id="509">509</a>
+<a href="#510" id="510">510</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -566,11 +592,11 @@
         <span class="self">self</span>.meta.clone()
     }
 
-    <span class="kw">async fn </span>create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
+    <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
         <span class="self">self</span>.inner
-            .create(path, args)
+            .create_dir(path, args)
             .map_err(|err| {
-                err.with_operation(Operation::Create)
+                err.with_operation(Operation::CreateDir)
                     .with_context(<span class="string">&quot;service&quot;</span>, <span class="self">self</span>.meta.scheme())
                     .with_context(<span class="string">&quot;path&quot;</span>, path)
             })
@@ -618,6 +644,30 @@
                 err.with_operation(Operation::Write)
                     .with_context(<span class="string">&quot;service&quot;</span>, <span class="self">self</span>.meta.scheme())
                     .with_context(<span class="string">&quot;path&quot;</span>, path)
+            })
+            .<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
+        <span class="self">self</span>.inner
+            .copy(from, to, args)
+            .map_err(|err| {
+                err.with_operation(Operation::Copy)
+                    .with_context(<span class="string">&quot;service&quot;</span>, <span class="self">self</span>.meta.scheme())
+                    .with_context(<span class="string">&quot;from&quot;</span>, from)
+                    .with_context(<span class="string">&quot;to&quot;</span>, to)
+            })
+            .<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
+        <span class="self">self</span>.inner
+            .rename(from, to, args)
+            .map_err(|err| {
+                err.with_operation(Operation::Rename)
+                    .with_context(<span class="string">&quot;service&quot;</span>, <span class="self">self</span>.meta.scheme())
+                    .with_context(<span class="string">&quot;from&quot;</span>, from)
+                    .with_context(<span class="string">&quot;to&quot;</span>, to)
             })
             .<span class="kw">await
     </span>}
@@ -720,9 +770,9 @@
             .<span class="kw">await
     </span>}
 
-    <span class="kw">fn </span>blocking_create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
-        <span class="self">self</span>.inner.blocking_create(path, args).map_err(|err| {
-            err.with_operation(Operation::BlockingCreate)
+    <span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
+        <span class="self">self</span>.inner.blocking_create_dir(path, args).map_err(|err| {
+            err.with_operation(Operation::BlockingCreateDir)
                 .with_context(<span class="string">&quot;service&quot;</span>, <span class="self">self</span>.meta.scheme())
                 .with_context(<span class="string">&quot;path&quot;</span>, path)
         })
@@ -766,6 +816,24 @@
                     .with_context(<span class="string">&quot;service&quot;</span>, <span class="self">self</span>.meta.scheme())
                     .with_context(<span class="string">&quot;path&quot;</span>, path)
             })
+    }
+
+    <span class="kw">fn </span>blocking_copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
+        <span class="self">self</span>.inner.blocking_copy(from, to, args).map_err(|err| {
+            err.with_operation(Operation::BlockingCopy)
+                .with_context(<span class="string">&quot;service&quot;</span>, <span class="self">self</span>.meta.scheme())
+                .with_context(<span class="string">&quot;from&quot;</span>, from)
+                .with_context(<span class="string">&quot;to&quot;</span>, to)
+        })
+    }
+
+    <span class="kw">fn </span>blocking_rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
+        <span class="self">self</span>.inner.blocking_rename(from, to, args).map_err(|err| {
+            err.with_operation(Operation::BlockingRename)
+                .with_context(<span class="string">&quot;service&quot;</span>, <span class="self">self</span>.meta.scheme())
+                .with_context(<span class="string">&quot;from&quot;</span>, from)
+                .with_context(<span class="string">&quot;to&quot;</span>, to)
+        })
     }
 
     <span class="kw">fn </span>blocking_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
@@ -895,14 +963,6 @@
         })
     }
 
-    <span class="kw">async fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.inner.append(bs).<span class="kw">await</span>.map_err(|err| {
-            err.with_operation(WriteOperation::Append)
-                .with_context(<span class="string">&quot;service&quot;</span>, <span class="self">self</span>.scheme)
-                .with_context(<span class="string">&quot;path&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-        })
-    }
-
     <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.inner.abort().<span class="kw">await</span>.map_err(|err| {
             err.with_operation(WriteOperation::Append)
@@ -924,14 +984,6 @@
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.inner.write(bs).map_err(|err| {
             err.with_operation(WriteOperation::BlockingWrite)
-                .with_context(<span class="string">&quot;service&quot;</span>, <span class="self">self</span>.scheme)
-                .with_context(<span class="string">&quot;path&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-        })
-    }
-
-    <span class="kw">fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.inner.append(bs).map_err(|err| {
-            err.with_operation(WriteOperation::BlockingAppend)
                 .with_context(<span class="string">&quot;service&quot;</span>, <span class="self">self</span>.scheme)
                 .with_context(<span class="string">&quot;path&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
         })

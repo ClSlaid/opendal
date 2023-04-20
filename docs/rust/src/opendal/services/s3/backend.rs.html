@@ -1166,30 +1166,6 @@
 <a href="#1166" id="1166">1166</a>
 <a href="#1167" id="1167">1167</a>
 <a href="#1168" id="1168">1168</a>
-<a href="#1169" id="1169">1169</a>
-<a href="#1170" id="1170">1170</a>
-<a href="#1171" id="1171">1171</a>
-<a href="#1172" id="1172">1172</a>
-<a href="#1173" id="1173">1173</a>
-<a href="#1174" id="1174">1174</a>
-<a href="#1175" id="1175">1175</a>
-<a href="#1176" id="1176">1176</a>
-<a href="#1177" id="1177">1177</a>
-<a href="#1178" id="1178">1178</a>
-<a href="#1179" id="1179">1179</a>
-<a href="#1180" id="1180">1180</a>
-<a href="#1181" id="1181">1181</a>
-<a href="#1182" id="1182">1182</a>
-<a href="#1183" id="1183">1183</a>
-<a href="#1184" id="1184">1184</a>
-<a href="#1185" id="1185">1185</a>
-<a href="#1186" id="1186">1186</a>
-<a href="#1187" id="1187">1187</a>
-<a href="#1188" id="1188">1188</a>
-<a href="#1189" id="1189">1189</a>
-<a href="#1190" id="1190">1190</a>
-<a href="#1191" id="1191">1191</a>
-<a href="#1192" id="1192">1192</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2113,7 +2089,7 @@
         am
     }
 
-    <span class="kw">async fn </span>create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
+    <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req =
             <span class="self">self</span>.core
                 .s3_put_object_request(path, <span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, AsyncBody::Empty)<span class="question-mark">?</span>;
@@ -2136,7 +2112,7 @@
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
         <span class="kw">let </span>resp = <span class="self">self
             </span>.core
-            .s3_get_object(path, args.range(), args.if_none_match())
+            .s3_get_object(path, args.range(), args.if_none_match(), args.if_match())
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
@@ -2151,38 +2127,9 @@
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
-        <span class="kw">let </span>upload_id = <span class="kw">if </span>args.append() {
-            <span class="kw">let </span>resp = <span class="self">self
-                </span>.core
-                .s3_initiate_multipart_upload(
-                    path,
-                    args.content_type(),
-                    args.content_disposition(),
-                    args.cache_control(),
-                )
-                .<span class="kw">await</span><span class="question-mark">?</span>;
-
-            <span class="kw">let </span>status = resp.status();
-
-            <span class="kw">match </span>status {
-                StatusCode::OK =&gt; {
-                    <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-
-                    <span class="kw">let </span>result: InitiateMultipartUploadResult =
-                        quick_xml::de::from_reader(bs.reader())
-                            .map_err(new_xml_deserialize_error)<span class="question-mark">?</span>;
-
-                    <span class="prelude-val">Some</span>(result.upload_id)
-                }
-                <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
-            }
-        } <span class="kw">else </span>{
-            <span class="prelude-val">None
-        </span>};
-
         <span class="prelude-val">Ok</span>((
             RpWrite::default(),
-            S3Writer::new(<span class="self">self</span>.core.clone(), args, path.to_string(), upload_id),
+            S3Writer::new(<span class="self">self</span>.core.clone(), path, args),
         ))
     }
 
@@ -2209,7 +2156,10 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(RpStat::new(Metadata::new(EntryMode::DIR)));
         }
 
-        <span class="kw">let </span>resp = <span class="self">self</span>.core.s3_head_object(path, args.if_none_match()).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self
+            </span>.core
+            .s3_head_object(path, args.if_none_match(), args.if_match())
+            .<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
 
@@ -2251,7 +2201,8 @@
         <span class="comment">// We will not send this request out, just for signing.
         </span><span class="kw">let </span><span class="kw-2">mut </span>req = <span class="kw">match </span>args.operation() {
             PresignOperation::Stat(v) =&gt; {
-                <span class="self">self</span>.core.s3_head_object_request(path, v.if_none_match())<span class="question-mark">?
+                <span class="self">self</span>.core
+                    .s3_head_object_request(path, v.if_none_match(), v.if_match())<span class="question-mark">?
             </span>}
             PresignOperation::Read(v) =&gt; <span class="self">self</span>.core.s3_get_object_request(
                 path,
@@ -2259,6 +2210,7 @@
                 v.override_content_disposition(),
                 v.override_cache_control(),
                 v.if_none_match(),
+                v.if_match(),
             )<span class="question-mark">?</span>,
             PresignOperation::Write(<span class="kw">_</span>) =&gt; {
                 <span class="self">self</span>.core

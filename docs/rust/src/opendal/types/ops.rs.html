@@ -383,6 +383,28 @@
 <a href="#383" id="383">383</a>
 <a href="#384" id="384">384</a>
 <a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -407,25 +429,17 @@
 </span><span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
-<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Args for `create` operation.
 ///
 /// The path must be normalized.
 </span><span class="attr">#[derive(Debug, Clone, Default)]
-</span><span class="kw">pub struct </span>OpCreate {
-    mode: EntryMode,
-}
+</span><span class="kw">pub struct </span>OpCreate {}
 
 <span class="kw">impl </span>OpCreate {
     <span class="doccomment">/// Create a new `OpCreate`.
-    </span><span class="kw">pub fn </span>new(mode: EntryMode) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ mode }
-    }
-
-    <span class="doccomment">/// Get mode from option.
-    </span><span class="kw">pub fn </span>mode(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; EntryMode {
-        <span class="self">self</span>.mode
+    </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::default()
     }
 }
 
@@ -607,6 +621,7 @@
     br: BytesRange,
     override_content_disposition: <span class="prelude-ty">Option</span>&lt;String&gt;,
     override_cache_control: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    if_match: <span class="prelude-ty">Option</span>&lt;String&gt;,
     if_none_match: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
@@ -650,6 +665,17 @@
         <span class="self">self</span>.override_cache_control.as_deref()
     }
 
+    <span class="doccomment">/// Set the If-Match of the option
+    </span><span class="kw">pub fn </span>with_if_match(<span class="kw-2">mut </span><span class="self">self</span>, if_match: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.if_match = <span class="prelude-val">Some</span>(if_match.to_string());
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Get If-Match from option
+    </span><span class="kw">pub fn </span>if_match(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
+        <span class="self">self</span>.if_match.as_deref()
+    }
+
     <span class="doccomment">/// Set the If-None-Match of the option
     </span><span class="kw">pub fn </span>with_if_none_match(<span class="kw-2">mut </span><span class="self">self</span>, if_none_match: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.if_none_match = <span class="prelude-val">Some</span>(if_none_match.to_string());
@@ -665,6 +691,7 @@
 <span class="doccomment">/// Args for `stat` operation.
 </span><span class="attr">#[derive(Debug, Clone, Default)]
 </span><span class="kw">pub struct </span>OpStat {
+    if_match: <span class="prelude-ty">Option</span>&lt;String&gt;,
     if_none_match: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
@@ -672,6 +699,17 @@
     <span class="doccomment">/// Create a new `OpStat`.
     </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::default()
+    }
+
+    <span class="doccomment">/// Set the If-Match of the option
+    </span><span class="kw">pub fn </span>with_if_match(<span class="kw-2">mut </span><span class="self">self</span>, if_match: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.if_match = <span class="prelude-val">Some</span>(if_match.to_string());
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Get If-Match from option
+    </span><span class="kw">pub fn </span>if_match(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
+        <span class="self">self</span>.if_match.as_deref()
     }
 
     <span class="doccomment">/// Set the If-None-Match of the option
@@ -689,8 +727,7 @@
 <span class="doccomment">/// Args for `write` operation.
 </span><span class="attr">#[derive(Debug, Clone, Default)]
 </span><span class="kw">pub struct </span>OpWrite {
-    append: bool,
-
+    content_length: <span class="prelude-ty">Option</span>&lt;u64&gt;,
     content_type: <span class="prelude-ty">Option</span>&lt;String&gt;,
     content_disposition: <span class="prelude-ty">Option</span>&lt;String&gt;,
     cache_control: <span class="prelude-ty">Option</span>&lt;String&gt;,
@@ -704,14 +741,21 @@
         <span class="self">Self</span>::default()
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>with_append(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.append = <span class="bool-val">true</span>;
+    <span class="doccomment">/// Get the content length from op.
+    ///
+    /// The content length is the total length of the data to be written.
+    </span><span class="kw">pub fn </span>content_length(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
+        <span class="self">self</span>.content_length
+    }
+
+    <span class="doccomment">/// Set the content length of op.
+    ///
+    /// If the content length is not set, the content length will be
+    /// calculated automatically by buffering part of data.
+    </span><span class="kw">pub fn </span>with_content_length(<span class="kw-2">mut </span><span class="self">self</span>, content_length: u64) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.content_length = <span class="prelude-val">Some</span>(content_length);
         <span class="self">self
     </span>}
-
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.append
-    }
 
     <span class="doccomment">/// Get the content type from option
     </span><span class="kw">pub fn </span>content_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {

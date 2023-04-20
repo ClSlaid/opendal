@@ -171,6 +171,10 @@
 <a href="#171" id="171">171</a>
 <a href="#172" id="172">172</a>
 <a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -244,6 +248,8 @@
     </span>S3,
     <span class="doccomment">/// [sled][crate::services::Sled]: Sled services
     </span>Sled,
+    <span class="doccomment">/// [wasabi][crate::services::Wasabi]: Wasabi service
+    </span>Wasabi,
     <span class="doccomment">/// [webdav][crate::services::Webdav]: WebDAV support.
     </span>Webdav,
     <span class="doccomment">/// [webhdfs][crate::services::Webhdfs]: WebHDFS RESTful API Services
@@ -302,6 +308,7 @@
             <span class="string">&quot;s3&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::S3),
             <span class="string">&quot;sled&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Sled),
             <span class="string">&quot;oss&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Oss),
+            <span class="string">&quot;wasabi&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Wasabi),
             <span class="string">&quot;webdav&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Webdav),
             <span class="string">&quot;webhdfs&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Webhdfs),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Custom(Box::leak(s.into_boxed_str()))),
@@ -332,6 +339,7 @@
             Scheme::S3 =&gt; <span class="string">&quot;s3&quot;</span>,
             Scheme::Sled =&gt; <span class="string">&quot;sled&quot;</span>,
             Scheme::Oss =&gt; <span class="string">&quot;oss&quot;</span>,
+            Scheme::Wasabi =&gt; <span class="string">&quot;wasabi&quot;</span>,
             Scheme::Webdav =&gt; <span class="string">&quot;webdav&quot;</span>,
             Scheme::Webhdfs =&gt; <span class="string">&quot;webhdfs&quot;</span>,
             Scheme::Custom(v) =&gt; v,

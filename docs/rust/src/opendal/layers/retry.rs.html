@@ -1061,41 +1061,6 @@
 <a href="#1061" id="1061">1061</a>
 <a href="#1062" id="1062">1062</a>
 <a href="#1063" id="1063">1063</a>
-<a href="#1064" id="1064">1064</a>
-<a href="#1065" id="1065">1065</a>
-<a href="#1066" id="1066">1066</a>
-<a href="#1067" id="1067">1067</a>
-<a href="#1068" id="1068">1068</a>
-<a href="#1069" id="1069">1069</a>
-<a href="#1070" id="1070">1070</a>
-<a href="#1071" id="1071">1071</a>
-<a href="#1072" id="1072">1072</a>
-<a href="#1073" id="1073">1073</a>
-<a href="#1074" id="1074">1074</a>
-<a href="#1075" id="1075">1075</a>
-<a href="#1076" id="1076">1076</a>
-<a href="#1077" id="1077">1077</a>
-<a href="#1078" id="1078">1078</a>
-<a href="#1079" id="1079">1079</a>
-<a href="#1080" id="1080">1080</a>
-<a href="#1081" id="1081">1081</a>
-<a href="#1082" id="1082">1082</a>
-<a href="#1083" id="1083">1083</a>
-<a href="#1084" id="1084">1084</a>
-<a href="#1085" id="1085">1085</a>
-<a href="#1086" id="1086">1086</a>
-<a href="#1087" id="1087">1087</a>
-<a href="#1088" id="1088">1088</a>
-<a href="#1089" id="1089">1089</a>
-<a href="#1090" id="1090">1090</a>
-<a href="#1091" id="1091">1091</a>
-<a href="#1092" id="1092">1092</a>
-<a href="#1093" id="1093">1093</a>
-<a href="#1094" id="1094">1094</a>
-<a href="#1095" id="1095">1095</a>
-<a href="#1096" id="1096">1096</a>
-<a href="#1097" id="1097">1097</a>
-<a href="#1098" id="1098">1098</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1266,15 +1231,15 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.inner
     }
 
-    <span class="kw">async fn </span>create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
-        { || <span class="self">self</span>.inner.create(path, args.clone()) }
+    <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
+        { || <span class="self">self</span>.inner.create_dir(path, args.clone()) }
             .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| {
                 <span class="macro">warn!</span>(
                     target: <span class="string">&quot;opendal::service&quot;</span>,
                     <span class="string">&quot;operation={} -&gt; retry after {}s: error={:?}&quot;</span>,
-                    Operation::Create, dur.as_secs_f64(), err)
+                    Operation::CreateDir, dur.as_secs_f64(), err)
             })
             .map(|v| v.map_err(|e| e.set_persistent()))
             .<span class="kw">await
@@ -1420,15 +1385,15 @@
             .<span class="kw">await
     </span>}
 
-    <span class="kw">fn </span>blocking_create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
-        { || <span class="self">self</span>.inner.blocking_create(path, args.clone()) }
+    <span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
+        { || <span class="self">self</span>.inner.blocking_create_dir(path, args.clone()) }
             .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| {
                 <span class="macro">warn!</span>(
                     target: <span class="string">&quot;opendal::service&quot;</span>,
                     <span class="string">&quot;operation={} -&gt; retry after {}s: error={:?}&quot;</span>,
-                    Operation::BlockingCreate, dur.as_secs_f64(), err)
+                    Operation::BlockingCreateDir, dur.as_secs_f64(), err)
             })
             .call()
             .map_err(|e| e.set_persistent())
@@ -1749,27 +1714,6 @@
         }
     }
 
-    <span class="kw">async fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>backoff = <span class="self">self</span>.builder.build();
-
-        <span class="kw">loop </span>{
-            <span class="kw">match </span><span class="self">self</span>.inner.append(bs.clone()).<span class="kw">await </span>{
-                <span class="prelude-val">Ok</span>(v) =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(v),
-                <span class="prelude-val">Err</span>(e) <span class="kw">if </span>!e.is_temporary() =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(e),
-                <span class="prelude-val">Err</span>(e) =&gt; <span class="kw">match </span>backoff.next() {
-                    <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(e),
-                    <span class="prelude-val">Some</span>(dur) =&gt; {
-                        <span class="macro">warn!</span>(target: <span class="string">&quot;opendal::service&quot;</span>,
-                              <span class="string">&quot;operation={} path={} -&gt; pager retry after {}s: error={:?}&quot;</span>,
-                              WriteOperation::Append, <span class="self">self</span>.path, dur.as_secs_f64(), e);
-                        tokio::time::sleep(dur).<span class="kw">await</span>;
-                        <span class="kw">continue</span>;
-                    }
-                },
-            }
-        }
-    }
-
     <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>backoff = <span class="self">self</span>.builder.build();
 
@@ -1823,20 +1767,6 @@
                 target: <span class="string">&quot;opendal::service&quot;</span>,
                 <span class="string">&quot;operation={} -&gt; pager retry after {}s: error={:?}&quot;</span>,
                 WriteOperation::BlockingWrite, dur.as_secs_f64(), err)
-            })
-            .call()
-            .map_err(|e| e.set_persistent())
-    }
-
-    <span class="kw">fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        { || <span class="self">self</span>.inner.append(bs.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
-            .when(|e| e.is_temporary())
-            .notify(<span class="kw">move </span>|err, dur| {
-                <span class="macro">warn!</span>(
-                target: <span class="string">&quot;opendal::service&quot;</span>,
-                <span class="string">&quot;operation={} -&gt; pager retry after {}s: error={:?}&quot;</span>,
-                WriteOperation::BlockingAppend, dur.as_secs_f64(), err)
             })
             .call()
             .map_err(|e| e.set_persistent())

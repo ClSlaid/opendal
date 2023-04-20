@@ -140,8 +140,8 @@
     <span class="doccomment">/// Operation for [`crate::raw::Accessor::info`]
     </span><span class="attr">#[default]
     </span>Info,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::create`]
-    </span>Create,
+    <span class="doccomment">/// Operation for [`crate::raw::Accessor::create_dir`]
+    </span>CreateDir,
     <span class="doccomment">/// Operation for [`crate::raw::Accessor::read`]
     </span>Read,
     <span class="doccomment">/// Operation for [`crate::raw::Accessor::write`]
@@ -162,8 +162,8 @@
     </span>Batch,
     <span class="doccomment">/// Operation for [`crate::raw::Accessor::presign`]
     </span>Presign,
-    <span class="doccomment">/// Operation for [`crate::raw::Accessor::blocking_create`]
-    </span>BlockingCreate,
+    <span class="doccomment">/// Operation for [`crate::raw::Accessor::blocking_create_dir`]
+    </span>BlockingCreateDir,
     <span class="doccomment">/// Operation for [`crate::raw::Accessor::blocking_read`]
     </span>BlockingRead,
     <span class="doccomment">/// Operation for [`crate::raw::Accessor::blocking_write`]
@@ -171,7 +171,7 @@
     <span class="doccomment">/// Operation for [`crate::raw::Accessor::blocking_copy`]
     </span>BlockingCopy,
     <span class="doccomment">/// Operation for [`crate::raw::Accessor::blocking_rename`]
-    </span>BlockingMove,
+    </span>BlockingRename,
     <span class="doccomment">/// Operation for [`crate::raw::Accessor::blocking_stat`]
     </span>BlockingStat,
     <span class="doccomment">/// Operation for [`crate::raw::Accessor::blocking_delete`]
@@ -199,7 +199,7 @@
     <span class="kw">fn </span>from(v: Operation) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
         <span class="kw">match </span>v {
             Operation::Info =&gt; <span class="string">&quot;metadata&quot;</span>,
-            Operation::Create =&gt; <span class="string">&quot;create&quot;</span>,
+            Operation::CreateDir =&gt; <span class="string">&quot;create_dir&quot;</span>,
             Operation::Read =&gt; <span class="string">&quot;read&quot;</span>,
             Operation::Write =&gt; <span class="string">&quot;write&quot;</span>,
             Operation::Copy =&gt; <span class="string">&quot;copy&quot;</span>,
@@ -210,11 +210,11 @@
             Operation::Scan =&gt; <span class="string">&quot;scan&quot;</span>,
             Operation::Presign =&gt; <span class="string">&quot;presign&quot;</span>,
             Operation::Batch =&gt; <span class="string">&quot;batch&quot;</span>,
-            Operation::BlockingCreate =&gt; <span class="string">&quot;blocking_create&quot;</span>,
+            Operation::BlockingCreateDir =&gt; <span class="string">&quot;blocking_create_dir&quot;</span>,
             Operation::BlockingRead =&gt; <span class="string">&quot;blocking_read&quot;</span>,
             Operation::BlockingWrite =&gt; <span class="string">&quot;blocking_write&quot;</span>,
             Operation::BlockingCopy =&gt; <span class="string">&quot;blocking_copy&quot;</span>,
-            Operation::BlockingMove =&gt; <span class="string">&quot;blocking_rename&quot;</span>,
+            Operation::BlockingRename =&gt; <span class="string">&quot;blocking_rename&quot;</span>,
             Operation::BlockingStat =&gt; <span class="string">&quot;blocking_stat&quot;</span>,
             Operation::BlockingDelete =&gt; <span class="string">&quot;blocking_delete&quot;</span>,
             Operation::BlockingList =&gt; <span class="string">&quot;blocking_list&quot;</span>,

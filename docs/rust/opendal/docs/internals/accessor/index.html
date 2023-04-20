@@ -25,7 +25,7 @@ underlying storage services via APIs provided by <a href="../../../raw/trait.Acc
 <p>This is an attribute from <a href="https://docs.rs/async-trait/latest/async_trait/"><code>async_trait</code></a>. By using this attribute, we can write the following code without use nightly feature.</p>
 
 <div class="example-wrap ignore"><div class='tooltip'>ⓘ</div><pre class="rust rust-example-rendered"><code><span class="kw">pub trait </span>Accessor {
-    <span class="kw">async fn </span>create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
+    <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 }</code></pre></div>
 <p><code>async_trait</code> will transform the <code>async fn</code> into:</p>
 

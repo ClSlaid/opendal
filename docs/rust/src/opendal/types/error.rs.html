@@ -361,6 +361,32 @@
 <a href="#361" id="361">361</a>
 <a href="#362" id="362">362</a>
 <a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -433,6 +459,29 @@
     </span>RateLimited,
     <span class="doccomment">/// The given file paths are same.
     </span>IsSameFile,
+    <span class="doccomment">/// The preconfition of this operation is not met.
+    ///
+    /// For example, reading a file with If-Match header but the file&#39;s ETag
+    /// is not match.
+    </span>PreconditionFailed,
+    <span class="doccomment">/// The content is truncated.
+    ///
+    /// This error kind means there are more content to come but been truncated.
+    ///
+    /// For examples:
+    ///
+    /// - Users expected to read 1024 bytes, but service returned more bytes.
+    /// - Service expected to write 1024 bytes, but users write more bytes.
+    </span>ContentTruncated,
+    <span class="doccomment">/// The content is incomplete.
+    ///
+    /// This error kind means expect content length is not reached.
+    ///
+    /// For examples:
+    ///
+    /// - Users expected to read 1024 bytes, but service returned less bytes.
+    /// - Service expected to write 1024 bytes, but users write less bytes.
+    </span>ContentIncomplete,
 }
 
 <span class="kw">impl </span>ErrorKind {
@@ -461,6 +510,9 @@
             ErrorKind::AlreadyExists =&gt; <span class="string">&quot;AlreadyExists&quot;</span>,
             ErrorKind::RateLimited =&gt; <span class="string">&quot;RateLimited&quot;</span>,
             ErrorKind::IsSameFile =&gt; <span class="string">&quot;IsSameFile&quot;</span>,
+            ErrorKind::PreconditionFailed =&gt; <span class="string">&quot;PreconditionFailed&quot;</span>,
+            ErrorKind::ContentTruncated =&gt; <span class="string">&quot;ContentTruncated&quot;</span>,
+            ErrorKind::ContentIncomplete =&gt; <span class="string">&quot;ContentIncomplete&quot;</span>,
         }
     }
 }

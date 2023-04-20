@@ -871,8 +871,8 @@
         am
     }
 
-    <span class="kw">async fn </span>create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>ftp_stream = <span class="self">self</span>.ftp_connect(Operation::Create).<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>ftp_stream = <span class="self">self</span>.ftp_connect(Operation::CreateDir).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>paths: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = path.split_inclusive(<span class="string">&#39;/&#39;</span>).collect();
 
@@ -936,10 +936,10 @@
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
-        <span class="kw">if </span>args.append() {
+        <span class="kw">if </span>args.content_length().is_none() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::Unsupported,
-                <span class="string">&quot;append write is not supported&quot;</span>,
+                <span class="string">&quot;write without content length is not supported&quot;</span>,
             ));
         }
 

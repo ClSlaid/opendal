@@ -869,6 +869,8 @@
 <a href="#869" id="869">869</a>
 <a href="#870" id="870">870</a>
 <a href="#871" id="871">871</a>
+<a href="#872" id="872">872</a>
+<a href="#873" id="873">873</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -900,6 +902,8 @@
 <span class="kw">use </span>http::header::CONTENT_DISPOSITION;
 <span class="kw">use </span>http::header::CONTENT_LENGTH;
 <span class="kw">use </span>http::header::CONTENT_TYPE;
+<span class="kw">use </span>http::header::IF_MATCH;
+<span class="kw">use </span>http::header::IF_NONE_MATCH;
 <span class="kw">use </span>http::HeaderValue;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::Response;
@@ -1076,6 +1080,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         if_none_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
+        if_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
@@ -1086,7 +1091,11 @@
         req = <span class="self">self</span>.insert_sse_headers(req, <span class="bool-val">false</span>);
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(if_none_match) = if_none_match {
-            req = req.header(http::header::IF_NONE_MATCH, if_none_match);
+            req = req.header(IF_NONE_MATCH, if_none_match);
+        }
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(if_match) = if_match {
+            req = req.header(IF_MATCH, if_match);
         }
 
         <span class="kw">let </span>req = req
@@ -1103,6 +1112,7 @@
         override_content_disposition: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
         override_cache_control: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
         if_none_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
+        if_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
@@ -1136,9 +1146,12 @@
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(if_none_match) = if_none_match {
-            req = req.header(http::header::IF_NONE_MATCH, if_none_match);
+            req = req.header(IF_NONE_MATCH, if_none_match);
         }
 
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(if_match) = if_match {
+            req = req.header(IF_MATCH, if_match);
+        }
         <span class="comment">// Set SSE headers.
         // TODO: how will this work with presign?
         </span>req = <span class="self">self</span>.insert_sse_headers(req, <span class="bool-val">false</span>);
@@ -1155,8 +1168,10 @@
         path: <span class="kw-2">&amp;</span>str,
         range: BytesRange,
         if_none_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
+        if_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.s3_get_object_request(path, range, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, if_none_match)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>req =
+            <span class="self">self</span>.s3_get_object_request(path, range, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, if_none_match, if_match)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -1212,23 +1227,9 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         if_none_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
+        if_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
-        <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
-
-        <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">&quot;{}/{}&quot;</span>, <span class="self">self</span>.endpoint, percent_encode_path(<span class="kw-2">&amp;</span>p));
-
-        <span class="kw">let </span><span class="kw-2">mut </span>req = Request::head(<span class="kw-2">&amp;</span>url);
-
-        <span class="comment">// Set SSE headers.
-        </span>req = <span class="self">self</span>.insert_sse_headers(req, <span class="bool-val">false</span>);
-
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(if_none_match) = if_none_match {
-            req = req.header(http::header::IF_NONE_MATCH, if_none_match);
-        }
-
-        <span class="kw">let </span><span class="kw-2">mut </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.s3_head_object_request(path, if_none_match, if_match)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -1323,10 +1324,13 @@
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(
-            <span class="string">&quot;{}?list-type=2&amp;delimiter={delimiter}&amp;prefix={}&quot;</span>,
+            <span class="string">&quot;{}?list-type=2&amp;prefix={}&quot;</span>,
             <span class="self">self</span>.endpoint,
             percent_encode_path(<span class="kw-2">&amp;</span>p)
         );
+        <span class="kw">if </span>!delimiter.is_empty() {
+            <span class="macro">write!</span>(url, <span class="string">&quot;&amp;delimiter={delimiter}&quot;</span>).expect(<span class="string">&quot;write into string must succeed&quot;</span>);
+        }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(limit) = limit {
             <span class="macro">write!</span>(url, <span class="string">&quot;&amp;max-keys={limit}&quot;</span>).expect(<span class="string">&quot;write into string must succeed&quot;</span>);
         }

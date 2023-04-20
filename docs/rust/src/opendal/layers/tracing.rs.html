@@ -389,6 +389,10 @@
 <a href="#389" id="389">389</a>
 <a href="#390" id="390">390</a>
 <a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -542,8 +546,8 @@
     }
 
     <span class="attr">#[tracing::instrument(level = <span class="string">&quot;debug&quot;</span>, skip(<span class="self">self</span>))]
-    </span><span class="kw">async fn </span>create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
-        <span class="self">self</span>.inner.create(path, args).<span class="kw">await
+    </span><span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
+        <span class="self">self</span>.inner.create_dir(path, args).<span class="kw">await
     </span>}
 
     <span class="attr">#[tracing::instrument(level = <span class="string">&quot;debug&quot;</span>, skip(<span class="self">self</span>))]
@@ -561,6 +565,16 @@
             .<span class="kw">await
             </span>.map(|(rp, r)| (rp, TracingWrapper::new(Span::current(), r)))
     }
+
+    <span class="attr">#[tracing::instrument(level = <span class="string">&quot;debug&quot;</span>, skip(<span class="self">self</span>))]
+    </span><span class="kw">async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
+        <span class="self">self</span>.inner().copy(from, to, args).<span class="kw">await
+    </span>}
+
+    <span class="attr">#[tracing::instrument(level = <span class="string">&quot;debug&quot;</span>, skip(<span class="self">self</span>))]
+    </span><span class="kw">async fn </span>rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
+        <span class="self">self</span>.inner().rename(from, to, args).<span class="kw">await
+    </span>}
 
     <span class="attr">#[tracing::instrument(level = <span class="string">&quot;debug&quot;</span>, skip(<span class="self">self</span>))]
     </span><span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
@@ -599,8 +613,8 @@
     </span>}
 
     <span class="attr">#[tracing::instrument(level = <span class="string">&quot;debug&quot;</span>, skip(<span class="self">self</span>))]
-    </span><span class="kw">fn </span>blocking_create(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
-        <span class="self">self</span>.inner.blocking_create(path, args)
+    </span><span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
+        <span class="self">self</span>.inner.blocking_create_dir(path, args)
     }
 
     <span class="attr">#[tracing::instrument(level = <span class="string">&quot;debug&quot;</span>, skip(<span class="self">self</span>))]
@@ -615,6 +629,16 @@
         <span class="self">self</span>.inner
             .blocking_write(path, args)
             .map(|(rp, r)| (rp, TracingWrapper::new(Span::current(), r)))
+    }
+
+    <span class="attr">#[tracing::instrument(level = <span class="string">&quot;debug&quot;</span>, skip(<span class="self">self</span>))]
+    </span><span class="kw">fn </span>blocking_copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
+        <span class="self">self</span>.inner().blocking_copy(from, to, args)
+    }
+
+    <span class="attr">#[tracing::instrument(level = <span class="string">&quot;debug&quot;</span>, skip(<span class="self">self</span>))]
+    </span><span class="kw">fn </span>blocking_rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
+        <span class="self">self</span>.inner().blocking_rename(from, to, args)
     }
 
     <span class="attr">#[tracing::instrument(level = <span class="string">&quot;debug&quot;</span>, skip(<span class="self">self</span>))]
@@ -719,14 +743,6 @@
         parent = <span class="kw-2">&amp;</span><span class="self">self</span>.span,
         level = <span class="string">&quot;trace&quot;</span>,
         skip_all)]
-    </span><span class="kw">async fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.inner.append(bs).<span class="kw">await
-    </span>}
-
-    <span class="attr">#[tracing::instrument(
-        parent = <span class="kw-2">&amp;</span><span class="self">self</span>.span,
-        level = <span class="string">&quot;trace&quot;</span>,
-        skip_all)]
     </span><span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.inner.abort().<span class="kw">await
     </span>}
@@ -747,14 +763,6 @@
         skip_all)]
     </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.inner.write(bs)
-    }
-
-    <span class="attr">#[tracing::instrument(
-        parent = <span class="kw-2">&amp;</span><span class="self">self</span>.span,
-        level = <span class="string">&quot;trace&quot;</span>,
-        skip_all)]
-    </span><span class="kw">fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.inner.append(bs)
     }
 
     <span class="attr">#[tracing::instrument(
