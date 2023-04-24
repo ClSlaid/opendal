@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["from_fd","Convert given fd into [`oio::BlockingRead`]."]],"struct":[["FdReader","FdReader is a wrapper of input fd to implement [`oio::Read`]."]]};
+window.SIDEBAR_ITEMS = {"fn":["from_fd"],"struct":["FdReader"]};

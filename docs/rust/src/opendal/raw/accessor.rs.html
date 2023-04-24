@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/raw/accessor.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>accessor.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-93196c7a1c3542a8.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../static.files/light-4743e13df3dfe8c4.css"><link rel="stylesheet" disabled href="../../../static.files/dark-0e1b889528bd466b.css"><link rel="stylesheet" disabled href="../../../static.files/ayu-65289d5d067c7c66.css"><script id="default-settings" ></script><script src="../../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../../static.files/source-script-ea63cb6500f71309.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-3367e395607fafc1.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../opendal/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/raw/accessor.rs`."><title>accessor.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-c4dbdcde0fbd8430.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../static.files/light-db279b6232be9c13.css"><link rel="stylesheet" disabled href="../../../static.files/dark-cf923f49f397b216.css"><link rel="stylesheet" disabled href="../../../static.files/ayu-be46fdc453a55015.css"><script src="../../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../../static.files/source-script-1b95b7cca98b26e5.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-98a684e84ae5b08b.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../opendal/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -566,77 +566,6 @@
 <a href="#566" id="566">566</a>
 <a href="#567" id="567">567</a>
 <a href="#568" id="568">568</a>
-<a href="#569" id="569">569</a>
-<a href="#570" id="570">570</a>
-<a href="#571" id="571">571</a>
-<a href="#572" id="572">572</a>
-<a href="#573" id="573">573</a>
-<a href="#574" id="574">574</a>
-<a href="#575" id="575">575</a>
-<a href="#576" id="576">576</a>
-<a href="#577" id="577">577</a>
-<a href="#578" id="578">578</a>
-<a href="#579" id="579">579</a>
-<a href="#580" id="580">580</a>
-<a href="#581" id="581">581</a>
-<a href="#582" id="582">582</a>
-<a href="#583" id="583">583</a>
-<a href="#584" id="584">584</a>
-<a href="#585" id="585">585</a>
-<a href="#586" id="586">586</a>
-<a href="#587" id="587">587</a>
-<a href="#588" id="588">588</a>
-<a href="#589" id="589">589</a>
-<a href="#590" id="590">590</a>
-<a href="#591" id="591">591</a>
-<a href="#592" id="592">592</a>
-<a href="#593" id="593">593</a>
-<a href="#594" id="594">594</a>
-<a href="#595" id="595">595</a>
-<a href="#596" id="596">596</a>
-<a href="#597" id="597">597</a>
-<a href="#598" id="598">598</a>
-<a href="#599" id="599">599</a>
-<a href="#600" id="600">600</a>
-<a href="#601" id="601">601</a>
-<a href="#602" id="602">602</a>
-<a href="#603" id="603">603</a>
-<a href="#604" id="604">604</a>
-<a href="#605" id="605">605</a>
-<a href="#606" id="606">606</a>
-<a href="#607" id="607">607</a>
-<a href="#608" id="608">608</a>
-<a href="#609" id="609">609</a>
-<a href="#610" id="610">610</a>
-<a href="#611" id="611">611</a>
-<a href="#612" id="612">612</a>
-<a href="#613" id="613">613</a>
-<a href="#614" id="614">614</a>
-<a href="#615" id="615">615</a>
-<a href="#616" id="616">616</a>
-<a href="#617" id="617">617</a>
-<a href="#618" id="618">618</a>
-<a href="#619" id="619">619</a>
-<a href="#620" id="620">620</a>
-<a href="#621" id="621">621</a>
-<a href="#622" id="622">622</a>
-<a href="#623" id="623">623</a>
-<a href="#624" id="624">624</a>
-<a href="#625" id="625">625</a>
-<a href="#626" id="626">626</a>
-<a href="#627" id="627">627</a>
-<a href="#628" id="628">628</a>
-<a href="#629" id="629">629</a>
-<a href="#630" id="630">630</a>
-<a href="#631" id="631">631</a>
-<a href="#632" id="632">632</a>
-<a href="#633" id="633">633</a>
-<a href="#634" id="634">634</a>
-<a href="#635" id="635">635</a>
-<a href="#636" id="636">636</a>
-<a href="#637" id="637">637</a>
-<a href="#638" id="638">638</a>
-<a href="#639" id="639">639</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -658,8 +587,6 @@
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>flagset::flags;
-<span class="kw">use </span>flagset::FlagSet;
 
 <span class="kw">use </span><span class="kw">crate</span>::ops::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
@@ -719,7 +646,7 @@
 
     <span class="doccomment">/// Invoke the `create` operation on the specified path
     ///
-    /// Require [`AccessorCapability::Write`]
+    /// Require [`Capability::create_dir`]
     ///
     /// # Behavior
     ///
@@ -737,7 +664,7 @@
     <span class="doccomment">/// Invoke the `read` operation on the specified path, returns a
     /// [`Reader`][crate::Reader] if operate successful.
     ///
-    /// Require [`AccessorCapability::Read`]
+    /// Require [`Capability::read`]
     ///
     /// # Behavior
     ///
@@ -755,7 +682,7 @@
     <span class="doccomment">/// Invoke the `write` operation on the specified path, returns a
     /// written size if operate successful.
     ///
-    /// Require [`AccessorCapability::Write`]
+    /// Require [`Capability::write`]
     ///
     /// # Behavior
     ///
@@ -771,7 +698,7 @@
 
     <span class="doccomment">/// Invoke the `copy` operation on the specified `from` path and `to` path.
     ///
-    /// Require [AccessorCapability::Copy]
+    /// Require [Capability::copy]
     ///
     /// # Behaviour
     ///
@@ -789,7 +716,7 @@
 
     <span class="doccomment">/// Invoke the `rename` operation on the specified `from` path and `to` path.
     ///
-    /// Require [AccessorCapability::Rename]
+    /// Require [Capability::rename]
     </span><span class="kw">async fn </span>rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
         <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>) = (from, to, args);
 
@@ -801,7 +728,7 @@
 
     <span class="doccomment">/// Invoke the `stat` operation on the specified path.
     ///
-    /// Require [`AccessorCapability::Read`]
+    /// Require [`Capability::stat`]
     ///
     /// # Behavior
     ///
@@ -819,7 +746,7 @@
 
     <span class="doccomment">/// Invoke the `delete` operation on the specified path.
     ///
-    /// Require [`AccessorCapability::Write`]
+    /// Require [`Capability::delete`]
     ///
     /// # Behavior
     ///
@@ -836,7 +763,7 @@
 
     <span class="doccomment">/// Invoke the `list` operation on the specified path.
     ///
-    /// Require [`AccessorCapability::List`]
+    /// Require [`Capability::list`]
     ///
     /// # Behavior
     ///
@@ -853,7 +780,7 @@
 
     <span class="doccomment">/// Invoke the `scan` operation on the specified path.
     ///
-    /// Require [`AccessorCapability::Scan`]
+    /// Require [`Capability::scan`]
     </span><span class="kw">async fn </span>scan(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpScan) -&gt; <span class="prelude-ty">Result</span>&lt;(RpScan, <span class="self">Self</span>::Pager)&gt; {
         <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>) = (path, args);
 
@@ -865,7 +792,7 @@
 
     <span class="doccomment">/// Invoke the `presign` operation on the specified path.
     ///
-    /// Require [`AccessorCapability::Presign`]
+    /// Require [`Capability::presign`]
     ///
     /// # Behavior
     ///
@@ -880,6 +807,8 @@
     }
 
     <span class="doccomment">/// Invoke the `batch` operations.
+    ///
+    /// Require [`Capability::batch`]
     </span><span class="kw">async fn </span>batch(<span class="kw-2">&amp;</span><span class="self">self</span>, args: OpBatch) -&gt; <span class="prelude-ty">Result</span>&lt;RpBatch&gt; {
         <span class="kw">let _ </span>= args;
 
@@ -891,9 +820,9 @@
 
     <span class="doccomment">/// Invoke the `blocking_create` operation on the specified path.
     ///
-    /// This operation is the blocking version of [`Accessor::create`]
+    /// This operation is the blocking version of [`Accessor::create_dir`]
     ///
-    /// Require [`AccessorCapability::Write`] and [`AccessorCapability::Blocking`]
+    /// Require [`Capability::create_dir`] and [`Capability::blocking`]
     </span><span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
         <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>) = (path, args);
 
@@ -907,7 +836,7 @@
     ///
     /// This operation is the blocking version of [`Accessor::read`]
     ///
-    /// Require [`AccessorCapability::Read`] and [`AccessorCapability::Blocking`]
+    /// Require [`Capability::read`] and [`Capability::blocking`]
     </span><span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
         <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>) = (path, args);
 
@@ -921,7 +850,7 @@
     ///
     /// This operation is the blocking version of [`Accessor::write`]
     ///
-    /// Require [`AccessorCapability::Write`] and [`AccessorCapability::Blocking`]
+    /// Require [`Capability::write`] and [`Capability::blocking`]
     </span><span class="kw">fn </span>blocking_write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::BlockingWriter)&gt; {
         <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>) = (path, args);
 
@@ -935,7 +864,7 @@
     ///
     /// This operation is the blocking version of [`Accessor::copy`]
     ///
-    /// Require [`AccessorCapability::Copy`] and [`AccessorCapability::Blocking`]
+    /// Require [`Capability::copy`] and [`Capability::blocking`]
     </span><span class="kw">fn </span>blocking_copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
         <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>) = (from, to, args);
 
@@ -949,7 +878,7 @@
     ///
     /// This operation is the blocking version of [`Accessor::rename`]
     ///
-    /// Require [`AccessorCapability::Rename`] and [`AccessorCapability::Blocking`]
+    /// Require [`Capability::rename`] and [`Capability::blocking`]
     </span><span class="kw">fn </span>blocking_rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
         <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>) = (from, to, args);
 
@@ -963,7 +892,7 @@
     ///
     /// This operation is the blocking version of [`Accessor::stat`]
     ///
-    /// Require [`AccessorCapability::Read`] and [`AccessorCapability::Blocking`]
+    /// Require [`Capability::stat`] and [`Capability::blocking`]
     </span><span class="kw">fn </span>blocking_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
         <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>) = (path, args);
 
@@ -977,7 +906,7 @@
     ///
     /// This operation is the blocking version of [`Accessor::delete`]
     ///
-    /// Require [`AccessorCapability::Write`] and [`AccessorCapability::Blocking`]
+    /// Require [`Capability::write`] and [`Capability::blocking`]
     </span><span class="kw">fn </span>blocking_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
         <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>) = (path, args);
 
@@ -991,7 +920,7 @@
     ///
     /// This operation is the blocking version of [`Accessor::list`]
     ///
-    /// Require [`AccessorCapability::List`] and [`AccessorCapability::Blocking`]
+    /// Require [`Capability::list`] and [`Capability::blocking`]
     ///
     /// # Behavior
     ///
@@ -1007,7 +936,7 @@
 
     <span class="doccomment">/// Invoke the `blocking_scan` operation on the specified path.
     ///
-    /// Require [`AccessorCapability::Scan`] and [`AccessorCapability::Blocking`]
+    /// Require [`Capability::scan`] and [`Capability::blocking`]
     </span><span class="kw">fn </span>blocking_scan(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpScan) -&gt; <span class="prelude-ty">Result</span>&lt;(RpScan, <span class="self">Self</span>::BlockingPager)&gt; {
         <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>) = (path, args);
 
@@ -1033,9 +962,7 @@
             scheme: Scheme::Custom(<span class="string">&quot;dummy&quot;</span>),
             root: <span class="string">&quot;&quot;</span>.to_string(),
             name: <span class="string">&quot;dummy&quot;</span>.to_string(),
-            max_batch_operations: <span class="prelude-val">None</span>,
-            capabilities: <span class="prelude-val">None</span>.into(),
-            hints: <span class="prelude-val">None</span>.into(),
+            capability: Capability::default(),
         }
     }
 }
@@ -1146,11 +1073,8 @@
     scheme: Scheme,
     root: String,
     name: String,
-    <span class="doccomment">/// limit of batch operation
-    /// only meaningful when accessor supports batch operation
-    </span>max_batch_operations: <span class="prelude-ty">Option</span>&lt;usize&gt;,
-    capabilities: FlagSet&lt;AccessorCapability&gt;,
-    hints: FlagSet&lt;AccessorHint&gt;,
+
+    capability: Capability,
 }
 
 <span class="kw">impl </span>AccessorInfo {
@@ -1194,87 +1118,21 @@
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// backend&#39;s number limitation of operations in a single batch.
-    ///
-    /// # Note
-    /// - Got Some(x): limitation is x
-    /// - Got None: no limitation
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>max_batch_operations(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
-        <span class="self">self</span>.max_batch_operations
+    <span class="doccomment">/// Get backend&#39;s capabilities.
+    </span><span class="kw">pub fn </span>capability(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Capability {
+        <span class="self">self</span>.capability
     }
 
-    <span class="doccomment">/// Set batch size limit for backend.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_max_batch_operations(<span class="kw-2">&amp;mut </span><span class="self">self</span>, limit: usize) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.max_batch_operations = <span class="prelude-val">Some</span>(limit);
-        <span class="self">self
-    </span>}
-
     <span class="doccomment">/// Get backend&#39;s capabilities.
-    </span><span class="kw">pub fn </span>capabilities(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FlagSet&lt;AccessorCapability&gt; {
-        <span class="self">self</span>.capabilities
+    </span><span class="kw">pub fn </span>capability_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Capability {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.capability
     }
 
     <span class="doccomment">/// Set capabilities for backend.
-    </span><span class="kw">pub fn </span>set_capabilities(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        capabilities: <span class="kw">impl </span>Into&lt;FlagSet&lt;AccessorCapability&gt;&gt;,
-    ) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.capabilities = capabilities.into();
+    </span><span class="kw">pub fn </span>set_capability(<span class="kw-2">&amp;mut </span><span class="self">self</span>, capability: Capability) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+        <span class="self">self</span>.capability = capability;
         <span class="self">self
     </span>}
-
-    <span class="doccomment">/// Get backend&#39;s hints.
-    </span><span class="kw">pub fn </span>hints(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FlagSet&lt;AccessorHint&gt; {
-        <span class="self">self</span>.hints
-    }
-
-    <span class="doccomment">/// Set hints for backend.
-    </span><span class="kw">pub fn </span>set_hints(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hints: <span class="kw">impl </span>Into&lt;FlagSet&lt;AccessorHint&gt;&gt;) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.hints = hints.into();
-        <span class="self">self
-    </span>}
-}
-
-<span class="macro">flags! </span>{
-    <span class="doccomment">/// AccessorCapability describes accessor&#39;s advanced capability.
-    </span><span class="kw">pub enum </span>AccessorCapability: u32 {
-        <span class="doccomment">/// Add this capability if service supports `read` and `stat`
-        </span>Read,
-        <span class="doccomment">/// Add this capability if service supports `write` and `delete`
-        </span>Write,
-        <span class="doccomment">/// Add this capability if service supports `copy`
-        </span>Copy,
-        <span class="doccomment">/// Add this capability if service supports `rename`
-        </span>Rename,
-        <span class="doccomment">/// Add this capability if service supports `list`
-        </span>List,
-        <span class="doccomment">/// Add this capability if service supports `scan`
-        </span>Scan,
-        <span class="doccomment">/// Add this capability if service supports `presign`
-        </span>Presign,
-        <span class="doccomment">/// Add this capability if service supports `blocking`
-        </span>Blocking,
-        <span class="doccomment">/// Add this capability if service supports `batch`
-        </span>Batch,
-    }
-}
-
-<span class="macro">flags! </span>{
-    <span class="doccomment">/// AccessorHint describes accessor&#39;s hint.
-    ///
-    /// Hint means developers can do optimize for this accessor.
-    ///
-    /// All hints are internal used only and will not be exposed to users.
-    </span><span class="kw">pub enum </span>AccessorHint: u64 {
-        <span class="doccomment">/// Read seekable means the underlying read is seekable.
-        ///
-        /// We can reuse the same reader instead of always creating new one.
-        </span>ReadSeekable,
-        <span class="doccomment">/// Read streamable means the underlying read is streamable.
-        ///
-        /// It&#39;s better to use stream to reading data.
-        </span>ReadStreamable,
-    }
 }
 </code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.2 (9eb3afe9e 2023-03-27)" data-search-js="search-98d53477a794af0b.js" data-settings-js="settings-c3c521c753752a1a.js" data-settings-css="settings-08ddfdda51b8ee2e.css" ></div></body></html>
+</section></main><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0 (84c898d65 2023-04-16)" data-search-js="search-8a59a8356673ec1f.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":[["accessor","The internal implementation details of `Accessor`."],["layer","The internal implementation details of `Layer`."]]};
+window.SIDEBAR_ITEMS = {"mod":["accessor","layer"]};

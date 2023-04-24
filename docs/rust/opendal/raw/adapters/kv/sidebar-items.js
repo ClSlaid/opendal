@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Backend","Backend of kv service."],["Metadata","Metadata for this key value accessor."]],"trait":[["Adapter","KvAdapter is the adapter to underlying kv services."]]};
+window.SIDEBAR_ITEMS = {"struct":["Backend","Metadata"],"trait":["Adapter"]};
