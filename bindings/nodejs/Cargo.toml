@@ -37,7 +37,7 @@ napi = { version = "2.11.3", default-features = false, features = [
   "napi6",
   "async",
 ] }
-napi-derive = "2.12.2"
+napi-derive = "2.12.5"
 opendal.workspace = true
 
 [build-dependencies]
