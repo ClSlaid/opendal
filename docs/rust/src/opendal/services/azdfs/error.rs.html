@@ -173,7 +173,7 @@
     <span class="kw">let </span>(kind, retryable) = <span class="kw">match </span>parts.status {
         StatusCode::NOT_FOUND =&gt; (ErrorKind::NotFound, <span class="bool-val">false</span>),
         StatusCode::FORBIDDEN =&gt; (ErrorKind::PermissionDenied, <span class="bool-val">false</span>),
-        StatusCode::PRECONDITION_FAILED =&gt; (ErrorKind::PreconditionFailed, <span class="bool-val">false</span>),
+        StatusCode::PRECONDITION_FAILED =&gt; (ErrorKind::ConditionNotMatch, <span class="bool-val">false</span>),
         StatusCode::INTERNAL_SERVER_ERROR
         | StatusCode::BAD_GATEWAY
         | StatusCode::SERVICE_UNAVAILABLE

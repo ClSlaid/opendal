@@ -1650,6 +1650,29 @@
 <a href="#1650" id="1650">1650</a>
 <a href="#1651" id="1651">1651</a>
 <a href="#1652" id="1652">1652</a>
+<a href="#1653" id="1653">1653</a>
+<a href="#1654" id="1654">1654</a>
+<a href="#1655" id="1655">1655</a>
+<a href="#1656" id="1656">1656</a>
+<a href="#1657" id="1657">1657</a>
+<a href="#1658" id="1658">1658</a>
+<a href="#1659" id="1659">1659</a>
+<a href="#1660" id="1660">1660</a>
+<a href="#1661" id="1661">1661</a>
+<a href="#1662" id="1662">1662</a>
+<a href="#1663" id="1663">1663</a>
+<a href="#1664" id="1664">1664</a>
+<a href="#1665" id="1665">1665</a>
+<a href="#1666" id="1666">1666</a>
+<a href="#1667" id="1667">1667</a>
+<a href="#1668" id="1668">1668</a>
+<a href="#1669" id="1669">1669</a>
+<a href="#1670" id="1670">1670</a>
+<a href="#1671" id="1671">1671</a>
+<a href="#1672" id="1672">1672</a>
+<a href="#1673" id="1673">1673</a>
+<a href="#1674" id="1674">1674</a>
+<a href="#1675" id="1675">1675</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1757,20 +1780,36 @@
     /// For example: accessor returns NotFound.
     ///
     /// `None` means disable the log for error.
-    </span><span class="kw">pub fn </span>with_error_level(<span class="kw-2">mut </span><span class="self">self</span>, level: <span class="prelude-ty">Option</span>&lt;Level&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.error_level = level;
-        <span class="self">self
-    </span>}
+    </span><span class="kw">pub fn </span>with_error_level(<span class="kw-2">mut </span><span class="self">self</span>, level: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(level_str) = level {
+            <span class="kw">let </span>level = level_str.parse().map_err(|<span class="kw">_</span>| {
+                Error::new(ErrorKind::ConfigInvalid, <span class="string">&quot;invalid log level&quot;</span>)
+                    .with_context(<span class="string">&quot;level&quot;</span>, level_str)
+            })<span class="question-mark">?</span>;
+            <span class="self">self</span>.error_level = <span class="prelude-val">Some</span>(level);
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.error_level = <span class="prelude-val">None</span>;
+        }
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>)
+    }
 
     <span class="doccomment">/// Setting the log level while unexpected failure happened.
     ///
     /// For example: accessor returns Unexpected network error.
     ///
     /// `None` means disable the log for failure.
-    </span><span class="kw">pub fn </span>with_failure_level(<span class="kw-2">mut </span><span class="self">self</span>, level: <span class="prelude-ty">Option</span>&lt;Level&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.failure_level = level;
-        <span class="self">self
-    </span>}
+    </span><span class="kw">pub fn </span>with_failure_level(<span class="kw-2">mut </span><span class="self">self</span>, level: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(level_str) = level {
+            <span class="kw">let </span>level = level_str.parse().map_err(|<span class="kw">_</span>| {
+                Error::new(ErrorKind::ConfigInvalid, <span class="string">&quot;invalid log level&quot;</span>)
+                    .with_context(<span class="string">&quot;level&quot;</span>, level_str)
+            })<span class="question-mark">?</span>;
+            <span class="self">self</span>.failure_level = <span class="prelude-val">Some</span>(level);
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.failure_level = <span class="prelude-val">None</span>;
+        }
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>)
+    }
 }
 
 <span class="kw">impl</span>&lt;A: Accessor&gt; Layer&lt;A&gt; <span class="kw">for </span>LoggingLayer {
@@ -2406,7 +2445,7 @@
             .map(|(rp, w)| {
                 <span class="macro">debug!</span>(
                     target: LOGGING_TARGET,
-                    <span class="string">&quot;service={} operation={} path={} -&gt; written&quot;</span>,
+                    <span class="string">&quot;service={} operation={} path={} -&gt; start writing&quot;</span>,
                     <span class="self">self</span>.scheme,
                     Operation::BlockingWrite,
                     path,
@@ -2992,19 +3031,6 @@
     }
 }
 
-<span class="kw">impl</span>&lt;W&gt; Drop <span class="kw">for </span>LoggingWriter&lt;W&gt; {
-    <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="macro">debug!</span>(
-            target: LOGGING_TARGET,
-            <span class="string">&quot;service={} operation={} path={} written={} -&gt; data written finished&quot;</span>,
-            <span class="self">self</span>.scheme,
-            <span class="self">self</span>.op,
-            <span class="self">self</span>.path,
-            <span class="self">self</span>.written
-        );
-    }
-}
-
 <span class="attr">#[async_trait]
 </span><span class="kw">impl</span>&lt;W: oio::Write&gt; oio::Write <span class="kw">for </span>LoggingWriter&lt;W&gt; {
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
@@ -3072,7 +3098,17 @@
 
     <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">match </span><span class="self">self</span>.inner.close().<span class="kw">await </span>{
-            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(()),
+            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
+                <span class="macro">debug!</span>(
+                    target: LOGGING_TARGET,
+                    <span class="string">&quot;service={} operation={} path={} written={} -&gt; data written finished&quot;</span>,
+                    <span class="self">self</span>.scheme,
+                    <span class="self">self</span>.op,
+                    <span class="self">self</span>.path,
+                    <span class="self">self</span>.written
+                );
+                <span class="prelude-val">Ok</span>(())
+            }
             <span class="prelude-val">Err</span>(err) =&gt; {
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(lvl) = <span class="self">self</span>.failure_level {
                     <span class="macro">log!</span>(
@@ -3127,7 +3163,17 @@
 
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">match </span><span class="self">self</span>.inner.close() {
-            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(()),
+            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
+                <span class="macro">debug!</span>(
+                    target: LOGGING_TARGET,
+                    <span class="string">&quot;service={} operation={} path={} written={} -&gt; data written finished&quot;</span>,
+                    <span class="self">self</span>.scheme,
+                    <span class="self">self</span>.op,
+                    <span class="self">self</span>.path,
+                    <span class="self">self</span>.written
+                );
+                <span class="prelude-val">Ok</span>(())
+            }
             <span class="prelude-val">Err</span>(err) =&gt; {
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(lvl) = <span class="self">self</span>.failure_level {
                     <span class="macro">log!</span>(

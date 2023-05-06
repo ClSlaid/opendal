@@ -1188,6 +1188,23 @@
 <a href="#1188" id="1188">1188</a>
 <a href="#1189" id="1189">1189</a>
 <a href="#1190" id="1190">1190</a>
+<a href="#1191" id="1191">1191</a>
+<a href="#1192" id="1192">1192</a>
+<a href="#1193" id="1193">1193</a>
+<a href="#1194" id="1194">1194</a>
+<a href="#1195" id="1195">1195</a>
+<a href="#1196" id="1196">1196</a>
+<a href="#1197" id="1197">1197</a>
+<a href="#1198" id="1198">1198</a>
+<a href="#1199" id="1199">1199</a>
+<a href="#1200" id="1200">1200</a>
+<a href="#1201" id="1201">1201</a>
+<a href="#1202" id="1202">1202</a>
+<a href="#1203" id="1203">1203</a>
+<a href="#1204" id="1204">1204</a>
+<a href="#1205" id="1205">1205</a>
+<a href="#1206" id="1206">1206</a>
+<a href="#1207" id="1207">1207</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1227,6 +1244,7 @@
 
 <span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
+<span class="kw">use </span><span class="kw">super</span>::error::parse_s3_error_code;
 <span class="kw">use </span><span class="kw">super</span>::pager::S3Pager;
 <span class="kw">use </span><span class="kw">super</span>::writer::S3Writer;
 <span class="kw">use </span><span class="kw">crate</span>::ops::<span class="kw-2">*</span>;
@@ -2109,17 +2127,29 @@
 
                 read: <span class="bool-val">true</span>,
                 read_can_next: <span class="bool-val">true</span>,
+                read_with_range: <span class="bool-val">true</span>,
                 read_with_if_match: <span class="bool-val">true</span>,
                 read_with_if_none_match: <span class="bool-val">true</span>,
+                read_with_override_cache_control: <span class="bool-val">true</span>,
                 read_with_override_content_disposition: <span class="bool-val">true</span>,
 
                 write: <span class="bool-val">true</span>,
+                write_with_cache_control: <span class="bool-val">true</span>,
+                write_with_content_type: <span class="bool-val">true</span>,
+                write_without_content_length: <span class="bool-val">true</span>,
+
                 list: <span class="bool-val">true</span>,
+                list_with_limit: <span class="bool-val">true</span>,
+                list_with_start_after: <span class="bool-val">true</span>,
+
                 scan: <span class="bool-val">true</span>,
                 copy: <span class="bool-val">true</span>,
                 presign: <span class="bool-val">true</span>,
                 batch: <span class="bool-val">true</span>,
                 batch_max_operations: <span class="prelude-val">Some</span>(<span class="number">1000</span>),
+
+                list_without_delimiter: <span class="bool-val">true</span>,
+                list_with_delimiter_slash: <span class="bool-val">true</span>,
 
                 ..Default::default()
             });
@@ -2230,14 +2260,13 @@
     <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Pager)&gt; {
         <span class="prelude-val">Ok</span>((
             RpList::default(),
-            S3Pager::new(<span class="self">self</span>.core.clone(), path, <span class="string">&quot;/&quot;</span>, args.limit()),
-        ))
-    }
-
-    <span class="kw">async fn </span>scan(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpScan) -&gt; <span class="prelude-ty">Result</span>&lt;(RpScan, <span class="self">Self</span>::Pager)&gt; {
-        <span class="prelude-val">Ok</span>((
-            RpScan::default(),
-            S3Pager::new(<span class="self">self</span>.core.clone(), path, <span class="string">&quot;&quot;</span>, args.limit()),
+            S3Pager::new(
+                <span class="self">self</span>.core.clone(),
+                path,
+                args.delimiter(),
+                args.limit(),
+                args.start_after(),
+            ),
         ))
     }
 
@@ -2305,10 +2334,15 @@
             </span><span class="kw">for </span>i <span class="kw">in </span>result.error {
                 <span class="kw">let </span>path = build_rel_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, <span class="kw-2">&amp;</span>i.key);
 
-                batched_result.push((
-                    path,
-                    <span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{i:?}&quot;</span>))),
-                ));
+                <span class="comment">// set the error kind and mark temporary if retryable
+                </span><span class="kw">let </span>(kind, retryable) =
+                    parse_s3_error_code(i.code.as_str()).unwrap_or((ErrorKind::Unexpected, <span class="bool-val">false</span>));
+                <span class="kw">let </span><span class="kw-2">mut </span>err = Error::new(kind, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{i:?}&quot;</span>));
+                <span class="kw">if </span>retryable {
+                    err = err.set_temporary();
+                }
+
+                batched_result.push((path, <span class="prelude-val">Err</span>(err)));
             }
 
             <span class="prelude-val">Ok</span>(RpBatch::new(batched_result))

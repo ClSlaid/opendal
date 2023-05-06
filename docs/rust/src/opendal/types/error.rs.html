@@ -387,6 +387,12 @@
 <a href="#387" id="387">387</a>
 <a href="#388" id="388">388</a>
 <a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -459,11 +465,17 @@
     </span>RateLimited,
     <span class="doccomment">/// The given file paths are same.
     </span>IsSameFile,
-    <span class="doccomment">/// The preconfition of this operation is not met.
+    <span class="doccomment">/// The condition of this operation is not match.
     ///
-    /// For example, reading a file with If-Match header but the file&#39;s ETag
-    /// is not match.
-    </span>PreconditionFailed,
+    /// The `condition` itself is context based.
+    ///
+    /// For example, in S3, the `condition` can be:
+    /// 1. writing a file with If-Match header but the file&#39;s ETag is not match (will get a 412 Precondition Failed).
+    /// 2. reading a file with If-None-Match header but the file&#39;s ETag is match (will get a 304 Not Modified).
+    ///
+    /// As OpenDAL cannot handle the `condition not match` error, it will always return this error to users.
+    /// So users could to handle this error by themselves.
+    </span>ConditionNotMatch,
     <span class="doccomment">/// The content is truncated.
     ///
     /// This error kind means there are more content to come but been truncated.
@@ -510,7 +522,7 @@
             ErrorKind::AlreadyExists =&gt; <span class="string">&quot;AlreadyExists&quot;</span>,
             ErrorKind::RateLimited =&gt; <span class="string">&quot;RateLimited&quot;</span>,
             ErrorKind::IsSameFile =&gt; <span class="string">&quot;IsSameFile&quot;</span>,
-            ErrorKind::PreconditionFailed =&gt; <span class="string">&quot;PreconditionFailed&quot;</span>,
+            ErrorKind::ConditionNotMatch =&gt; <span class="string">&quot;ConditionNotMatch&quot;</span>,
             ErrorKind::ContentTruncated =&gt; <span class="string">&quot;ContentTruncated&quot;</span>,
             ErrorKind::ContentIncomplete =&gt; <span class="string">&quot;ContentIncomplete&quot;</span>,
         }

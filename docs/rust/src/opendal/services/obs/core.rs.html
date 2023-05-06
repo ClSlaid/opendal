@@ -244,6 +244,17 @@
 <a href="#244" id="244">244</a>
 <a href="#245" id="245">245</a>
 <a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -268,6 +279,7 @@
 <span class="kw">use </span>http::header::CONTENT_LENGTH;
 <span class="kw">use </span>http::header::CONTENT_TYPE;
 <span class="kw">use </span>http::header::IF_MATCH;
+<span class="kw">use </span>http::header::IF_NONE_MATCH;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::Response;
 <span class="kw">use </span>reqsign::HuaweicloudObsCredential;
@@ -334,6 +346,7 @@
         path: <span class="kw-2">&amp;</span>str,
         range: BytesRange,
         if_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
+        if_none_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
@@ -347,6 +360,10 @@
 
         <span class="kw">if </span>!range.is_full() {
             req = req.header(http::header::RANGE, range.to_header())
+        }
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(if_none_match) = if_none_match {
+            req = req.header(IF_NONE_MATCH, if_none_match);
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = req
@@ -392,6 +409,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         if_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
+        if_none_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
@@ -404,6 +422,10 @@
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(if_match) = if_match {
             req = req.header(IF_MATCH, if_match);
+        }
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(if_none_match) = if_none_match {
+            req = req.header(IF_NONE_MATCH, if_none_match);
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = req

@@ -565,6 +565,65 @@
 <a href="#565" id="565">565</a>
 <a href="#566" id="566">566</a>
 <a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a>
+<a href="#599" id="599">599</a>
+<a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
+<a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a>
+<a href="#624" id="624">624</a>
+<a href="#625" id="625">625</a>
+<a href="#626" id="626">626</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -588,6 +647,7 @@
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>http::header::HOST;
 <span class="kw">use </span>http::StatusCode;
 <span class="kw">use </span>log::debug;
 <span class="kw">use </span>reqsign::GoogleCredentialLoader;
@@ -619,7 +679,7 @@
 /// - [x] list
 /// - [x] scan
 /// - [x] copy
-/// - [ ] presign
+/// - [x] presign
 /// - [ ] blocking
 ///
 /// # Configuration
@@ -941,12 +1001,29 @@
             .set_root(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root)
             .set_name(<span class="kw-2">&amp;</span><span class="self">self</span>.core.bucket)
             .set_capability(Capability {
+                stat: <span class="bool-val">true</span>,
+                stat_with_if_match: <span class="bool-val">true</span>,
+                stat_with_if_none_match: <span class="bool-val">true</span>,
+
                 read: <span class="bool-val">true</span>,
                 read_can_next: <span class="bool-val">true</span>,
+                read_with_range: <span class="bool-val">true</span>,
+                read_with_if_match: <span class="bool-val">true</span>,
+                read_with_if_none_match: <span class="bool-val">true</span>,
+
                 write: <span class="bool-val">true</span>,
+                write_with_content_type: <span class="bool-val">true</span>,
+                write_without_content_length: <span class="bool-val">true</span>,
+
                 list: <span class="bool-val">true</span>,
+                list_with_limit: <span class="bool-val">true</span>,
+                list_with_start_after: <span class="bool-val">true</span>,
                 scan: <span class="bool-val">true</span>,
                 copy: <span class="bool-val">true</span>,
+                presign: <span class="bool-val">true</span>,
+
+                list_with_delimiter_slash: <span class="bool-val">true</span>,
+                list_without_delimiter: <span class="bool-val">true</span>,
                 ..Default::default()
             });
         am
@@ -1001,17 +1078,21 @@
         }
     }
 
-    <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
+    <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
         <span class="comment">// Stat root always returns a DIR.
         </span><span class="kw">if </span>path == <span class="string">&quot;/&quot; </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(RpStat::new(Metadata::new(EntryMode::DIR)));
         }
 
-        <span class="kw">let </span>resp = <span class="self">self</span>.core.gcs_get_object_metadata(path).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self
+            </span>.core
+            .gcs_get_object_metadata(path, args.if_match(), args.if_none_match())
+            .<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">if </span>resp.status().is_success() {
             <span class="comment">// read http response body
             </span><span class="kw">let </span>slc = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+
             <span class="kw">let </span>meta: GetObjectJsonResponse =
                 serde_json::from_slice(<span class="kw-2">&amp;</span>slc).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
@@ -1058,15 +1139,52 @@
     <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Pager)&gt; {
         <span class="prelude-val">Ok</span>((
             RpList::default(),
-            GcsPager::new(<span class="self">self</span>.core.clone(), path, <span class="string">&quot;/&quot;</span>, args.limit()),
+            GcsPager::new(
+                <span class="self">self</span>.core.clone(),
+                path,
+                args.delimiter(),
+                args.limit(),
+                args.start_after(),
+            ),
         ))
     }
 
-    <span class="kw">async fn </span>scan(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpScan) -&gt; <span class="prelude-ty">Result</span>&lt;(RpScan, <span class="self">Self</span>::Pager)&gt; {
-        <span class="prelude-val">Ok</span>((
-            RpScan::default(),
-            GcsPager::new(<span class="self">self</span>.core.clone(), path, <span class="string">&quot;&quot;</span>, args.limit()),
-        ))
+    <span class="kw">async fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
+        <span class="comment">// We will not send this request out, just for signing.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>req = <span class="kw">match </span>args.operation() {
+            PresignOperation::Stat(v) =&gt; {
+                <span class="self">self</span>.core
+                    .gcs_head_object_xml_request(path, v.if_match(), v.if_none_match())<span class="question-mark">?
+            </span>}
+            PresignOperation::Read(v) =&gt; <span class="self">self</span>.core.gcs_get_object_xml_request(
+                path,
+                v.range(),
+                v.if_match(),
+                v.if_none_match(),
+            )<span class="question-mark">?</span>,
+            PresignOperation::Write(<span class="kw">_</span>) =&gt; {
+                <span class="self">self</span>.core
+                    .gcs_insert_object_xml_request(path, <span class="prelude-val">None</span>, AsyncBody::Empty)<span class="question-mark">?
+            </span>}
+        };
+
+        <span class="self">self</span>.core.sign_query(<span class="kw-2">&amp;mut </span>req, args.expire()).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="comment">// We don&#39;t need this request anymore, consume it directly.
+        </span><span class="kw">let </span>(<span class="kw-2">mut </span>parts, <span class="kw">_</span>) = req.into_parts();
+        <span class="comment">// Always remove host header, let users&#39; client to set it based on HTTP
+        // version.
+        //
+        // As discussed in &lt;https://github.com/seanmonstar/reqwest/issues/1809&gt;,
+        // google server could send RST_STREAM of PROTOCOL_ERROR if our request
+        // contains host header.
+        </span>parts.headers.remove(HOST);
+
+        <span class="prelude-val">Ok</span>(RpPresign::new(PresignedRequest::new(
+            parts.method,
+            parts.uri,
+            parts.headers,
+        )))
     }
 }
 

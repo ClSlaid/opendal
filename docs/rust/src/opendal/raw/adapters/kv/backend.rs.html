@@ -331,6 +331,13 @@
 <a href="#331" id="331">331</a>
 <a href="#332" id="332">332</a>
 <a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -358,7 +365,13 @@
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Backend of kv service.
+<span class="doccomment">/// Backend of kv service. If the storage service is one k-v-like service, it should implement this kv [`Backend`] by right.
+///
+/// `Backend` implements one general logic on how to read, write, scan the data from one kv store efficiently.
+/// And the [`Adapter`] held by `Backend` will handle how to communicate with one k-v-like service really and provides
+/// a series of basic operation for this service.
+///
+/// OpenDAL developer can implement one new k-v store backend easily with help of this Backend.
 </span><span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>Backend&lt;S: Adapter&gt; {
     kv: Arc&lt;S&gt;,
@@ -401,6 +414,7 @@
         <span class="kw">if </span>cap.read {
             cap.read_can_seek = <span class="bool-val">true</span>;
             cap.read_can_next = <span class="bool-val">true</span>;
+            cap.read_with_range = <span class="bool-val">true</span>;
             cap.stat = <span class="bool-val">true</span>;
         }
 

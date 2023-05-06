@@ -299,6 +299,21 @@
 <a href="#299" id="299">299</a>
 <a href="#300" id="300">300</a>
 <a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -335,6 +350,11 @@
 
 <span class="doccomment">/// Writer is designed to write data into given path in an asynchronous
 /// manner.
+///
+/// ## Notes
+///
+/// Please make sure either `close` or `abort` has been called before
+/// dropping the writer otherwise the data could be lost.
 ///
 /// ## Notes
 ///
@@ -382,7 +402,12 @@
         }
     }
 
-    <span class="doccomment">/// Abort inner writer.
+    <span class="doccomment">/// Abort the writer and clean up all written data.
+    ///
+    /// ## Notes
+    ///
+    /// Abort should only be called when the writer is not closed or
+    /// aborted, otherwise an unexpected error could be returned.
     </span><span class="kw">pub async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">if let </span>State::Idle(<span class="prelude-val">Some</span>(w)) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.state {
             w.abort().<span class="kw">await
@@ -394,7 +419,12 @@
         }
     }
 
-    <span class="doccomment">/// Close the writer and make sure all data have been stored.
+    <span class="doccomment">/// Close the writer and make sure all data have been committed.
+    ///
+    /// ## Notes
+    ///
+    /// Close should only be called when the writer is not closed or
+    /// aborted, otherwise an unexpected error could be returned.
     </span><span class="kw">pub async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">if let </span>State::Idle(<span class="prelude-val">Some</span>(w)) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.state {
             w.close().<span class="kw">await

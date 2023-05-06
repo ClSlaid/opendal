@@ -360,6 +360,34 @@
 <a href="#360" id="360">360</a>
 <a href="#361" id="361">361</a>
 <a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -381,28 +409,25 @@
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::fmt::Write;
-<span class="kw">use </span>std::str::FromStr;
 
 <span class="kw">use </span>http::header::HeaderName;
-<span class="kw">use </span>http::header::CACHE_CONTROL;
 <span class="kw">use </span>http::header::CONTENT_LENGTH;
 <span class="kw">use </span>http::header::CONTENT_TYPE;
 <span class="kw">use </span>http::header::IF_MATCH;
 <span class="kw">use </span>http::header::IF_NONE_MATCH;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::Response;
-<span class="kw">use </span>http::Uri;
 <span class="kw">use </span>reqsign::AzureStorageCredential;
 <span class="kw">use </span>reqsign::AzureStorageLoader;
 <span class="kw">use </span>reqsign::AzureStorageSigner;
 
-<span class="kw">use </span><span class="kw">super</span>::batch::BatchDeleteRequestBuilder;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">mod </span>constants {
     <span class="kw">pub const </span>X_MS_BLOB_TYPE: <span class="kw-2">&amp;</span>str = <span class="string">&quot;x-ms-blob-type&quot;</span>;
     <span class="kw">pub const </span>X_MS_COPY_SOURCE: <span class="kw-2">&amp;</span>str = <span class="string">&quot;x-ms-copy-source&quot;</span>;
+    <span class="kw">pub const </span>X_MS_BLOB_CACHE_CONTROL: <span class="kw-2">&amp;</span>str = <span class="string">&quot;x-ms-blob-cache-control&quot;</span>;
 }
 
 <span class="kw">pub struct </span>AzblobCore {
@@ -444,6 +469,14 @@
         }
     }
 
+    <span class="kw">pub async fn </span>sign_query&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, req: <span class="kw-2">&amp;mut </span>Request&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>cred = <span class="self">self</span>.load_credential().<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="self">self</span>.signer
+            .sign_query(req, <span class="kw-2">&amp;</span>cred)
+            .map_err(new_request_sign_error)
+    }
+
     <span class="kw">pub async fn </span>sign&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, req: <span class="kw-2">&amp;mut </span>Request&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>cred = <span class="self">self</span>.load_credential().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.signer.sign(req, <span class="kw-2">&amp;</span>cred).map_err(new_request_sign_error)
@@ -463,14 +496,14 @@
 }
 
 <span class="kw">impl </span>AzblobCore {
-    <span class="kw">pub async fn </span>azblob_get_blob(
+    <span class="kw">pub fn </span>azblob_get_blob_request(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         range: BytesRange,
         if_none_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
         if_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
         override_content_disposition: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(
@@ -516,9 +549,28 @@
             req = req.header(IF_MATCH, if_match);
         }
 
-        <span class="kw">let </span><span class="kw-2">mut </span>req = req
+        <span class="kw">let </span>req = req
             .body(AsyncBody::Empty)
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(req)
+    }
+
+    <span class="kw">pub async fn </span>azblob_get_blob(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        path: <span class="kw-2">&amp;</span>str,
+        range: BytesRange,
+        if_none_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
+        if_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
+        override_content_disposition: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.azblob_get_blob_request(
+            path,
+            range,
+            if_none_match,
+            if_match,
+            override_content_disposition,
+        )<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -544,7 +596,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::put(<span class="kw-2">&amp;</span>url);
         <span class="kw">if let </span><span class="prelude-val">Some</span>(cache_control) = cache_control {
-            req = req.header(CACHE_CONTROL, cache_control);
+            req = req.header(constants::X_MS_BLOB_CACHE_CONTROL, cache_control);
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = size {
             req = req.header(CONTENT_LENGTH, size)
@@ -565,12 +617,12 @@
         <span class="prelude-val">Ok</span>(req)
     }
 
-    <span class="kw">pub async fn </span>azblob_get_blob_properties(
+    <span class="kw">pub fn </span>azblob_head_blob_request(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         if_none_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
         if_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>url = <span class="macro">format!</span>(
@@ -590,15 +642,26 @@
             req = req.header(IF_MATCH, if_match);
         }
 
-        <span class="kw">let </span><span class="kw-2">mut </span>req = req
+        <span class="kw">let </span>req = req
             .body(AsyncBody::Empty)
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(req)
+    }
+
+    <span class="kw">pub async fn </span>azblob_get_blob_properties(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        path: <span class="kw-2">&amp;</span>str,
+        if_none_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
+        if_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.azblob_head_blob_request(path, if_none_match, if_match)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>azblob_delete_blob(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub fn </span>azblob_delete_blob_request(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>url = <span class="macro">format!</span>(
@@ -610,9 +673,13 @@
 
         <span class="kw">let </span>req = Request::delete(<span class="kw-2">&amp;</span>url);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>req = req
+        req.header(CONTENT_LENGTH, <span class="number">0</span>)
             .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+            .map_err(new_request_build_error)
+    }
+
+    <span class="kw">pub async fn </span>azblob_delete_blob(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.azblob_delete_blob_request(path)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.send(req).<span class="kw">await
@@ -688,35 +755,24 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         paths: <span class="kw-2">&amp;</span>[String],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
-        <span class="comment">// init batch request
-        </span><span class="kw">let </span>url = <span class="macro">format!</span>(
+        <span class="kw">let </span>url = <span class="macro">format!</span>(
             <span class="string">&quot;{}/{}?restype=container&amp;comp=batch&quot;</span>,
             <span class="self">self</span>.endpoint, <span class="self">self</span>.container
         );
-        <span class="kw">let </span><span class="kw-2">mut </span>batch_delete_req_builder = BatchDeleteRequestBuilder::new(<span class="kw-2">&amp;</span>url);
 
-        <span class="kw">for </span>path <span class="kw">in </span>paths.iter() {
-            <span class="comment">// build sub requests
-            </span><span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
-            <span class="kw">let </span>encoded_path = percent_encode_path(<span class="kw-2">&amp;</span>p);
+        <span class="kw">let </span><span class="kw-2">mut </span>multipart = Multipart::new();
 
-            <span class="kw">let </span>url = Uri::from_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
-                <span class="string">&quot;{}/{}/{}&quot;</span>,
-                <span class="self">self</span>.endpoint, <span class="self">self</span>.container, encoded_path
-            ))
-            .unwrap();
+        <span class="kw">for </span>(idx, path) <span class="kw">in </span>paths.iter().enumerate() {
+            <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.azblob_delete_blob_request(path)<span class="question-mark">?</span>;
 
-            <span class="kw">let </span><span class="kw-2">mut </span>sub_req = Request::delete(<span class="kw-2">&amp;</span>url.to_string())
-                .header(CONTENT_LENGTH, <span class="number">0</span>)
-                .body(AsyncBody::Empty)
-                .map_err(new_request_build_error)<span class="question-mark">?</span>;
-
-            <span class="self">self</span>.batch_sign(<span class="kw-2">&amp;mut </span>sub_req).<span class="kw">await</span><span class="question-mark">?</span>;
-
-            batch_delete_req_builder.append(sub_req);
+            <span class="self">self</span>.batch_sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
+            multipart = multipart.part(
+                MixedPart::from_request(req).part_header(<span class="string">&quot;content-id&quot;</span>.parse().unwrap(), idx.into()),
+            );
         }
 
-        <span class="kw">let </span><span class="kw-2">mut </span>req = batch_delete_req_builder.try_into_req()<span class="question-mark">?</span>;
+        <span class="kw">let </span>req = Request::post(url);
+        <span class="kw">let </span><span class="kw-2">mut </span>req = multipart.apply(req)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.send(req).<span class="kw">await

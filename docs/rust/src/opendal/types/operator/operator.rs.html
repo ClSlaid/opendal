@@ -1366,6 +1366,12 @@
 <a href="#1366" id="1366">1366</a>
 <a href="#1367" id="1367">1367</a>
 <a href="#1368" id="1368">1368</a>
+<a href="#1369" id="1369">1369</a>
+<a href="#1370" id="1370">1370</a>
+<a href="#1371" id="1371">1371</a>
+<a href="#1372" id="1372">1372</a>
+<a href="#1373" id="1373">1373</a>
+<a href="#1374" id="1374">1374</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1401,8 +1407,11 @@
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Operator is the entry for all public async APIs.
+/// Developer should manipulate the data from storage service through Operator only by right.
 ///
-/// Read [`concepts`][docs::concepts] for know more about [`Operator`].
+/// We will usually do some general checks and data transformations in this layer,
+/// like normalizing path from input, checking whether the path refers to one file or one directory, and so on.
+/// Read [`concepts`][docs::concepts] for more about [`Operator`].
 ///
 /// # Examples
 ///
@@ -1429,9 +1438,11 @@
 /// ```
 </span><span class="attr">#[derive(Clone, Debug)]
 </span><span class="kw">pub struct </span>Operator {
-    accessor: FusedAccessor,
+    <span class="comment">// accessor is what Operator delegates for
+    </span>accessor: FusedAccessor,
 
-    limit: usize,
+    <span class="comment">// limit is usually the maximum size of data that operator will handle in one operation
+    </span>limit: usize,
 }
 
 <span class="doccomment">/// # Operator basic API.
@@ -1453,7 +1464,8 @@
         <span class="self">self</span>.accessor
     }
 
-    <span class="doccomment">/// Get current operator&#39;s limit
+    <span class="doccomment">/// Get current operator&#39;s limit.
+    /// Limit is usually the maximum size of data that operator will handle in one operation.
     </span><span class="kw">pub fn </span>limit(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.limit
     }
@@ -1526,7 +1538,7 @@
     ///
     /// Use `stat` if you:
     ///
-    /// - Want detect the outside changes of path.
+    /// - Want to detect the outside changes of path.
     /// - Don&#39;t want to read from cached metadata.
     ///
     /// You may want to use `metadata` if you are working with entries
@@ -1561,7 +1573,7 @@
     ///
     /// Use `stat` if you:
     ///
-    /// - Want detect the outside changes of path.
+    /// - Want to detect the outside changes of path.
     /// - Don&#39;t want to read from cached metadata.
     ///
     /// You may want to use `metadata` if you are working with entries
@@ -1609,7 +1621,7 @@
     ///
     /// You may want to use `stat`, if you:
     ///
-    /// - Want detect the outside changes of path.
+    /// - Want to detect the outside changes of path.
     /// - Don&#39;t want to read from cached metadata.
     ///
     /// # Behavior
@@ -1621,8 +1633,8 @@
     ///
     /// ## Query already cached metadata
     ///
-    /// By query metadata with `None`, we can only query in-memory metadata
-    /// cache. In this way, we can make sure that no API call will send.
+    /// By querying metadata with `None`, we can only query in-memory metadata
+    /// cache. In this way, we can make sure that no API call will be sent.
     ///
     /// ```
     /// # use anyhow::Result;
@@ -1662,7 +1674,7 @@
     ///
     /// ## Query all metadata
     ///
-    /// By query metadata with `Complete`, we can make sure that we have fetched all metadata of this entry.
+    /// By querying metadata with `Complete`, we can make sure that we have fetched all metadata of this entry.
     ///
     /// ```
     /// # use anyhow::Result;
@@ -2018,7 +2030,7 @@
     ///
     /// - `from` and `to` must be a file.
     /// - `to` will be overwritten if it exists.
-    /// - If `from` and `to` are the same,  a `IsSameFile` error will occur.
+    /// - If `from` and `to` are the same,  an `IsSameFile` error will occur.
     /// - `copy` is idempotent. For same `from` and `to` input, the result will be the same.
     ///
     /// # Examples
@@ -2077,7 +2089,7 @@
     ///
     /// - `from` and `to` must be a file.
     /// - `to` will be overwritten if it exists.
-    /// - If `from` and `to` are the same, a `IsSameFile` error will occur.
+    /// - If `from` and `to` are the same, an `IsSameFile` error will occur.
     ///
     /// # Examples
     ///
@@ -2243,7 +2255,7 @@
     ///
     /// # Notes
     ///
-    /// - Delete not existing error won&#39;t return errors.
+    /// - Deleting a file that does not exist won&#39;t return errors.
     ///
     /// # Examples
     ///
@@ -2289,9 +2301,9 @@
         <span class="self">self</span>.remove_via(stream::iter(paths)).<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// remove will given paths.
-
-    /// remove_via will remove files via given stream.
+    <span class="doccomment">/// remove will remove files via the given paths.
+    ///
+    /// remove_via will remove files via the given stream.
     ///
     /// We will delete by chunks with given batch limit on the stream.
     ///
@@ -2465,10 +2477,10 @@
     /// # use anyhow::Result;
     /// # use futures::io;
     /// use futures::TryStreamExt;
+    /// use opendal::ops::OpList;
     /// use opendal::EntryMode;
     /// use opendal::Metakey;
     /// use opendal::Operator;
-    /// use opendal::ops::OpList;
     /// # #[tokio::main]
     /// # async fn test(op: Operator) -&gt; Result&lt;()&gt; {
     /// let option = OpList::new().with_limit(10).with_start_after(&quot;start&quot;);

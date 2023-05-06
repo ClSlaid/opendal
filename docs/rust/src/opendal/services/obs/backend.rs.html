@@ -430,6 +430,17 @@
 <a href="#430" id="430">430</a>
 <a href="#431" id="431">431</a>
 <a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -738,12 +749,27 @@
             .set_root(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root)
             .set_name(<span class="kw-2">&amp;</span><span class="self">self</span>.core.bucket)
             .set_capability(Capability {
+                stat: <span class="bool-val">true</span>,
+                stat_with_if_match: <span class="bool-val">true</span>,
+                stat_with_if_none_match: <span class="bool-val">true</span>,
+
                 read: <span class="bool-val">true</span>,
                 read_can_next: <span class="bool-val">true</span>,
+                read_with_range: <span class="bool-val">true</span>,
+                read_with_if_match: <span class="bool-val">true</span>,
+                read_with_if_none_match: <span class="bool-val">true</span>,
+
                 write: <span class="bool-val">true</span>,
+                write_with_content_type: <span class="bool-val">true</span>,
+                write_with_cache_control: <span class="bool-val">true</span>,
+
                 list: <span class="bool-val">true</span>,
                 scan: <span class="bool-val">true</span>,
                 copy: <span class="bool-val">true</span>,
+
+                list_with_delimiter_slash: <span class="bool-val">true</span>,
+                list_without_delimiter: <span class="bool-val">true</span>,
+
                 ..Default::default()
             });
 
@@ -773,7 +799,7 @@
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
         <span class="kw">let </span>resp = <span class="self">self
             </span>.core
-            .obs_get_object(path, args.range(), args.if_match())
+            .obs_get_object(path, args.range(), args.if_match(), args.if_none_match())
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
@@ -821,7 +847,10 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(RpStat::new(Metadata::new(EntryMode::DIR)));
         }
 
-        <span class="kw">let </span>resp = <span class="self">self</span>.core.obs_get_head_object(path, args.if_match()).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self
+            </span>.core
+            .obs_get_head_object(path, args.if_match(), args.if_none_match())
+            .<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
 
@@ -851,14 +880,7 @@
     <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Pager)&gt; {
         <span class="prelude-val">Ok</span>((
             RpList::default(),
-            ObsPager::new(<span class="self">self</span>.core.clone(), path, <span class="string">&quot;/&quot;</span>, args.limit()),
-        ))
-    }
-
-    <span class="kw">async fn </span>scan(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpScan) -&gt; <span class="prelude-ty">Result</span>&lt;(RpScan, <span class="self">Self</span>::Pager)&gt; {
-        <span class="prelude-val">Ok</span>((
-            RpScan::default(),
-            ObsPager::new(<span class="self">self</span>.core.clone(), path, <span class="string">&quot;&quot;</span>, args.limit()),
+            ObsPager::new(<span class="self">self</span>.core.clone(), path, args.delimiter(), args.limit()),
         ))
     }
 }

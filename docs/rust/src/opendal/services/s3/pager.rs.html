@@ -229,6 +229,22 @@
 <a href="#229" id="229">229</a>
 <a href="#230" id="230">230</a>
 <a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -267,18 +283,28 @@
     delimiter: String,
     limit: <span class="prelude-ty">Option</span>&lt;usize&gt;,
 
+    <span class="doccomment">/// Amazon S3 starts listing **after** this specified key
+    </span>start_after: <span class="prelude-ty">Option</span>&lt;String&gt;,
+
     token: String,
     done: bool,
 }
 
 <span class="kw">impl </span>S3Pager {
-    <span class="kw">pub fn </span>new(core: Arc&lt;S3Core&gt;, path: <span class="kw-2">&amp;</span>str, delimiter: <span class="kw-2">&amp;</span>str, limit: <span class="prelude-ty">Option</span>&lt;usize&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(
+        core: Arc&lt;S3Core&gt;,
+        path: <span class="kw-2">&amp;</span>str,
+        delimiter: <span class="kw-2">&amp;</span>str,
+        limit: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+        start_after: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
+    ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             core,
 
             path: path.to_string(),
             delimiter: delimiter.to_string(),
             limit,
+            start_after: start_after.map(String::from),
 
             token: <span class="string">&quot;&quot;</span>.to_string(),
             done: <span class="bool-val">false</span>,
@@ -295,7 +321,13 @@
 
         <span class="kw">let </span>resp = <span class="self">self
             </span>.core
-            .s3_list_objects(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="kw-2">&amp;</span><span class="self">self</span>.token, <span class="kw-2">&amp;</span><span class="self">self</span>.delimiter, <span class="self">self</span>.limit)
+            .s3_list_objects(
+                <span class="kw-2">&amp;</span><span class="self">self</span>.path,
+                <span class="kw-2">&amp;</span><span class="self">self</span>.token,
+                <span class="kw-2">&amp;</span><span class="self">self</span>.delimiter,
+                <span class="self">self</span>.limit,
+                <span class="self">self</span>.start_after.clone(),
+            )
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">if </span>resp.status() != http::StatusCode::OK {

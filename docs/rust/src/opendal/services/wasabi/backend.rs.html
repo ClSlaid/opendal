@@ -1168,6 +1168,9 @@
 <a href="#1168" id="1168">1168</a>
 <a href="#1169" id="1169">1169</a>
 <a href="#1170" id="1170">1170</a>
+<a href="#1171" id="1171">1171</a>
+<a href="#1172" id="1172">1172</a>
+<a href="#1173" id="1173">1173</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -2072,8 +2075,14 @@
             .set_root(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root)
             .set_name(<span class="kw-2">&amp;</span><span class="self">self</span>.core.bucket)
             .set_capability(Capability {
+                stat: <span class="bool-val">true</span>,
+                stat_with_if_match: <span class="bool-val">true</span>,
+                stat_with_if_none_match: <span class="bool-val">true</span>,
+
                 read: <span class="bool-val">true</span>,
                 read_can_next: <span class="bool-val">true</span>,
+                read_with_range: <span class="bool-val">true</span>,
+
                 write: <span class="bool-val">true</span>,
                 list: <span class="bool-val">true</span>,
                 scan: <span class="bool-val">true</span>,
@@ -2081,6 +2090,10 @@
                 presign: <span class="bool-val">true</span>,
                 batch: <span class="bool-val">true</span>,
                 rename: <span class="bool-val">true</span>,
+
+                list_without_delimiter: <span class="bool-val">true</span>,
+                list_with_delimiter_slash: <span class="bool-val">true</span>,
+
                 ..Default::default()
             });
 
@@ -2181,14 +2194,7 @@
     <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Pager)&gt; {
         <span class="prelude-val">Ok</span>((
             RpList::default(),
-            WasabiPager::new(<span class="self">self</span>.core.clone(), path, <span class="string">&quot;/&quot;</span>, args.limit()),
-        ))
-    }
-
-    <span class="kw">async fn </span>scan(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpScan) -&gt; <span class="prelude-ty">Result</span>&lt;(RpScan, <span class="self">Self</span>::Pager)&gt; {
-        <span class="prelude-val">Ok</span>((
-            RpScan::default(),
-            WasabiPager::new(<span class="self">self</span>.core.clone(), path, <span class="string">&quot;&quot;</span>, args.limit()),
+            WasabiPager::new(<span class="self">self</span>.core.clone(), path, args.delimiter(), args.limit()),
         ))
     }
 
@@ -2226,7 +2232,7 @@
         <span class="kw">if </span>ops.len() &gt; <span class="number">1000 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::Unsupported,
-                <span class="string">&quot;s3 services only allow delete up to 1000 keys at once&quot;</span>,
+                <span class="string">&quot;wasabi services only allow delete up to 1000 keys at once&quot;</span>,
             )
             .with_context(<span class="string">&quot;length&quot;</span>, ops.len().to_string()));
         }

@@ -175,6 +175,22 @@
 <a href="#175" id="175">175</a>
 <a href="#176" id="176">176</a>
 <a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -238,6 +254,10 @@
     </span>Moka,
     <span class="doccomment">/// [obs][crate::services::Obs]: Huawei Cloud OBS services.
     </span>Obs,
+    <span class="doccomment">/// [onedrive][crate::services::Onedrive]: Microsoft OneDrive services.
+    </span>Onedrive,
+    <span class="doccomment">/// [gdrive][crate::services::Gdrive]: GoogleDrive services.
+    </span>Gdrive,
     <span class="doccomment">/// [oss][crate::services::Oss]: Aliyun Object Storage Services
     </span>Oss,
     <span class="doccomment">/// [redis][crate::services::Redis]: Redis services
@@ -246,8 +266,14 @@
     </span>Rocksdb,
     <span class="doccomment">/// [s3][crate::services::S3]: AWS S3 alike services.
     </span>S3,
+    <span class="doccomment">/// [sftp][crate::services::Sftp]: SFTP services
+    </span>Sftp,
     <span class="doccomment">/// [sled][crate::services::Sled]: Sled services
     </span>Sled,
+    <span class="doccomment">/// [Supabase][crate::services::Supabase]: Supabase storage service
+    </span>Supabase,
+    <span class="doccomment">/// [Vercel Artifacts][crate::services::vercel_artifacts]: Vercel Artifacts service, as known as Vercel Remote Caching.
+    </span>VercelArtifacts,
     <span class="doccomment">/// [wasabi][crate::services::Wasabi]: Wasabi service
     </span>Wasabi,
     <span class="doccomment">/// [webdav][crate::services::Webdav]: WebDAV support.
@@ -307,6 +333,7 @@
             <span class="string">&quot;rocksdb&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Rocksdb),
             <span class="string">&quot;s3&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::S3),
             <span class="string">&quot;sled&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Sled),
+            <span class="string">&quot;supabase&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Supabase),
             <span class="string">&quot;oss&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Oss),
             <span class="string">&quot;wasabi&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Wasabi),
             <span class="string">&quot;webdav&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Scheme::Webdav),
@@ -334,10 +361,15 @@
             Scheme::Memory =&gt; <span class="string">&quot;memory&quot;</span>,
             Scheme::Moka =&gt; <span class="string">&quot;moka&quot;</span>,
             Scheme::Obs =&gt; <span class="string">&quot;obs&quot;</span>,
+            Scheme::Onedrive =&gt; <span class="string">&quot;onedrive&quot;</span>,
+            Scheme::Gdrive =&gt; <span class="string">&quot;gdrive&quot;</span>,
             Scheme::Redis =&gt; <span class="string">&quot;redis&quot;</span>,
             Scheme::Rocksdb =&gt; <span class="string">&quot;rocksdb&quot;</span>,
             Scheme::S3 =&gt; <span class="string">&quot;s3&quot;</span>,
+            Scheme::Sftp =&gt; <span class="string">&quot;sftp&quot;</span>,
             Scheme::Sled =&gt; <span class="string">&quot;sled&quot;</span>,
+            Scheme::Supabase =&gt; <span class="string">&quot;supabase&quot;</span>,
+            Scheme::VercelArtifacts =&gt; <span class="string">&quot;vercel_artifacts&quot;</span>,
             Scheme::Oss =&gt; <span class="string">&quot;oss&quot;</span>,
             Scheme::Wasabi =&gt; <span class="string">&quot;wasabi&quot;</span>,
             Scheme::Webdav =&gt; <span class="string">&quot;webdav&quot;</span>,

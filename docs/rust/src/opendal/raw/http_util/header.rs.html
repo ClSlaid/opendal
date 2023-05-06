@@ -343,6 +343,31 @@
 <a href="#343" id="343">343</a>
 <a href="#344" id="344">344</a>
 <a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -365,6 +390,7 @@
 <span class="kw">use </span>chrono::DateTime;
 <span class="kw">use </span>chrono::Utc;
 <span class="kw">use </span>http::header::HeaderName;
+<span class="kw">use </span>http::header::CACHE_CONTROL;
 <span class="kw">use </span>http::header::CONTENT_DISPOSITION;
 <span class="kw">use </span>http::header::CONTENT_LENGTH;
 <span class="kw">use </span>http::header::CONTENT_RANGE;
@@ -396,6 +422,26 @@
                 <span class="string">&quot;header value has to be valid utf-8 string&quot;</span>,
             )
             .with_operation(<span class="string">&quot;http_util::parse_location&quot;</span>)
+            .set_source(e)
+        })<span class="question-mark">?</span>)),
+    }
+}
+
+<span class="doccomment">/// Parse cache control from header map.
+///
+/// # Note
+///
+/// The returned value is the raw string of `cache-control` header,
+/// maybe `no-cache`, `max-age=3600`, etc.
+</span><span class="kw">pub fn </span>parse_cache_control(headers: <span class="kw-2">&amp;</span>HeaderMap) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;&gt; {
+    <span class="kw">match </span>headers.get(CACHE_CONTROL) {
+        <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+        <span class="prelude-val">Some</span>(v) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(v.to_str().map_err(|e| {
+            Error::new(
+                ErrorKind::Unexpected,
+                <span class="string">&quot;header value has to be valid utf-8 string&quot;</span>,
+            )
+            .with_operation(<span class="string">&quot;http_util::parse_cache_control&quot;</span>)
             .set_source(e)
         })<span class="question-mark">?</span>)),
     }
@@ -537,6 +583,10 @@
         EntryMode::FILE
     };
     <span class="kw">let </span><span class="kw-2">mut </span>m = Metadata::new(mode);
+
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = parse_cache_control(headers)<span class="question-mark">? </span>{
+        m.set_cache_control(v);
+    }
 
     <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = parse_content_length(headers)<span class="question-mark">? </span>{
         m.set_content_length(v);

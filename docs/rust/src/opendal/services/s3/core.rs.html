@@ -878,6 +878,10 @@
 <a href="#878" id="878">878</a>
 <a href="#879" id="879">879</a>
 <a href="#880" id="880">880</a>
+<a href="#881" id="881">881</a>
+<a href="#882" id="882">882</a>
+<a href="#883" id="883">883</a>
+<a href="#884" id="884">884</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1326,14 +1330,13 @@
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Make this functions as `pub(suber)` because `DirStream` depends
-    /// on this.
-    </span><span class="kw">pub async fn </span>s3_list_objects(
+    <span class="kw">pub async fn </span>s3_list_objects(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         continuation_token: <span class="kw-2">&amp;</span>str,
         delimiter: <span class="kw-2">&amp;</span>str,
         limit: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+        start_after: <span class="prelude-ty">Option</span>&lt;String&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
@@ -1347,6 +1350,11 @@
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(limit) = limit {
             <span class="macro">write!</span>(url, <span class="string">&quot;&amp;max-keys={limit}&quot;</span>).expect(<span class="string">&quot;write into string must succeed&quot;</span>);
+        }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(start_after) = start_after {
+            <span class="kw">let </span>start_after = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, <span class="kw-2">&amp;</span>start_after);
+            <span class="macro">write!</span>(url, <span class="string">&quot;&amp;start-after={}&quot;</span>, percent_encode_path(<span class="kw-2">&amp;</span>start_after))
+                .expect(<span class="string">&quot;write into string must succeed&quot;</span>);
         }
         <span class="kw">if </span>!continuation_token.is_empty() {
             <span class="comment">// AWS S3 could return continuation-token that contains `=`

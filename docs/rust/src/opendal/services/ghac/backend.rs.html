@@ -649,6 +649,8 @@
 <a href="#649" id="649">649</a>
 <a href="#650" id="650">650</a>
 <a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -954,6 +956,8 @@
             .set_capability(Capability {
                 read: <span class="bool-val">true</span>,
                 read_can_next: <span class="bool-val">true</span>,
+                read_with_range: <span class="bool-val">true</span>,
+
                 write: <span class="bool-val">true</span>,
 
                 ..Default::default()

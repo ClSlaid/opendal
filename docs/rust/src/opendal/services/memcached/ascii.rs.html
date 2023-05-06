@@ -143,58 +143,92 @@
 <a href="#143" id="143">143</a>
 <a href="#144" id="144">144</a>
 <a href="#145" id="145">145</a>
-</pre><pre class="rust"><code><span class="comment">// Copyright 2017 vavrusa &lt;marek@vavrusa.com&gt;
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+</pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// &quot;License&quot;); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
 //
-// Licensed under the MIT License (see MIT-ascii.txt);
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
-</span><span class="kw">use </span>core::fmt::Display;
-<span class="kw">use </span>std::io::Error;
-<span class="kw">use </span>std::io::ErrorKind;
-<span class="kw">use </span>std::marker::Unpin;
+</span><span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="kw">use </span>futures::io::AsyncBufReadExt;
-<span class="kw">use </span>futures::io::AsyncRead;
-<span class="kw">use </span>futures::io::AsyncReadExt;
-<span class="kw">use </span>futures::io::AsyncWrite;
-<span class="kw">use </span>futures::io::AsyncWriteExt;
-<span class="kw">use </span>futures::io::BufReader;
+<span class="kw">use </span><span class="kw">super</span>::backend::parse_io_error;
+<span class="kw">use </span>tokio::io::AsyncBufReadExt;
+<span class="kw">use </span>tokio::io::AsyncReadExt;
+<span class="kw">use </span>tokio::io::AsyncWriteExt;
+<span class="kw">use </span>tokio::io::BufReader;
+<span class="kw">use </span>tokio::net::TcpStream;
 
-<span class="doccomment">/// Memcache ASCII protocol implementation.
-</span><span class="kw">pub struct </span>Protocol&lt;S&gt; {
-    io: BufReader&lt;S&gt;,
+<span class="kw">pub struct </span>Connection {
+    io: BufReader&lt;TcpStream&gt;,
     buf: Vec&lt;u8&gt;,
 }
 
-<span class="kw">impl</span>&lt;S&gt; Protocol&lt;S&gt;
-<span class="kw">where
-    </span>S: AsyncRead + AsyncWrite + Unpin,
-{
-    <span class="doccomment">/// Creates the ASCII protocol on a stream.
-    </span><span class="kw">pub fn </span>new(io: S) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>Connection {
+    <span class="kw">pub fn </span>new(io: TcpStream) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             io: BufReader::new(io),
             buf: Vec::new(),
         }
     }
 
-    <span class="doccomment">/// Returns the value for given key as bytes. If the value doesn&#39;t exist, [`ErrorKind::NotFound`] is returned.
-    </span><span class="kw">pub async fn </span>get&lt;K: AsRef&lt;[u8]&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, Error&gt; {
+    <span class="kw">pub async fn </span>get(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
         <span class="comment">// Send command
         </span><span class="kw">let </span>writer = <span class="self">self</span>.io.get_mut();
         writer
-            .write_all(<span class="kw-2">&amp;</span>[<span class="string">b&quot;get &quot;</span>, key.as_ref(), <span class="string">b&quot;\r\n&quot;</span>].concat())
-            .<span class="kw">await</span><span class="question-mark">?</span>;
-        writer.flush().<span class="kw">await</span><span class="question-mark">?</span>;
+            .write_all(<span class="kw-2">&amp;</span>[<span class="string">b&quot;get &quot;</span>, key.as_bytes(), <span class="string">b&quot;\r\n&quot;</span>].concat())
+            .<span class="kw">await
+            </span>.map_err(parse_io_error)<span class="question-mark">?</span>;
+        writer.flush().<span class="kw">await</span>.map_err(parse_io_error)<span class="question-mark">?</span>;
 
         <span class="comment">// Read response header
-        </span><span class="kw">let </span>header = <span class="self">self</span>.read_line().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>header = std::str::from_utf8(header).map_err(|<span class="kw">_</span>| ErrorKind::InvalidData)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>header = <span class="self">self</span>.read_header().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="comment">// Check response header and parse value length
         </span><span class="kw">if </span>header.contains(<span class="string">&quot;ERROR&quot;</span>) {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Other, header));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(
+                Error::new(ErrorKind::Unexpected, <span class="string">&quot;unexpected data received&quot;</span>)
+                    .with_context(<span class="string">&quot;message&quot;</span>, header),
+            );
         } <span class="kw">else if </span>header.starts_with(<span class="string">&quot;END&quot;</span>) {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ErrorKind::NotFound.into());
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
         }
 
         <span class="comment">// VALUE &lt;key&gt; &lt;flags&gt; &lt;bytes&gt; [&lt;cas unique&gt;]\r\n
@@ -202,90 +236,110 @@
             .split(<span class="string">&#39; &#39;</span>)
             .nth(<span class="number">3</span>)
             .and_then(|len| len.trim_end().parse().ok())
-            .ok_or(ErrorKind::InvalidData)<span class="question-mark">?</span>;
+            .ok_or_else(|| Error::new(ErrorKind::Unexpected, <span class="string">&quot;invalid data received&quot;</span>))<span class="question-mark">?</span>;
 
         <span class="comment">// Read value
         </span><span class="kw">let </span><span class="kw-2">mut </span>buffer: Vec&lt;u8&gt; = <span class="macro">vec!</span>[<span class="number">0</span>; length];
-        <span class="self">self</span>.io.read_exact(<span class="kw-2">&amp;mut </span>buffer).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.io
+            .read_exact(<span class="kw-2">&amp;mut </span>buffer)
+            .<span class="kw">await
+            </span>.map_err(parse_io_error)<span class="question-mark">?</span>;
 
         <span class="comment">// Read the trailing header
         </span><span class="self">self</span>.read_line().<span class="kw">await</span><span class="question-mark">?</span>; <span class="comment">// \r\n
         </span><span class="self">self</span>.read_line().<span class="kw">await</span><span class="question-mark">?</span>; <span class="comment">// END\r\n
 
-        </span><span class="prelude-val">Ok</span>(buffer)
+        </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(buffer))
     }
 
-    <span class="doccomment">/// Set key to given value and don&#39;t wait for response.
-    </span><span class="kw">pub async fn </span>set&lt;K: Display&gt;(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        key: K,
-        val: <span class="kw-2">&amp;</span>[u8],
-        expiration: u32,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+    <span class="kw">pub async fn </span>set(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str, val: <span class="kw-2">&amp;</span>[u8], expiration: u32) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>header = <span class="macro">format!</span>(<span class="string">&quot;set {} 0 {} {}\r\n&quot;</span>, key, expiration, val.len());
-        <span class="self">self</span>.io.write_all(header.as_bytes()).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="self">self</span>.io.write_all(val).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="self">self</span>.io.write_all(<span class="string">b&quot;\r\n&quot;</span>).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="self">self</span>.io.flush().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.io
+            .write_all(header.as_bytes())
+            .<span class="kw">await
+            </span>.map_err(parse_io_error)<span class="question-mark">?</span>;
+        <span class="self">self</span>.io.write_all(val).<span class="kw">await</span>.map_err(parse_io_error)<span class="question-mark">?</span>;
+        <span class="self">self</span>.io.write_all(<span class="string">b&quot;\r\n&quot;</span>).<span class="kw">await</span>.map_err(parse_io_error)<span class="question-mark">?</span>;
+        <span class="self">self</span>.io.flush().<span class="kw">await</span>.map_err(parse_io_error)<span class="question-mark">?</span>;
 
         <span class="comment">// Read response header
-        </span><span class="kw">let </span>header = <span class="self">self</span>.read_line().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>header = std::str::from_utf8(header).map_err(|<span class="kw">_</span>| ErrorKind::InvalidData)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>header = <span class="self">self</span>.read_header().<span class="kw">await</span><span class="question-mark">?</span>;
+
         <span class="comment">// Check response header and make sure we got a `STORED`
         </span><span class="kw">if </span>header.contains(<span class="string">&quot;STORED&quot;</span>) {
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         } <span class="kw">else if </span>header.contains(<span class="string">&quot;ERROR&quot;</span>) {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Other, header));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(
+                Error::new(ErrorKind::Unexpected, <span class="string">&quot;unexpected data received&quot;</span>)
+                    .with_context(<span class="string">&quot;message&quot;</span>, header),
+            );
         }
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Delete a key and don&#39;t wait for response.
-    </span><span class="kw">pub async fn </span>delete&lt;K: Display&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+    <span class="kw">pub async fn </span>delete(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>header = <span class="macro">format!</span>(<span class="string">&quot;delete {}\r\n&quot;</span>, key);
-        <span class="self">self</span>.io.write_all(header.as_bytes()).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="self">self</span>.io.flush().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.io
+            .write_all(header.as_bytes())
+            .<span class="kw">await
+            </span>.map_err(parse_io_error)<span class="question-mark">?</span>;
+        <span class="self">self</span>.io.flush().<span class="kw">await</span>.map_err(parse_io_error)<span class="question-mark">?</span>;
 
         <span class="comment">// Read response header
-        </span><span class="kw">let </span>header = <span class="self">self</span>.read_line().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>header = std::str::from_utf8(header).map_err(|<span class="kw">_</span>| ErrorKind::InvalidData)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>header = <span class="self">self</span>.read_header().<span class="kw">await</span><span class="question-mark">?</span>;
+
         <span class="comment">// Check response header and parse value length
-        </span><span class="kw">if </span>header.contains(<span class="string">&quot;NOT_FOUND&quot;</span>) {
+        </span><span class="kw">if </span>header.contains(<span class="string">&quot;NOT_FOUND&quot;</span>) || header.starts_with(<span class="string">&quot;END&quot;</span>) {
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
-        } <span class="kw">else if </span>header.starts_with(<span class="string">&quot;END&quot;</span>) {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ErrorKind::NotFound.into());
         } <span class="kw">else if </span>header.contains(<span class="string">&quot;ERROR&quot;</span>) || !header.contains(<span class="string">&quot;DELETED&quot;</span>) {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Other, header));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(
+                Error::new(ErrorKind::Unexpected, <span class="string">&quot;unexpected data received&quot;</span>)
+                    .with_context(<span class="string">&quot;message&quot;</span>, header),
+            );
         }
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Return the version of the remote server.
-    </span><span class="kw">pub async fn </span>version(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String, Error&gt; {
-        <span class="self">self</span>.io.write_all(<span class="string">b&quot;version\r\n&quot;</span>).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="self">self</span>.io.flush().<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="kw">pub async fn </span>version(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
+        <span class="self">self</span>.io
+            .write_all(<span class="string">b&quot;version\r\n&quot;</span>)
+            .<span class="kw">await
+            </span>.map_err(parse_io_error)<span class="question-mark">?</span>;
+        <span class="self">self</span>.io.flush().<span class="kw">await</span>.map_err(parse_io_error)<span class="question-mark">?</span>;
 
         <span class="comment">// Read response header
-        </span><span class="kw">let </span>header = {
-            <span class="kw">let </span>buf = <span class="self">self</span>.read_line().<span class="kw">await</span><span class="question-mark">?</span>;
-            std::str::from_utf8(buf).map_err(|<span class="kw">_</span>| Error::from(ErrorKind::InvalidData))<span class="question-mark">?
-        </span>};
+        </span><span class="kw">let </span>header = <span class="self">self</span>.read_header().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">if </span>!header.starts_with(<span class="string">&quot;VERSION&quot;</span>) {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Other, header));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(
+                Error::new(ErrorKind::Unexpected, <span class="string">&quot;unexpected data received&quot;</span>)
+                    .with_context(<span class="string">&quot;message&quot;</span>, header),
+            );
         }
         <span class="kw">let </span>version = header.trim_start_matches(<span class="string">&quot;VERSION &quot;</span>).trim_end();
         <span class="prelude-val">Ok</span>(version.to_string())
     }
 
-    <span class="kw">async fn </span>read_line(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>[u8], Error&gt; {
+    <span class="kw">async fn </span>read_line(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt; {
         <span class="kw">let </span><span class="self">Self </span>{ io, buf } = <span class="self">self</span>;
         buf.clear();
-        io.read_until(<span class="string">b&#39;\n&#39;</span>, buf).<span class="kw">await</span><span class="question-mark">?</span>;
+        io.read_until(<span class="string">b&#39;\n&#39;</span>, buf).<span class="kw">await</span>.map_err(parse_io_error)<span class="question-mark">?</span>;
         <span class="kw">if </span>buf.last().copied() != <span class="prelude-val">Some</span>(<span class="string">b&#39;\n&#39;</span>) {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ErrorKind::UnexpectedEof.into());
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                ErrorKind::ContentIncomplete,
+                <span class="string">&quot;unexpected eof, the response must be incomplete&quot;</span>,
+            ));
         }
         <span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span>buf[..])
+    }
+
+    <span class="kw">async fn </span>read_header(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
+        <span class="kw">let </span>header = <span class="self">self</span>.read_line().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>header = std::str::from_utf8(header).map_err(|err| {
+            Error::new(ErrorKind::Unexpected, <span class="string">&quot;invalid data received&quot;</span>).set_source(err)
+        })<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(header)
     }
 }
 </code></pre></div>

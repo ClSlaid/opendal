@@ -422,6 +422,43 @@
 <a href="#422" id="422">422</a>
 <a href="#423" id="423">423</a>
 <a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a>
+<a href="#456" id="456">456</a>
+<a href="#457" id="457">457</a>
+<a href="#458" id="458">458</a>
+<a href="#459" id="459">459</a>
+<a href="#460" id="460">460</a>
+<a href="#461" id="461">461</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -460,6 +497,7 @@
 
     mode: EntryMode,
 
+    cache_control: <span class="prelude-ty">Option</span>&lt;String&gt;,
     content_disposition: <span class="prelude-ty">Option</span>&lt;String&gt;,
     content_length: <span class="prelude-ty">Option</span>&lt;u64&gt;,
     content_md5: <span class="prelude-ty">Option</span>&lt;String&gt;,
@@ -473,7 +511,7 @@
     <span class="doccomment">/// Create a new metadata
     </span><span class="kw">pub fn </span>new(mode: EntryMode) -&gt; <span class="self">Self </span>{
         <span class="comment">// Mode is required to be set for metadata.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>bit = Metakey::Mode.into();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>bit: FlagSet&lt;Metakey&gt; = Metakey::Mode.into();
         <span class="comment">// If mode is dir, we should always mark it as complete.
         </span><span class="kw">if </span>mode.is_dir() {
             bit |= Metakey::Complete
@@ -481,8 +519,10 @@
 
         <span class="self">Self </span>{
             bit,
+
             mode,
 
+            cache_control: <span class="prelude-val">None</span>,
             content_length: <span class="prelude-val">None</span>,
             content_md5: <span class="prelude-val">None</span>,
             content_type: <span class="prelude-val">None</span>,
@@ -525,16 +565,48 @@
     }
 
     <span class="doccomment">/// Set mode for entry.
-    </span><span class="kw">pub fn </span>set_mode(<span class="kw-2">&amp;mut </span><span class="self">self</span>, mode: EntryMode) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.mode = mode;
+    </span><span class="kw">pub fn </span>set_mode(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: EntryMode) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+        <span class="self">self</span>.mode = v;
         <span class="self">self</span>.bit |= Metakey::Mode;
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set mode for entry.
-    </span><span class="kw">pub fn </span>with_mode(<span class="kw-2">mut </span><span class="self">self</span>, mode: EntryMode) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.mode = mode;
+    </span><span class="kw">pub fn </span>with_mode(<span class="kw-2">mut </span><span class="self">self</span>, v: EntryMode) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.mode = v;
         <span class="self">self</span>.bit |= Metakey::Mode;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Cache control of this entry.
+    /// Cache-Control is defined by [RFC 7234](https://httpwg.org/specs/rfc7234.html#header.cache-control)
+    /// Refer to [MDN Cache-Control](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control) for more information.
+    </span><span class="kw">pub fn </span>cache_control(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
+        <span class="macro">debug_assert!</span>(
+            <span class="self">self</span>.bit.contains(Metakey::CacheControl) || <span class="self">self</span>.bit.contains(Metakey::Complete),
+            <span class="string">&quot;visiting not set metadata: cache_control, maybe a bug&quot;
+        </span>);
+
+        <span class="self">self</span>.cache_control.as_deref()
+    }
+
+    <span class="doccomment">/// Set cache control of this entry.
+    ///
+    /// Cache-Control is defined by [RFC 7234](https://httpwg.org/specs/rfc7234.html#header.cache-control)
+    /// Refer to [MDN Cache-Control](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control) for more information.
+    </span><span class="kw">pub fn </span>set_cache_control(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+        <span class="self">self</span>.cache_control = <span class="prelude-val">Some</span>(v.to_string());
+        <span class="self">self</span>.bit |= Metakey::CacheControl;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Set cache control of this entry.
+    ///
+    /// Cache-Control is defined by [RFC 7234](https://httpwg.org/specs/rfc7234.html#header.cache-control)
+    /// Refer to [MDN Cache-Control](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control) for more information.
+    </span><span class="kw">pub fn </span>with_cache_control(<span class="kw-2">mut </span><span class="self">self</span>, v: String) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.cache_control = <span class="prelude-val">Some</span>(v);
+        <span class="self">self</span>.bit |= Metakey::CacheControl;
         <span class="self">self
     </span>}
 
@@ -557,15 +629,15 @@
     }
 
     <span class="doccomment">/// Set content length of this entry.
-    </span><span class="kw">pub fn </span>set_content_length(<span class="kw-2">&amp;mut </span><span class="self">self</span>, content_length: u64) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.content_length = <span class="prelude-val">Some</span>(content_length);
+    </span><span class="kw">pub fn </span>set_content_length(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: u64) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+        <span class="self">self</span>.content_length = <span class="prelude-val">Some</span>(v);
         <span class="self">self</span>.bit |= Metakey::ContentLength;
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set content length of this entry.
-    </span><span class="kw">pub fn </span>with_content_length(<span class="kw-2">mut </span><span class="self">self</span>, content_length: u64) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.content_length = <span class="prelude-val">Some</span>(content_length);
+    </span><span class="kw">pub fn </span>with_content_length(<span class="kw-2">mut </span><span class="self">self</span>, v: u64) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.content_length = <span class="prelude-val">Some</span>(v);
         <span class="self">self</span>.bit |= Metakey::ContentLength;
         <span class="self">self
     </span>}
@@ -589,8 +661,8 @@
     ///
     /// Content MD5 is defined by [RFC 2616](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html).
     /// And removed by [RFC 7231](https://www.rfc-editor.org/rfc/rfc7231).
-    </span><span class="kw">pub fn </span>set_content_md5(<span class="kw-2">&amp;mut </span><span class="self">self</span>, content_md5: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.content_md5 = <span class="prelude-val">Some</span>(content_md5.to_string());
+    </span><span class="kw">pub fn </span>set_content_md5(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+        <span class="self">self</span>.content_md5 = <span class="prelude-val">Some</span>(v.to_string());
         <span class="self">self</span>.bit |= Metakey::ContentMd5;
         <span class="self">self
     </span>}
@@ -599,8 +671,8 @@
     ///
     /// Content MD5 is defined by [RFC 2616](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html).
     /// And removed by [RFC 7231](https://www.rfc-editor.org/rfc/rfc7231).
-    </span><span class="kw">pub fn </span>with_content_md5(<span class="kw-2">mut </span><span class="self">self</span>, content_md5: String) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.content_md5 = <span class="prelude-val">Some</span>(content_md5);
+    </span><span class="kw">pub fn </span>with_content_md5(<span class="kw-2">mut </span><span class="self">self</span>, v: String) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.content_md5 = <span class="prelude-val">Some</span>(v);
         <span class="self">self</span>.bit |= Metakey::ContentMd5;
         <span class="self">self
     </span>}
@@ -684,8 +756,8 @@
     ///
     /// `Last-Modified` is defined by [RFC 7232](https://httpwg.org/specs/rfc7232.html#header.last-modified)
     /// Refer to [MDN Last-Modified](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified) for more information.
-    </span><span class="kw">pub fn </span>set_last_modified(<span class="kw-2">&amp;mut </span><span class="self">self</span>, last_modified: DateTime&lt;Utc&gt;) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.last_modified = <span class="prelude-val">Some</span>(last_modified);
+    </span><span class="kw">pub fn </span>set_last_modified(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: DateTime&lt;Utc&gt;) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+        <span class="self">self</span>.last_modified = <span class="prelude-val">Some</span>(v);
         <span class="self">self</span>.bit |= Metakey::LastModified;
         <span class="self">self
     </span>}
@@ -694,8 +766,8 @@
     ///
     /// `Last-Modified` is defined by [RFC 7232](https://httpwg.org/specs/rfc7232.html#header.last-modified)
     /// Refer to [MDN Last-Modified](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified) for more information.
-    </span><span class="kw">pub fn </span>with_last_modified(<span class="kw-2">mut </span><span class="self">self</span>, last_modified: DateTime&lt;Utc&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.last_modified = <span class="prelude-val">Some</span>(last_modified);
+    </span><span class="kw">pub fn </span>with_last_modified(<span class="kw-2">mut </span><span class="self">self</span>, v: DateTime&lt;Utc&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.last_modified = <span class="prelude-val">Some</span>(v);
         <span class="self">self</span>.bit |= Metakey::LastModified;
         <span class="self">self
     </span>}
@@ -731,8 +803,8 @@
     /// - `W/&quot;0815&quot;`
     ///
     /// `&quot;` is part of etag, don&#39;t trim it before setting.
-    </span><span class="kw">pub fn </span>set_etag(<span class="kw-2">&amp;mut </span><span class="self">self</span>, etag: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.etag = <span class="prelude-val">Some</span>(etag.to_string());
+    </span><span class="kw">pub fn </span>set_etag(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+        <span class="self">self</span>.etag = <span class="prelude-val">Some</span>(v.to_string());
         <span class="self">self</span>.bit |= Metakey::Etag;
         <span class="self">self
     </span>}
@@ -748,8 +820,8 @@
     /// - `W/&quot;0815&quot;`
     ///
     /// `&quot;` is part of etag, don&#39;t trim it before setting.
-    </span><span class="kw">pub fn </span>with_etag(<span class="kw-2">mut </span><span class="self">self</span>, etag: String) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.etag = <span class="prelude-val">Some</span>(etag);
+    </span><span class="kw">pub fn </span>with_etag(<span class="kw-2">mut </span><span class="self">self</span>, v: String) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.etag = <span class="prelude-val">Some</span>(v);
         <span class="self">self</span>.bit |= Metakey::Etag;
         <span class="self">self
     </span>}
@@ -785,8 +857,8 @@
     /// - &quot;inline&quot;
     /// - &quot;attachment&quot;
     /// - &quot;attachment; filename=\&quot;filename.jpg\&quot;&quot;
-    </span><span class="kw">pub fn </span>with_content_disposition(<span class="kw-2">mut </span><span class="self">self</span>, content_disposition: String) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.content_disposition = <span class="prelude-val">Some</span>(content_disposition);
+    </span><span class="kw">pub fn </span>with_content_disposition(<span class="kw-2">mut </span><span class="self">self</span>, v: String) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.content_disposition = <span class="prelude-val">Some</span>(v);
         <span class="self">self</span>.bit |= Metakey::ContentDisposition;
         <span class="self">self
     </span>}
@@ -802,8 +874,8 @@
     /// - &quot;inline&quot;
     /// - &quot;attachment&quot;
     /// - &quot;attachment; filename=\&quot;filename.jpg\&quot;&quot;
-    </span><span class="kw">pub fn </span>set_content_disposition(<span class="kw-2">&amp;mut </span><span class="self">self</span>, content_disposition: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.content_disposition = <span class="prelude-val">Some</span>(content_disposition.to_string());
+    </span><span class="kw">pub fn </span>set_content_disposition(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+        <span class="self">self</span>.content_disposition = <span class="prelude-val">Some</span>(v.to_string());
         <span class="self">self</span>.bit |= Metakey::ContentDisposition;
         <span class="self">self
     </span>}
@@ -830,6 +902,8 @@
 
         <span class="doccomment">/// Key for mode.
         </span>Mode,
+        <span class="doccomment">/// Key for cache control.
+        </span>CacheControl,
         <span class="doccomment">/// Key for content disposition.
         </span>ContentDisposition,
         <span class="doccomment">/// Key for content length.

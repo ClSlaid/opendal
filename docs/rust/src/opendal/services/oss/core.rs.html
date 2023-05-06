@@ -736,6 +736,48 @@
 <a href="#736" id="736">736</a>
 <a href="#737" id="737">737</a>
 <a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -765,6 +807,8 @@
 <span class="kw">use </span>http::header::IF_MATCH;
 <span class="kw">use </span>http::header::IF_NONE_MATCH;
 <span class="kw">use </span>http::header::RANGE;
+<span class="kw">use </span>http::HeaderName;
+<span class="kw">use </span>http::HeaderValue;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::Response;
 <span class="kw">use </span>reqsign::AliyunCredential;
@@ -778,6 +822,10 @@
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">mod </span>constants {
+    <span class="kw">pub const </span>X_OSS_SERVER_SIDE_ENCRYPTION: <span class="kw-2">&amp;</span>str = <span class="string">&quot;x-oss-server-side-encryption&quot;</span>;
+
+    <span class="kw">pub const </span>X_OSS_SERVER_SIDE_ENCRYPTION_KEY_ID: <span class="kw-2">&amp;</span>str = <span class="string">&quot;x-oss-server-side-encryption-key-id&quot;</span>;
+
     <span class="kw">pub const </span>RESPONSE_CONTENT_DISPOSITION: <span class="kw-2">&amp;</span>str = <span class="string">&quot;response-content-disposition&quot;</span>;
 }
 
@@ -790,6 +838,9 @@
     </span><span class="kw">pub </span>host: String,
     <span class="kw">pub </span>endpoint: String,
     <span class="kw">pub </span>presign_endpoint: String,
+
+    <span class="kw">pub </span>server_side_encryption: <span class="prelude-ty">Option</span>&lt;HeaderValue&gt;,
+    <span class="kw">pub </span>server_side_encryption_key_id: <span class="prelude-ty">Option</span>&lt;HeaderValue&gt;,
 
     <span class="kw">pub </span>client: HttpClient,
     <span class="kw">pub </span>loader: AliyunLoader,
@@ -848,6 +899,31 @@
     </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
+
+    <span class="doccomment">/// Set sse headers
+    /// # Note
+    /// According to the OSS documentation, only PutObject, CopyObject, and InitiateMultipartUpload may require to be set.
+    </span><span class="kw">pub fn </span>insert_sse_headers(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>req: http::request::Builder) -&gt; http::request::Builder {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="kw-2">&amp;</span><span class="self">self</span>.server_side_encryption {
+            <span class="kw">let </span><span class="kw-2">mut </span>v = v.clone();
+            v.set_sensitive(<span class="bool-val">true</span>);
+
+            req = req.header(
+                HeaderName::from_static(constants::X_OSS_SERVER_SIDE_ENCRYPTION),
+                v,
+            )
+        }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="kw-2">&amp;</span><span class="self">self</span>.server_side_encryption_key_id {
+            <span class="kw">let </span><span class="kw-2">mut </span>v = v.clone();
+            v.set_sensitive(<span class="bool-val">true</span>);
+
+            req = req.header(
+                HeaderName::from_static(constants::X_OSS_SERVER_SIDE_ENCRYPTION_KEY_ID),
+                v,
+            )
+        }
+        req
+    }
 }
 
 <span class="kw">impl </span>OssCore {
@@ -881,6 +957,9 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(cache_control) = cache_control {
             req = req.header(CACHE_CONTROL, cache_control)
         }
+
+        <span class="comment">// set sse headers
+        </span>req = <span class="self">self</span>.insert_sse_headers(req);
 
         <span class="kw">let </span>req = req.body(body).map_err(new_request_build_error)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(req)
@@ -1071,8 +1150,13 @@
         );
         <span class="kw">let </span>source = <span class="macro">format!</span>(<span class="string">&quot;/{}/{}&quot;</span>, <span class="self">self</span>.bucket, percent_encode_path(<span class="kw-2">&amp;</span>source));
 
-        <span class="kw">let </span><span class="kw-2">mut </span>req = Request::put(<span class="kw-2">&amp;</span>url)
-            .header(<span class="string">&quot;x-oss-copy-source&quot;</span>, source)
+        <span class="kw">let </span><span class="kw-2">mut </span>req = Request::put(<span class="kw-2">&amp;</span>url);
+
+        req = <span class="self">self</span>.insert_sse_headers(req);
+
+        req = req.header(<span class="string">&quot;x-oss-copy-source&quot;</span>, source);
+
+        <span class="kw">let </span><span class="kw-2">mut </span>req = req
             .body(AsyncBody::Empty)
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
@@ -1176,7 +1260,7 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(cache_control) = cache_control {
             req = req.header(CACHE_CONTROL, cache_control);
         }
-
+        req = <span class="self">self</span>.insert_sse_headers(req);
         <span class="kw">let </span><span class="kw-2">mut </span>req = req.body(body).map_err(new_request_build_error)<span class="question-mark">?</span>;
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(req)

@@ -565,6 +565,8 @@
 <a href="#565" id="565">565</a>
 <a href="#566" id="566">566</a>
 <a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -627,10 +629,10 @@
 ///
 /// # Configuration
 ///
-/// - `endpoint`: set the endpoint for connection
+/// - `endpoint`: Set the endpoint for connection
 /// - `root`: Set the work directory for backend
-/// - `credential`:  login credentials
-/// - `tls`: tls mode
+/// - `user`: Set the login user
+/// - `password`: Set the login password
 ///
 /// You can refer to [`FtpBuilder`]&#39;s docs for more information
 ///
@@ -885,8 +887,10 @@
             .set_root(<span class="kw-2">&amp;</span><span class="self">self</span>.root)
             .set_capability(Capability {
                 read: <span class="bool-val">true</span>,
+                read_with_range: <span class="bool-val">true</span>,
                 write: <span class="bool-val">true</span>,
                 list: <span class="bool-val">true</span>,
+                list_with_delimiter_slash: <span class="bool-val">true</span>,
                 ..Default::default()
             });
 

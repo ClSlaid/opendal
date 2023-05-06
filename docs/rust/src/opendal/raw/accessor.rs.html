@@ -566,6 +566,19 @@
 <a href="#566" id="566">566</a>
 <a href="#567" id="567">567</a>
 <a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -593,6 +606,16 @@
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Underlying trait of all backends for implementors.
+///
+/// The actual data access of storage service happens in Accessor layer.
+/// Every storage supported by OpenDAL must implement [`Accessor`] but not all
+/// methods of [`Accessor`] will be implemented according to how the storage service is.
+///
+/// For example, user can not modify the content from one HTTP file server directly.
+/// So [`Http`][crate::services::Http] implements and provides only read related actions.
+///
+/// [`Accessor`] gives default implementation for all methods which will raise [`ErrorKind::Unsupported`] error.
+/// And what action this [`Accessor`] supports will be pointed out in [`AccessorInfo`].
 ///
 /// # Note
 ///
@@ -641,7 +664,6 @@
     ///
     /// - scheme: declare the scheme of backend.
     /// - capabilities: declare the capabilities of current backend.
-    /// - hints: declare the hints of current backend
     </span><span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo;
 
     <span class="doccomment">/// Invoke the `create` operation on the specified path
@@ -782,12 +804,16 @@
     ///
     /// Require [`Capability::scan`]
     </span><span class="kw">async fn </span>scan(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpScan) -&gt; <span class="prelude-ty">Result</span>&lt;(RpScan, <span class="self">Self</span>::Pager)&gt; {
-        <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>) = (path, args);
+        <span class="kw">let </span><span class="kw-2">mut </span>op_list = OpList::new().with_delimiter(<span class="string">&quot;&quot;</span>);
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(limit) = args.limit() {
+            op_list = op_list.with_limit(limit)
+        }
+        <span class="kw">let </span>result = <span class="self">self</span>.list(path, op_list).<span class="kw">await</span>;
 
-        <span class="prelude-val">Err</span>(Error::new(
-            ErrorKind::Unsupported,
-            <span class="string">&quot;operation is not supported&quot;</span>,
-        ))
+        <span class="kw">return match </span>result {
+            <span class="prelude-val">Ok</span>(r) =&gt; <span class="prelude-val">Ok</span>((RpScan::default(), r.<span class="number">1</span>)),
+            <span class="prelude-val">Err</span>(e) =&gt; <span class="prelude-val">Err</span>(e),
+        };
     }
 
     <span class="doccomment">/// Invoke the `presign` operation on the specified path.
@@ -1055,7 +1081,7 @@
     }
 }
 
-<span class="doccomment">/// FusedAccessor is the type erased accessor with `Box&lt;dyn Read&gt;`.
+<span class="doccomment">/// FusedAccessor is the type erased accessor with `Arc&lt;dyn Accessor&gt;`.
 </span><span class="kw">pub type </span>FusedAccessor = Arc&lt;
     <span class="kw">dyn </span>Accessor&lt;
         Reader = oio::Reader,
