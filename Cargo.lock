@@ -281,7 +281,21 @@ dependencies = [
  "futures-io",
  "rustls 0.19.1",
  "webpki 0.21.4",
- "webpki-roots",
+ "webpki-roots 0.21.1",
+]
+
+[[package]]
+name = "async-tls"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cfeefd0ca297cbbb3bd34fd6b228401c2a5177038257afd751bc29f0a2da4795"
+dependencies = [
+ "futures-core",
+ "futures-io",
+ "rustls 0.20.8",
+ "rustls-pemfile",
+ "webpki 0.22.0",
+ "webpki-roots 0.22.6",
 ]
 
 [[package]]
@@ -2622,7 +2636,7 @@ version = "0.34.0"
 dependencies = [
  "anyhow",
  "async-compat",
- "async-tls",
+ "async-tls 0.12.0",
  "async-trait",
  "backon",
  "base64 0.21.0",
@@ -4350,7 +4364,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d865bcb2d4bfea8c0ab4ca6c3f79d011ad04db5ef1fc693e720299bb60c58018"
 dependencies = [
  "async-std",
- "async-tls",
+ "async-tls 0.11.0",
  "chrono",
  "lazy-regex",
  "log",
@@ -5184,6 +5198,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "aabe153544e473b775453675851ecc86863d2a81d786d741f6b76778f2a48940"
 dependencies = [
  "webpki 0.21.4",
+]
+
+[[package]]
+name = "webpki-roots"
+version = "0.22.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b6c71e40d7d2c34a5106301fb632274ca37242cd0c9d3e64dbece371a40a2d87"
+dependencies = [
+ "webpki 0.22.0",
 ]
 
 [[package]]
