@@ -561,6 +561,11 @@
 <a href="#561" id="561">561</a>
 <a href="#562" id="562">562</a>
 <a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -602,8 +607,13 @@
 ///
 /// This service can be used to:
 ///
+/// - [x] stat
 /// - [x] read
 /// - [ ] ~~write~~
+/// - [ ] ~~create_dir~~
+/// - [ ] ~~delete~~
+/// - [ ] ~~copy~~
+/// - [ ] ~~rename~~
 /// - [ ] ~~list~~
 /// - [ ] ~~scan~~
 /// - [ ] ~~presign~~
@@ -964,7 +974,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_read() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let _ </span>= env_logger::builder().is_test(<span class="bool-val">true</span>).try_init();
+        <span class="kw">let _ </span>= tracing_subscriber::fmt().with_test_writer().try_init();
 
         <span class="kw">let </span>mock_server = MockServer::start().<span class="kw">await</span>;
         Mock::given(method(<span class="string">&quot;GET&quot;</span>))
@@ -990,7 +1000,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_read_via_basic_auth() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let _ </span>= env_logger::builder().is_test(<span class="bool-val">true</span>).try_init();
+        <span class="kw">let _ </span>= tracing_subscriber::fmt().with_test_writer().try_init();
 
         <span class="kw">let </span>(username, password) = (<span class="string">&quot;your_username&quot;</span>, <span class="string">&quot;your_password&quot;</span>);
 
@@ -1020,7 +1030,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_read_via_bearer_auth() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let _ </span>= env_logger::builder().is_test(<span class="bool-val">true</span>).try_init();
+        <span class="kw">let _ </span>= tracing_subscriber::fmt().with_test_writer().try_init();
 
         <span class="kw">let </span>token = <span class="string">&quot;your_token&quot;</span>;
 
@@ -1050,7 +1060,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_stat() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let _ </span>= env_logger::builder().is_test(<span class="bool-val">true</span>).try_init();
+        <span class="kw">let _ </span>= tracing_subscriber::fmt().with_test_writer().try_init();
 
         <span class="kw">let </span>mock_server = MockServer::start().<span class="kw">await</span>;
         Mock::given(method(<span class="string">&quot;HEAD&quot;</span>))
@@ -1072,7 +1082,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_read_with() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let _ </span>= env_logger::builder().is_test(<span class="bool-val">true</span>).try_init();
+        <span class="kw">let _ </span>= tracing_subscriber::fmt().with_test_writer().try_init();
 
         <span class="kw">let </span>mock_server = MockServer::start().<span class="kw">await</span>;
         Mock::given(method(<span class="string">&quot;GET&quot;</span>))
@@ -1101,7 +1111,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_stat_with() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let _ </span>= env_logger::builder().is_test(<span class="bool-val">true</span>).try_init();
+        <span class="kw">let _ </span>= tracing_subscriber::fmt().with_test_writer().try_init();
 
         <span class="kw">let </span>mock_server = MockServer::start().<span class="kw">await</span>;
         Mock::given(method(<span class="string">&quot;HEAD&quot;</span>))

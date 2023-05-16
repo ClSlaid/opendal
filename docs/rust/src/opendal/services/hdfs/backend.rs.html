@@ -527,6 +527,17 @@
 <a href="#527" id="527">527</a>
 <a href="#528" id="528">528</a>
 <a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
+<a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
+<a href="#534" id="534">534</a>
+<a href="#535" id="535">535</a>
+<a href="#536" id="536">536</a>
+<a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -570,8 +581,13 @@
 ///
 /// This service can be used to:
 ///
+/// - [x] stat
 /// - [x] read
 /// - [x] write
+/// - [x] create_dir
+/// - [x] delete
+/// - [ ] copy
+/// - [ ] rename
 /// - [x] list
 /// - [ ] ~~scan~~
 /// - [ ] ~~presign~~
@@ -622,7 +638,7 @@
 /// ```
 ///
 /// `CLASSPATH` is not set correctly or your hadoop installation is incorrect.
-///  
+///
 /// To set `CLASSPATH`:
 /// ```shell
 /// export CLASSPATH=$(find $HADOOP_HOME -iname &quot;*.jar&quot; | xargs echo | tr &#39; &#39; &#39;:&#39;):${CLASSPATH}
@@ -767,27 +783,33 @@
         am.set_scheme(Scheme::Hdfs)
             .set_root(<span class="kw-2">&amp;</span><span class="self">self</span>.root)
             .set_capability(Capability {
+                stat: <span class="bool-val">true</span>,
+
                 read: <span class="bool-val">true</span>,
                 read_can_seek: <span class="bool-val">true</span>,
                 read_with_range: <span class="bool-val">true</span>,
 
                 write: <span class="bool-val">true</span>,
+                create_dir: <span class="bool-val">true</span>,
+                delete: <span class="bool-val">true</span>,
+
                 list: <span class="bool-val">true</span>,
+                list_with_delimiter_slash: <span class="bool-val">true</span>,
+
                 blocking: <span class="bool-val">true</span>,
 
-                list_with_delimiter_slash: <span class="bool-val">true</span>,
                 ..Default::default()
             });
 
         am
     }
 
-    <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
+    <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
         <span class="kw">let </span>p = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="self">self</span>.client.create_dir(<span class="kw-2">&amp;</span>p).map_err(parse_io_error)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(RpCreate::default())
+        <span class="prelude-val">Ok</span>(RpCreateDir::default())
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
@@ -920,12 +942,12 @@
         <span class="prelude-val">Ok</span>((RpList::default(), <span class="prelude-val">Some</span>(rd)))
     }
 
-    <span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
+    <span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
         <span class="kw">let </span>p = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="self">self</span>.client.create_dir(<span class="kw-2">&amp;</span>p).map_err(parse_io_error)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(RpCreate::default())
+        <span class="prelude-val">Ok</span>(RpCreateDir::default())
     }
 
     <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {

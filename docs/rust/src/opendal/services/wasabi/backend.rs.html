@@ -1171,6 +1171,15 @@
 <a href="#1171" id="1171">1171</a>
 <a href="#1172" id="1172">1172</a>
 <a href="#1173" id="1173">1173</a>
+<a href="#1174" id="1174">1174</a>
+<a href="#1175" id="1175">1175</a>
+<a href="#1176" id="1176">1176</a>
+<a href="#1177" id="1177">1177</a>
+<a href="#1178" id="1178">1178</a>
+<a href="#1179" id="1179">1179</a>
+<a href="#1180" id="1180">1180</a>
+<a href="#1181" id="1181">1181</a>
+<a href="#1182" id="1182">1182</a>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1233,13 +1242,16 @@
 ///
 /// This service can be used to:
 ///
+/// - [x] stat
 /// - [x] read
 /// - [x] write
+/// - [x] create_dir
+/// - [x] delete
 /// - [x] copy
+/// - [x] rename
 /// - [x] list
 /// - [x] scan
 /// - [x] presign
-/// - [x] rename
 /// - [ ] blocking
 ///
 /// # Configuration
@@ -2024,7 +2036,7 @@
         </span><span class="kw">let </span>endpoint = <span class="self">self</span>.build_endpoint(<span class="kw-2">&amp;</span>region);
         <span class="macro">debug!</span>(<span class="string">&quot;backend use endpoint: {endpoint}&quot;</span>);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>loader = AwsLoader::new(client.client(), cfg).with_allow_anonymous();
+        <span class="kw">let </span><span class="kw-2">mut </span>loader = AwsLoader::new(client.client(), cfg);
         <span class="kw">if </span><span class="self">self</span>.disable_ec2_metadata {
             loader = loader.with_disable_ec2_metadata();
         }
@@ -2084,15 +2096,21 @@
                 read_with_range: <span class="bool-val">true</span>,
 
                 write: <span class="bool-val">true</span>,
-                list: <span class="bool-val">true</span>,
-                scan: <span class="bool-val">true</span>,
+                create_dir: <span class="bool-val">true</span>,
+                delete: <span class="bool-val">true</span>,
                 copy: <span class="bool-val">true</span>,
-                presign: <span class="bool-val">true</span>,
-                batch: <span class="bool-val">true</span>,
                 rename: <span class="bool-val">true</span>,
 
+                list: <span class="bool-val">true</span>,
                 list_without_delimiter: <span class="bool-val">true</span>,
                 list_with_delimiter_slash: <span class="bool-val">true</span>,
+
+                presign: <span class="bool-val">true</span>,
+                presign_stat: <span class="bool-val">true</span>,
+                presign_read: <span class="bool-val">true</span>,
+                presign_write: <span class="bool-val">true</span>,
+
+                batch: <span class="bool-val">true</span>,
 
                 ..Default::default()
             });
@@ -2100,7 +2118,7 @@
         am
     }
 
-    <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreate) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreate&gt; {
+    <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req =
             <span class="self">self</span>.core
                 .put_object_request(path, <span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, AsyncBody::Empty)<span class="question-mark">?</span>;
@@ -2114,7 +2132,7 @@
         <span class="kw">match </span>status {
             StatusCode::CREATED | StatusCode::OK =&gt; {
                 resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(RpCreate::default())
+                <span class="prelude-val">Ok</span>(RpCreateDir::default())
             }
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
         }
@@ -2311,7 +2329,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_build_endpoint() {
-        <span class="kw">let _ </span>= env_logger::try_init();
+        <span class="kw">let _ </span>= tracing_subscriber::fmt().with_test_writer().try_init();
 
         <span class="kw">let </span>endpoint_cases = <span class="macro">vec!</span>[
             <span class="prelude-val">Some</span>(<span class="string">&quot;s3.wasabisys.com&quot;</span>),
