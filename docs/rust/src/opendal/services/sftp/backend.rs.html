@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/services/sftp/backend.rs`."><title>backend.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-c4dbdcde0fbd8430.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../../static.files/light-db279b6232be9c13.css"><link rel="stylesheet" disabled href="../../../../static.files/dark-cf923f49f397b216.css"><link rel="stylesheet" disabled href="../../../../static.files/ayu-be46fdc453a55015.css"><script src="../../../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../../../static.files/source-script-1b95b7cca98b26e5.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../static.files/main-98a684e84ae5b08b.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../../opendal/index.html"><img class="rust-logo" src="../../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/services/sftp/backend.rs`."><title>backend.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-ba5701c5741a7b69.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.70.0 (90c541806 2023-05-31)" data-search-js="search-e077946657036a58.js" data-settings-js="settings-298e1ea74db45b39.js" data-settings-css="settings-7bfb4c59cc6bc502.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../../../static.files/source-script-905937fbbdc8e9ea.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../static.files/main-f61008743c98d196.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../../opendal/index.html"><img class="rust-logo" src="../../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -541,7 +541,22 @@
 <a href="#541" id="541">541</a>
 <a href="#542" id="542">542</a>
 <a href="#543" id="543">543</a>
-</pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
+<a href="#544" id="544">544</a>
+<a href="#545" id="545">545</a>
+<a href="#546" id="546">546</a>
+<a href="#547" id="547">547</a>
+<a href="#548" id="548">548</a>
+<a href="#549" id="549">549</a>
+<a href="#550" id="550">550</a>
+<a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+</pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
 // regarding copyright ownership.  The ASF licenses this file
@@ -579,74 +594,25 @@
 <span class="kw">use </span><span class="kw">super</span>::pager::SftpPager;
 <span class="kw">use </span><span class="kw">super</span>::utils::SftpReader;
 <span class="kw">use </span><span class="kw">super</span>::writer::SftpWriter;
-<span class="kw">use </span><span class="kw">crate</span>::ops::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// SFTP services support. (only works on unix)
 ///
-/// Warning: Maximum number of file holdings is depend on the remote system configuration.
-/// For example, the default value is 255 in macos, and 1024 in linux. If you want to open
+/// Warning: Maximum number of file holdings is depending on the remote system configuration.
+///
+/// For example, the default value is 255 in macOS, and 1024 in linux. If you want to open
 /// lots of files, you should pay attention to close the file after using it.
 ///
-/// # Capabilities
-///
-/// This service can be used to:
-///
-/// - [x] stat
-/// - [x] read
-/// - [x] write
-/// - [x] create_dir
-/// - [x] delete
-/// - [ ] copy
-/// - [ ] rename
-/// - [x] list
-/// - [ ] ~~scan~~
-/// - [ ] ~~presign~~
-/// - [ ] blocking
-///
-/// # Configuration
-///
-/// - `endpoint`: Set the endpoint for connection
-/// - `root`: Set the work directory for backend, default to `/home/$USER/`
-/// - `user`: Set the login user
-/// - `key`: Set the public key for login
-/// - `known_hosts_strategy`: Set the strategy for known hosts, default to `Strict`
-///
-/// It doesn&#39;t support password login, you can use public key instead.
-///
-/// You can refer to [`SftpBuilder`]&#39;s docs for more information
-///
-/// # Example
-///
-/// ## Via Builder
-///
-/// ```no_run
-/// use anyhow::Result;
-/// use opendal::services::Ftp;
-/// use opendal::Object;
-/// use opendal::Operator;
-///
-/// #[tokio::main]
-/// async fn main() -&gt; Result&lt;()&gt; {
-///     // create backend builder
-///     let mut builder = Sftp::default();
-///
-///     builder.endpoint(&quot;127.0.0.1&quot;).user(&quot;test&quot;).key(&quot;test_key&quot;);
-///
-///     let op: Operator = Operator::new(builder)?.finish();
-///     let _obj: Object = op.object(&quot;test_file&quot;);
-///     Ok(())
-/// }
-/// ```
-
-</span><span class="attr">#[derive(Default)]
+</span><span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">&quot;docs.md&quot;</span>)]
+#[derive(Default)]
 </span><span class="kw">pub struct </span>SftpBuilder {
     endpoint: <span class="prelude-ty">Option</span>&lt;String&gt;,
     root: <span class="prelude-ty">Option</span>&lt;String&gt;,
     user: <span class="prelude-ty">Option</span>&lt;String&gt;,
     key: <span class="prelude-ty">Option</span>&lt;String&gt;,
     known_hosts_strategy: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    enable_copy: bool,
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>SftpBuilder {
@@ -717,6 +683,14 @@
 
         <span class="self">self
     </span>}
+
+    <span class="doccomment">/// set enable_copy for sftp backend.
+    /// It requires the server supports copy-file extension.
+    </span><span class="kw">pub fn </span>enable_copy(<span class="kw-2">&amp;mut </span><span class="self">self</span>, enable_copy: bool) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+        <span class="self">self</span>.enable_copy = enable_copy;
+
+        <span class="self">self
+    </span>}
 }
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>SftpBuilder {
@@ -768,6 +742,7 @@
             user,
             key: <span class="self">self</span>.key.clone(),
             known_hosts_strategy,
+            copyable: <span class="self">self</span>.enable_copy,
             client: tokio::sync::OnceCell::new(),
         })
     }
@@ -793,6 +768,7 @@
     user: String,
     key: <span class="prelude-ty">Option</span>&lt;String&gt;,
     known_hosts_strategy: KnownHosts,
+    copyable: bool,
     client: tokio::sync::OnceCell&lt;Sftp&gt;,
 }
 
@@ -808,6 +784,7 @@
     <span class="kw">type </span>BlockingReader = ();
     <span class="kw">type </span>Writer = SftpWriter;
     <span class="kw">type </span>BlockingWriter = ();
+    <span class="kw">type </span>Appender = SftpWriter;
     <span class="kw">type </span>Pager = <span class="prelude-ty">Option</span>&lt;SftpPager&gt;;
     <span class="kw">type </span>BlockingPager = ();
 
@@ -819,14 +796,21 @@
                 stat: <span class="bool-val">true</span>,
 
                 read: <span class="bool-val">true</span>,
+                read_with_range: <span class="bool-val">true</span>,
+                read_can_seek: <span class="bool-val">true</span>,
 
                 write: <span class="bool-val">true</span>,
+                write_without_content_length: <span class="bool-val">true</span>,
                 create_dir: <span class="bool-val">true</span>,
                 delete: <span class="bool-val">true</span>,
 
                 list: <span class="bool-val">true</span>,
                 list_with_limit: <span class="bool-val">true</span>,
                 list_with_delimiter_slash: <span class="bool-val">true</span>,
+
+                copy: <span class="self">self</span>.copyable,
+                rename: <span class="bool-val">true</span>,
+                append: <span class="bool-val">true</span>,
 
                 ..Default::default()
             });
@@ -895,14 +879,7 @@
         <span class="prelude-val">Ok</span>((RpRead::new(end - start), r))
     }
 
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
-        <span class="kw">if </span>args.content_length().is_none() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                ErrorKind::Unsupported,
-                <span class="string">&quot;write without content length is not supported&quot;</span>,
-            ));
-        }
-
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>((dir, <span class="kw">_</span>)) = path.rsplit_once(<span class="string">&#39;/&#39;</span>) {
             <span class="self">self</span>.create_dir(dir, OpCreateDir::default()).<span class="kw">await</span><span class="question-mark">?</span>;
         }
@@ -916,6 +893,59 @@
         <span class="kw">let </span>file = client.create(<span class="kw-2">&amp;</span>path).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>((RpWrite::new(), SftpWriter::new(file)))
+    }
+
+    <span class="kw">async fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpAppend) -&gt; <span class="prelude-ty">Result</span>&lt;(RpAppend, <span class="self">Self</span>::Appender)&gt; {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>((dir, <span class="kw">_</span>)) = path.rsplit_once(<span class="string">&#39;/&#39;</span>) {
+            <span class="self">self</span>.create_dir(dir, OpCreateDir::default()).<span class="kw">await</span><span class="question-mark">?</span>;
+        }
+
+        <span class="kw">let </span>client = <span class="self">self</span>.connect().<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span><span class="kw-2">mut </span>fs = client.fs();
+        fs.set_cwd(<span class="kw-2">&amp;</span><span class="self">self</span>.root);
+        <span class="kw">let </span>path = fs.canonicalize(path).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span><span class="kw-2">mut </span>option = client.options();
+        option.append(<span class="bool-val">true</span>).create(<span class="bool-val">true</span>);
+
+        <span class="kw">let </span>file = option.open(path).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>((RpAppend::new(), SftpWriter::new(file)))
+    }
+
+    <span class="kw">async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
+        <span class="kw">let </span>client = <span class="self">self</span>.connect().<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span><span class="kw-2">mut </span>fs = client.fs();
+        fs.set_cwd(<span class="kw-2">&amp;</span><span class="self">self</span>.root);
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>((dir, <span class="kw">_</span>)) = to.rsplit_once(<span class="string">&#39;/&#39;</span>) {
+            <span class="self">self</span>.create_dir(dir, OpCreateDir::default()).<span class="kw">await</span><span class="question-mark">?</span>;
+        }
+
+        <span class="kw">let </span>src = fs.canonicalize(from).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>dst = fs.canonicalize(to).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>src_file = client.open(<span class="kw-2">&amp;</span>src).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>dst_file = client.create(dst).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        src_file.copy_all_to(<span class="kw-2">&amp;mut </span>dst_file).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(RpCopy::default())
+    }
+
+    <span class="kw">async fn </span>rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
+        <span class="kw">let </span>client = <span class="self">self</span>.connect().<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span><span class="kw-2">mut </span>fs = client.fs();
+        fs.set_cwd(<span class="kw-2">&amp;</span><span class="self">self</span>.root);
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>((dir, <span class="kw">_</span>)) = to.rsplit_once(<span class="string">&#39;/&#39;</span>) {
+            <span class="self">self</span>.create_dir(dir, OpCreateDir::default()).<span class="kw">await</span><span class="question-mark">?</span>;
+        }
+        fs.rename(from, to).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(RpRename::default())
     }
 
     <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
@@ -1084,5 +1114,4 @@
 
     <span class="prelude-val">Ok</span>(sftp)
 }
-</code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0 (84c898d65 2023-04-16)" data-search-js="search-8a59a8356673ec1f.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>
+</code></pre></div></section></main></body></html>
