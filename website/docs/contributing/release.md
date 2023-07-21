@@ -227,6 +227,12 @@ ${name}
 
 Example: <https://lists.apache.org/thread/xk5myl10mztcfotn59oo59s4ckvojds6>
 
+#### Rescure
+
+If the mail you sent is malformed, like containing wrong links and wrong version, please cancel the vote and start a new role.
+
+Example: <https://lists.apache.org/thread/w749l4j2kjhc0yrl1vgwqkozyfnhfwk1>
+
 ### Incubator Community Vote
 
 Incubator Community Vote should send email to: <general@incubator.apache.org>:
