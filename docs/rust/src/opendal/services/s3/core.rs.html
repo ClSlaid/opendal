@@ -875,19 +875,6 @@
 <a href="#875" id="875">875</a>
 <a href="#876" id="876">876</a>
 <a href="#877" id="877">877</a>
-<a href="#878" id="878">878</a>
-<a href="#879" id="879">879</a>
-<a href="#880" id="880">880</a>
-<a href="#881" id="881">881</a>
-<a href="#882" id="882">882</a>
-<a href="#883" id="883">883</a>
-<a href="#884" id="884">884</a>
-<a href="#885" id="885">885</a>
-<a href="#886" id="886">886</a>
-<a href="#887" id="887">887</a>
-<a href="#888" id="888">888</a>
-<a href="#889" id="889">889</a>
-<a href="#890" id="890">890</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -923,7 +910,7 @@
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::Response;
 <span class="kw">use </span>reqsign::AwsCredential;
-<span class="kw">use </span>reqsign::AwsLoader;
+<span class="kw">use </span>reqsign::AwsCredentialLoad;
 <span class="kw">use </span>reqsign::AwsV4Signer;
 <span class="kw">use </span>serde::Deserialize;
 <span class="kw">use </span>serde::Serialize;
@@ -953,6 +940,7 @@
         <span class="string">&quot;x-amz-copy-source-server-side-encryption-customer-key-md5&quot;</span>;
 
     <span class="kw">pub const </span>RESPONSE_CONTENT_DISPOSITION: <span class="kw-2">&amp;</span>str = <span class="string">&quot;response-content-disposition&quot;</span>;
+    <span class="kw">pub const </span>RESPONSE_CONTENT_TYPE: <span class="kw-2">&amp;</span>str = <span class="string">&quot;response-content-type&quot;</span>;
     <span class="kw">pub const </span>RESPONSE_CACHE_CONTROL: <span class="kw-2">&amp;</span>str = <span class="string">&quot;response-cache-control&quot;</span>;
 }
 
@@ -969,7 +957,7 @@
     <span class="kw">pub </span>allow_anonymous: bool,
 
     <span class="kw">pub </span>signer: AwsV4Signer,
-    <span class="kw">pub </span>loader: AwsLoader,
+    <span class="kw">pub </span>loader: Box&lt;<span class="kw">dyn </span>AwsCredentialLoad&gt;,
     <span class="kw">pub </span>client: HttpClient,
     <span class="kw">pub </span>write_min_size: usize,
     <span class="kw">pub </span>batch_max_operations: usize,
@@ -990,7 +978,7 @@
     </span><span class="kw">async fn </span>load_credential(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;AwsCredential&gt;&gt; {
         <span class="kw">let </span>cred = <span class="self">self
             </span>.loader
-            .load()
+            .load_credential(<span class="self">self</span>.client.client())
             .<span class="kw">await
             </span>.map_err(new_request_credential_error)<span class="question-mark">?</span>;
 
@@ -1128,15 +1116,7 @@
         <span class="prelude-val">Ok</span>(req)
     }
 
-    <span class="kw">pub fn </span>s3_get_object_request(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span>str,
-        range: BytesRange,
-        override_content_disposition: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
-        override_cache_control: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
-        if_none_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
-        if_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
+    <span class="kw">pub fn </span>s3_get_object_request(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="comment">// Construct headers to add to the request
@@ -1144,14 +1124,21 @@
 
         <span class="comment">// Add query arguments to the URL based on response overrides
         </span><span class="kw">let </span><span class="kw-2">mut </span>query_args = Vec::new();
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(override_content_disposition) = override_content_disposition {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(override_content_disposition) = args.override_content_disposition() {
             query_args.push(<span class="macro">format!</span>(
                 <span class="string">&quot;{}={}&quot;</span>,
                 constants::RESPONSE_CONTENT_DISPOSITION,
                 percent_encode_path(override_content_disposition)
             ))
         }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(override_cache_control) = override_cache_control {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(override_content_type) = args.override_content_type() {
+            query_args.push(<span class="macro">format!</span>(
+                <span class="string">&quot;{}={}&quot;</span>,
+                constants::RESPONSE_CONTENT_TYPE,
+                percent_encode_path(override_content_type)
+            ))
+        }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(override_cache_control) = args.override_cache_control() {
             query_args.push(<span class="macro">format!</span>(
                 <span class="string">&quot;{}={}&quot;</span>,
                 constants::RESPONSE_CACHE_CONTROL,
@@ -1164,15 +1151,16 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::get(<span class="kw-2">&amp;</span>url);
 
+        <span class="kw">let </span>range = args.range();
         <span class="kw">if </span>!range.is_full() {
             req = req.header(http::header::RANGE, range.to_header());
         }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(if_none_match) = if_none_match {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(if_none_match) = args.if_none_match() {
             req = req.header(IF_NONE_MATCH, if_none_match);
         }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(if_match) = if_match {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(if_match) = args.if_match() {
             req = req.header(IF_MATCH, if_match);
         }
         <span class="comment">// Set SSE headers.
@@ -1189,19 +1177,9 @@
     <span class="kw">pub async fn </span>s3_get_object(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
-        range: BytesRange,
-        if_none_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
-        if_match: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
-        override_content_disposition: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
+        args: OpRead,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.s3_get_object_request(
-            path,
-            range,
-            override_content_disposition,
-            <span class="prelude-val">None</span>,
-            if_none_match,
-            if_match,
-        )<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.s3_get_object_request(path, args)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -1437,7 +1415,7 @@
         path: <span class="kw-2">&amp;</span>str,
         upload_id: <span class="kw-2">&amp;</span>str,
         part_number: usize,
-        size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
+        size: u64,
         body: AsyncBody,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Request&lt;AsyncBody&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
@@ -1452,9 +1430,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::put(<span class="kw-2">&amp;</span>url);
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = size {
-            req = req.header(CONTENT_LENGTH, size);
-        }
+        req = req.header(CONTENT_LENGTH, size);
 
         <span class="comment">// Set SSE headers.
         </span>req = <span class="self">self</span>.insert_sse_headers(req, <span class="bool-val">true</span>);
@@ -1469,7 +1445,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         upload_id: <span class="kw-2">&amp;</span>str,
-        parts: <span class="kw-2">&amp;</span>[CompleteMultipartUploadRequestPart],
+        parts: Vec&lt;CompleteMultipartUploadRequestPart&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
@@ -1485,10 +1461,8 @@
         <span class="comment">// Set SSE headers.
         </span><span class="kw">let </span>req = <span class="self">self</span>.insert_sse_headers(req, <span class="bool-val">true</span>);
 
-        <span class="kw">let </span>content = quick_xml::se::to_string(<span class="kw-2">&amp;</span>CompleteMultipartUploadRequest {
-            part: parts.to_vec(),
-        })
-        .map_err(new_xml_deserialize_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>content = quick_xml::se::to_string(<span class="kw-2">&amp;</span>CompleteMultipartUploadRequest { part: parts })
+            .map_err(new_xml_deserialize_error)<span class="question-mark">?</span>;
         <span class="comment">// Make sure content length has been set to avoid post with chunked encoding.
         </span><span class="kw">let </span>req = req.header(CONTENT_LENGTH, content.len());
         <span class="comment">// Set content-type to `application/xml` to avoid mixed with form post.

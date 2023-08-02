@@ -322,10 +322,6 @@
 <a href="#322" id="322">322</a>
 <a href="#323" id="323">323</a>
 <a href="#324" id="324">324</a>
-<a href="#325" id="325">325</a>
-<a href="#326" id="326">326</a>
-<a href="#327" id="327">327</a>
-<a href="#328" id="328">328</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -349,10 +345,12 @@
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>etcd_client::Certificate;
+<span class="kw">use </span>etcd_client::Client;
+<span class="kw">use </span>etcd_client::ConnectOptions;
 <span class="kw">use </span>etcd_client::Error <span class="kw">as </span>EtcdError;
+<span class="kw">use </span>etcd_client::GetOptions;
 <span class="kw">use </span>etcd_client::Identity;
 <span class="kw">use </span>etcd_client::TlsOptions;
-<span class="kw">use </span>etcd_client::{Client, ConnectOptions, GetOptions};
 <span class="kw">use </span>tokio::sync::OnceCell;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
@@ -538,11 +536,11 @@
 
         <span class="kw">let </span>client = OnceCell::new();
         <span class="prelude-val">Ok</span>(EtcdBackend::new(Adapter {
-            root,
             endpoints,
             client,
             options,
-        }))
+        })
+        .with_root(root.as_str()))
     }
 }
 
@@ -558,7 +556,6 @@
 
 <span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>Adapter {
-    root: String,
     endpoints: Vec&lt;String&gt;,
     client: OnceCell&lt;Client&gt;,
     options: ConnectOptions,
@@ -569,7 +566,6 @@
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
         <span class="kw">let </span><span class="kw-2">mut </span>ds = f.debug_struct(<span class="string">&quot;Adapter&quot;</span>);
 
-        ds.field(<span class="string">&quot;root&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root);
         ds.field(<span class="string">&quot;endpoints&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.endpoints.join(<span class="string">&quot;,&quot;</span>));
         ds.field(<span class="string">&quot;options&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.options.clone());
         ds.finish()
@@ -606,9 +602,8 @@
     }
 
     <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
-        <span class="kw">let </span>p = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, key);
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.conn().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>resp = client.get(p, <span class="prelude-val">None</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = client.get(key, <span class="prelude-val">None</span>).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">if let </span><span class="prelude-val">Some</span>(kv) = resp.kvs().first() {
             <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(kv.value().to_vec()))
         } <span class="kw">else </span>{
@@ -617,24 +612,21 @@
     }
 
     <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>p = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, key);
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.conn().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let _ </span>= client.put(p, value, <span class="prelude-val">None</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let _ </span>= client.put(key, value, <span class="prelude-val">None</span>).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>p = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, key);
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.conn().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let _ </span>= client.delete(p, <span class="prelude-val">None</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let _ </span>= client.delete(key, <span class="prelude-val">None</span>).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">async fn </span>scan(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;String&gt;&gt; {
-        <span class="kw">let </span>p = build_rooted_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.conn().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>get_options = <span class="prelude-val">Some</span>(GetOptions::new().with_prefix().with_keys_only());
-        <span class="kw">let </span>resp = client.get(p, get_options).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = client.get(path, get_options).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>res = Vec::default();
         <span class="kw">for </span>kv <span class="kw">in </span>resp.kvs() {
             res.push(kv.key_str().map(String::from).map_err(|err| {
