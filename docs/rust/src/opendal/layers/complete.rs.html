@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/layers/complete.rs`."><title>complete.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-f3501f0f5ae15dfb.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.71.1 (eb26296b5 2023-08-03)" data-search-js="search-4926e5fc22a5646a.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../../static.files/source-script-11255107d0a65077.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-f0540c1d82cde29b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../opendal/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/layers/complete.rs`."><title>complete.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9bb858ba049f1f21.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.72.0 (5680fa18f 2023-08-23)" data-channel="1.72.0" data-search-js="search-f6292fe389d70017.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ><script src="../../../static.files/storage-59fd9b8ccb335783.js"></script><script defer src="../../../static.files/source-script-106908c7a7964ba4.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../opendal/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1006,50 +1006,6 @@
 <a href="#1006" id="1006">1006</a>
 <a href="#1007" id="1007">1007</a>
 <a href="#1008" id="1008">1008</a>
-<a href="#1009" id="1009">1009</a>
-<a href="#1010" id="1010">1010</a>
-<a href="#1011" id="1011">1011</a>
-<a href="#1012" id="1012">1012</a>
-<a href="#1013" id="1013">1013</a>
-<a href="#1014" id="1014">1014</a>
-<a href="#1015" id="1015">1015</a>
-<a href="#1016" id="1016">1016</a>
-<a href="#1017" id="1017">1017</a>
-<a href="#1018" id="1018">1018</a>
-<a href="#1019" id="1019">1019</a>
-<a href="#1020" id="1020">1020</a>
-<a href="#1021" id="1021">1021</a>
-<a href="#1022" id="1022">1022</a>
-<a href="#1023" id="1023">1023</a>
-<a href="#1024" id="1024">1024</a>
-<a href="#1025" id="1025">1025</a>
-<a href="#1026" id="1026">1026</a>
-<a href="#1027" id="1027">1027</a>
-<a href="#1028" id="1028">1028</a>
-<a href="#1029" id="1029">1029</a>
-<a href="#1030" id="1030">1030</a>
-<a href="#1031" id="1031">1031</a>
-<a href="#1032" id="1032">1032</a>
-<a href="#1033" id="1033">1033</a>
-<a href="#1034" id="1034">1034</a>
-<a href="#1035" id="1035">1035</a>
-<a href="#1036" id="1036">1036</a>
-<a href="#1037" id="1037">1037</a>
-<a href="#1038" id="1038">1038</a>
-<a href="#1039" id="1039">1039</a>
-<a href="#1040" id="1040">1040</a>
-<a href="#1041" id="1041">1041</a>
-<a href="#1042" id="1042">1042</a>
-<a href="#1043" id="1043">1043</a>
-<a href="#1044" id="1044">1044</a>
-<a href="#1045" id="1045">1045</a>
-<a href="#1046" id="1046">1046</a>
-<a href="#1047" id="1047">1047</a>
-<a href="#1048" id="1048">1048</a>
-<a href="#1049" id="1049">1049</a>
-<a href="#1050" id="1050">1050</a>
-<a href="#1051" id="1051">1051</a>
-<a href="#1052" id="1052">1052</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1067,10 +1023,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::cmp;
+<span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::io;
 <span class="kw">use </span>std::sync::Arc;
+<span class="kw">use </span>std::task::ready;
 <span class="kw">use </span>std::task::Context;
 <span class="kw">use </span>std::task::Poll;
 
@@ -1107,12 +1065,12 @@
 /// capabilities. CompleteLayer will add those capabilities in
 /// a zero cost way.
 ///
-/// Underlying services will return [`AccessorHint`] to indicate the
+/// Underlying services will return [`AccessorInfo`] to indicate the
 /// features that returning readers support.
 ///
 /// - If both `seekable` and `streamable`, return directly.
-/// - If not `streamable`, with [`oio::into_streamable_reader`].
-/// - If not `seekable`, with [`oio::into_reader::by_range`]
+/// - If not `streamable`, with [`oio::into_read_from_stream`].
+/// - If not `seekable`, with [`oio::into_seekable_read_by_range`]
 /// - If neither not supported, wrap both by_range and into_streamable.
 ///
 /// All implementations of Reader should be `zero cost`. In our cases,
@@ -1124,10 +1082,9 @@
 ///
 /// ### Read is Seekable
 ///
-/// We use internal `AccessorHint::ReadSeekable` to decide the most
-/// suitable implementations.
+/// We use [`Capability`] to decide the most suitable implementations.
 ///
-/// If there is a hint that `ReadSeekable`, we will open it with given args
+/// If [`Capability`] `read_can_seek` is true, we will open it with given args
 /// directly. Otherwise, we will pick a seekable reader implementation based
 /// on input range for it.
 ///
@@ -1143,55 +1100,41 @@
 /// We use internal `AccessorHint::ReadStreamable` to decide the most
 /// suitable implementations.
 ///
-/// If there is a hint that `ReadStreamable`, we will use existing reader
+/// If [`Capability`] `read_can_next` is true, we will use existing reader
 /// directly. Otherwise, we will use transform this reader as a stream.
-///
-/// ### Consume instead of Drop
-///
-/// Normally, if reader is seekable, we need to drop current reader and start
-/// a new read call.
-///
-/// We can consume the data if the seek position is close enough. For
-/// example, users try to seek to `Current(1)`, we can just read the data
-/// can consume it.
-///
-/// In this way, we can reduce the extra cost of dropping reader.
 ///
 /// ## List Completion
 ///
 /// There are two styles of list, but not all services support both of
 /// them. CompleteLayer will add those capabilities in a zero cost way.
 ///
-/// Underlying services will return [`AccessorHint`] to indicate the
+/// Underlying services will return [`Capability`] to indicate the
 /// features that returning pagers support.
 ///
-/// - If both `flat` and `hierarchy`, return directly.
-/// - If only `flat`, with [`oio::to_flat_pager`].
-/// - if only `hierarchy`, with [`oio::to_hierarchy_pager`].
-/// - If neither not supported, something must be wrong.
+/// - If both `list_with_delimiter_slash` and `list_without_delimiter`, return directly.
+/// - If only `list_without_delimiter`, with [`oio::to_flat_pager`].
+/// - if only `list_with_delimiter_slash`, with [`oio::to_hierarchy_pager`].
+/// - If neither not supported, something must be wrong for `list` is true.
 ///
 /// ## Capability Check
 ///
 /// Before performing any operations, `CompleteLayer` will first check
 /// the operation against capability of the underlying service. If the
 /// operation is not supported, an error will be returned directly.
-///
-/// [`AccessorHint`]: crate::raw::AccessorHint
 </span><span class="kw">pub struct </span>CompleteLayer;
 
 <span class="kw">impl</span>&lt;A: Accessor&gt; Layer&lt;A&gt; <span class="kw">for </span>CompleteLayer {
     <span class="kw">type </span>LayeredAccessor = CompleteReaderAccessor&lt;A&gt;;
 
     <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccessor {
-        <span class="kw">let </span>meta = inner.info();
         CompleteReaderAccessor {
-            meta,
+            meta: inner.info(),
             inner: Arc::new(inner),
         }
     }
 }
 
-<span class="doccomment">/// Provide reader wrapper for backend.
+<span class="doccomment">/// Provide complete wrapper for backend.
 </span><span class="kw">pub struct </span>CompleteReaderAccessor&lt;A: Accessor&gt; {
     meta: AccessorInfo,
     inner: Arc&lt;A&gt;,
@@ -1204,14 +1147,24 @@
 }
 
 <span class="kw">impl</span>&lt;A: Accessor&gt; CompleteReaderAccessor&lt;A&gt; {
+    <span class="kw">fn </span>new_unsupported_error(<span class="kw-2">&amp;</span><span class="self">self</span>, op: <span class="kw">impl </span>Into&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt;) -&gt; Error {
+        <span class="kw">let </span>scheme = <span class="self">self</span>.meta.scheme();
+        <span class="kw">let </span>op = op.into();
+        Error::new(
+            ErrorKind::Unsupported,
+            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;service {scheme} doesn&#39;t support operation {op}&quot;</span>),
+        )
+        .with_operation(op)
+    }
+
     <span class="kw">async fn </span>complete_reader(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         args: OpRead,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, CompleteReader&lt;A, A::Reader&gt;)&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.capability();
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.native_capability();
         <span class="kw">if </span>!capability.read {
-            <span class="kw">return </span>new_capability_unsupported_error(Operation::Read);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::Read));
         }
 
         <span class="kw">let </span>seekable = capability.read_can_seek;
@@ -1262,9 +1215,9 @@
         path: <span class="kw-2">&amp;</span>str,
         args: OpRead,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, CompleteReader&lt;A, A::BlockingReader&gt;)&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.capability();
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
         <span class="kw">if </span>!capability.read || !capability.blocking {
-            <span class="kw">return </span>new_capability_unsupported_error(Operation::BlockingRead);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::BlockingRead));
         }
 
         <span class="kw">let </span>seekable = capability.read_can_seek;
@@ -1318,13 +1271,9 @@
         path: <span class="kw-2">&amp;</span>str,
         args: OpList,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, CompletePager&lt;A, A::Pager&gt;)&gt; {
-        <span class="kw">let </span>cap = <span class="self">self</span>.meta.capability();
+        <span class="kw">let </span>cap = <span class="self">self</span>.meta.full_capability();
         <span class="kw">if </span>!cap.list {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(
-                Error::new(ErrorKind::Unsupported, <span class="string">&quot;operation is not supported&quot;</span>)
-                    .with_context(<span class="string">&quot;service&quot;</span>, <span class="self">self</span>.meta.scheme())
-                    .with_operation(<span class="string">&quot;list&quot;</span>),
-            );
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::List));
         }
 
         <span class="kw">let </span>delimiter = args.delimiter();
@@ -1367,13 +1316,9 @@
         path: <span class="kw-2">&amp;</span>str,
         args: OpList,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, CompletePager&lt;A, A::BlockingPager&gt;)&gt; {
-        <span class="kw">let </span>cap = <span class="self">self</span>.meta.capability();
+        <span class="kw">let </span>cap = <span class="self">self</span>.meta.full_capability();
         <span class="kw">if </span>!cap.list {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(
-                Error::new(ErrorKind::Unsupported, <span class="string">&quot;operation is not supported&quot;</span>)
-                    .with_context(<span class="string">&quot;service&quot;</span>, <span class="self">self</span>.meta.scheme())
-                    .with_operation(<span class="string">&quot;list&quot;</span>),
-            );
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::BlockingList));
         }
 
         <span class="kw">let </span>delimiter = args.delimiter();
@@ -1418,9 +1363,11 @@
     <span class="kw">type </span>Inner = A;
     <span class="kw">type </span>Reader = CompleteReader&lt;A, A::Reader&gt;;
     <span class="kw">type </span>BlockingReader = CompleteReader&lt;A, A::BlockingReader&gt;;
-    <span class="kw">type </span>Writer = CompleteWriter&lt;A::Writer&gt;;
+    <span class="kw">type </span>Writer = oio::TwoWaysWriter&lt;
+        CompleteWriter&lt;A::Writer&gt;,
+        oio::ExactBufWriter&lt;CompleteWriter&lt;A::Writer&gt;&gt;,
+    &gt;;
     <span class="kw">type </span>BlockingWriter = CompleteWriter&lt;A::BlockingWriter&gt;;
-    <span class="kw">type </span>Appender = CompleteAppender&lt;A::Appender&gt;;
     <span class="kw">type </span>Pager = CompletePager&lt;A, A::Pager&gt;;
     <span class="kw">type </span>BlockingPager = CompletePager&lt;A, A::BlockingPager&gt;;
 
@@ -1428,18 +1375,94 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.inner
     }
 
+    <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
+        <span class="kw">let </span><span class="kw-2">mut </span>meta = <span class="self">self</span>.meta.clone();
+        <span class="kw">let </span>cap = meta.full_capability_mut();
+        <span class="kw">if </span>cap.read {
+            cap.read_can_next = <span class="bool-val">true</span>;
+            cap.read_can_seek = <span class="bool-val">true</span>;
+        }
+        meta
+    }
+
+    <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
+        <span class="kw">if </span>!capability.create_dir {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::CreateDir));
+        }
+
+        <span class="self">self</span>.inner().create_dir(path, args).<span class="kw">await
+    </span>}
+
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
         <span class="self">self</span>.complete_reader(path, args).<span class="kw">await
     </span>}
 
-    <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
-        <span class="self">self</span>.complete_blocking_reader(path, args)
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
+        <span class="kw">if </span>!capability.write {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::Write));
+        }
+        <span class="kw">if </span>args.append() &amp;&amp; !capability.write_can_append {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                ErrorKind::Unsupported,
+                <span class="kw-2">&amp;</span><span class="macro">format!</span>(
+                    <span class="string">&quot;service {} doesn&#39;t support operation write with append&quot;</span>,
+                    <span class="self">self</span>.info().scheme()
+                ),
+            ));
+        }
+
+        <span class="comment">// Calculate buffer size.
+        </span><span class="kw">let </span>buffer_size = args.buffer().map(|<span class="kw-2">mut </span>size| {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = capability.write_multi_max_size {
+                size = cmp::min(v, size);
+            }
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = capability.write_multi_min_size {
+                size = cmp::max(v, size);
+            }
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = capability.write_multi_align_size {
+                <span class="comment">// Make sure size &gt;= size first.
+                </span>size = cmp::max(v, size);
+                size -= size % v;
+            }
+
+            size
+        });
+
+        <span class="kw">let </span>(rp, w) = <span class="self">self</span>.inner.write(path, args.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>w = CompleteWriter::new(w);
+
+        <span class="kw">let </span>w = <span class="kw">match </span>buffer_size {
+            <span class="prelude-val">None </span>=&gt; oio::TwoWaysWriter::One(w),
+            <span class="prelude-val">Some</span>(size) =&gt; oio::TwoWaysWriter::Two(oio::ExactBufWriter::new(w, size)),
+        };
+
+        <span class="prelude-val">Ok</span>((rp, w))
     }
 
+    <span class="kw">async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
+        <span class="kw">if </span>!capability.copy {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::Copy));
+        }
+
+        <span class="self">self</span>.inner().copy(from, to, args).<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
+        <span class="kw">if </span>!capability.rename {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::Rename));
+        }
+
+        <span class="self">self</span>.inner().rename(from, to, args).<span class="kw">await
+    </span>}
+
     <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.capability();
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
         <span class="kw">if </span>!capability.stat {
-            <span class="kw">return </span>new_capability_unsupported_error(Operation::Stat);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::Stat));
         }
 
         <span class="self">self</span>.inner.stat(path, args).<span class="kw">await</span>.map(|v| {
@@ -1450,10 +1473,98 @@
         })
     }
 
+    <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
+        <span class="kw">if </span>!capability.delete {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::Delete));
+        }
+
+        <span class="self">self</span>.inner().delete(path, args).<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Pager)&gt; {
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
+        <span class="kw">if </span>!capability.list {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::List));
+        }
+
+        <span class="self">self</span>.complete_list(path, args).<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>batch(<span class="kw-2">&amp;</span><span class="self">self</span>, args: OpBatch) -&gt; <span class="prelude-ty">Result</span>&lt;RpBatch&gt; {
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
+        <span class="kw">if </span>!capability.batch {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::Batch));
+        }
+
+        <span class="self">self</span>.inner().batch(args).<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
+        <span class="kw">if </span>!capability.presign {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::Presign));
+        }
+
+        <span class="self">self</span>.inner.presign(path, args).<span class="kw">await
+    </span>}
+
+    <span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
+        <span class="kw">if </span>!capability.create_dir || !capability.blocking {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::BlockingCreateDir));
+        }
+
+        <span class="self">self</span>.inner().blocking_create_dir(path, args)
+    }
+
+    <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
+        <span class="self">self</span>.complete_blocking_reader(path, args)
+    }
+
+    <span class="kw">fn </span>blocking_write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::BlockingWriter)&gt; {
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
+        <span class="kw">if </span>!capability.write || !capability.blocking {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::BlockingWrite));
+        }
+
+        <span class="kw">if </span>args.append() &amp;&amp; !capability.write_can_append {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                ErrorKind::Unsupported,
+                <span class="kw-2">&amp;</span><span class="macro">format!</span>(
+                    <span class="string">&quot;service {} doesn&#39;t support operation write with append&quot;</span>,
+                    <span class="self">self</span>.info().scheme()
+                ),
+            ));
+        }
+
+        <span class="self">self</span>.inner
+            .blocking_write(path, args)
+            .map(|(rp, w)| (rp, CompleteWriter::new(w)))
+    }
+
+    <span class="kw">fn </span>blocking_copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
+        <span class="kw">if </span>!capability.copy || !capability.blocking {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::BlockingCopy));
+        }
+
+        <span class="self">self</span>.inner().blocking_copy(from, to, args)
+    }
+
+    <span class="kw">fn </span>blocking_rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
+        <span class="kw">if </span>!capability.rename || !capability.blocking {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::BlockingRename));
+        }
+
+        <span class="self">self</span>.inner().blocking_rename(from, to, args)
+    }
+
     <span class="kw">fn </span>blocking_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.capability();
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
         <span class="kw">if </span>!capability.stat || !capability.blocking {
-            <span class="kw">return </span>new_capability_unsupported_error(Operation::BlockingStat);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::BlockingStat));
         }
 
         <span class="self">self</span>.inner.blocking_stat(path, args).map(|v| {
@@ -1464,150 +1575,23 @@
         })
     }
 
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.capability();
-        <span class="kw">if </span>!capability.write {
-            <span class="kw">return </span>new_capability_unsupported_error(Operation::Write);
-        }
-
-        <span class="kw">let </span>size = args.content_length();
-        <span class="self">self</span>.inner
-            .write(path, args)
-            .<span class="kw">await
-            </span>.map(|(rp, w)| (rp, CompleteWriter::new(w, size)))
-    }
-
-    <span class="kw">fn </span>blocking_write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::BlockingWriter)&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.capability();
-        <span class="kw">if </span>!capability.write || !capability.blocking {
-            <span class="kw">return </span>new_capability_unsupported_error(Operation::BlockingWrite);
-        }
-
-        <span class="kw">let </span>size = args.content_length();
-        <span class="self">self</span>.inner
-            .blocking_write(path, args)
-            .map(|(rp, w)| (rp, CompleteWriter::new(w, size)))
-    }
-
-    <span class="kw">async fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpAppend) -&gt; <span class="prelude-ty">Result</span>&lt;(RpAppend, <span class="self">Self</span>::Appender)&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.capability();
-        <span class="kw">if </span>!capability.append {
-            <span class="kw">return </span>new_capability_unsupported_error(Operation::Append);
-        }
-
-        <span class="self">self</span>.inner
-            .append(path, args)
-            .<span class="kw">await
-            </span>.map(|(rp, a)| (rp, CompleteAppender::new(a)))
-    }
-
-    <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.capability();
-        <span class="kw">if </span>!capability.create_dir {
-            <span class="kw">return </span>new_capability_unsupported_error(Operation::CreateDir);
-        }
-
-        <span class="self">self</span>.inner().create_dir(path, args).<span class="kw">await
-    </span>}
-
-    <span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.capability();
-        <span class="kw">if </span>!capability.create_dir || !capability.blocking {
-            <span class="kw">return </span>new_capability_unsupported_error(Operation::BlockingCreateDir);
-        }
-
-        <span class="self">self</span>.inner().blocking_create_dir(path, args)
-    }
-
-    <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.capability();
-        <span class="kw">if </span>!capability.delete {
-            <span class="kw">return </span>new_capability_unsupported_error(Operation::Delete);
-        }
-
-        <span class="self">self</span>.inner().delete(path, args).<span class="kw">await
-    </span>}
-
     <span class="kw">fn </span>blocking_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.capability();
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
         <span class="kw">if </span>!capability.delete || !capability.blocking {
-            <span class="kw">return </span>new_capability_unsupported_error(Operation::BlockingDelete);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::BlockingDelete));
         }
 
         <span class="self">self</span>.inner().blocking_delete(path, args)
     }
 
-    <span class="kw">async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.capability();
-        <span class="kw">if </span>!capability.copy {
-            <span class="kw">return </span>new_capability_unsupported_error(Operation::Copy);
-        }
-
-        <span class="self">self</span>.inner().copy(from, to, args).<span class="kw">await
-    </span>}
-
-    <span class="kw">fn </span>blocking_copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.capability();
-        <span class="kw">if </span>!capability.copy || !capability.blocking {
-            <span class="kw">return </span>new_capability_unsupported_error(Operation::BlockingCopy);
-        }
-
-        <span class="self">self</span>.inner().blocking_copy(from, to, args)
-    }
-
-    <span class="kw">async fn </span>rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.capability();
-        <span class="kw">if </span>!capability.rename {
-            <span class="kw">return </span>new_capability_unsupported_error(Operation::Rename);
-        }
-
-        <span class="self">self</span>.inner().rename(from, to, args).<span class="kw">await
-    </span>}
-
-    <span class="kw">fn </span>blocking_rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.capability();
-        <span class="kw">if </span>!capability.rename || !capability.blocking {
-            <span class="kw">return </span>new_capability_unsupported_error(Operation::BlockingRename);
-        }
-
-        <span class="self">self</span>.inner().blocking_rename(from, to, args)
-    }
-
-    <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Pager)&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.capability();
-        <span class="kw">if </span>!capability.list {
-            <span class="kw">return </span>new_capability_unsupported_error(Operation::List);
-        }
-
-        <span class="self">self</span>.complete_list(path, args).<span class="kw">await
-    </span>}
-
     <span class="kw">fn </span>blocking_list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::BlockingPager)&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.capability();
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
         <span class="kw">if </span>!capability.list || !capability.blocking {
-            <span class="kw">return </span>new_capability_unsupported_error(Operation::BlockingList);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::BlockingList));
         }
 
         <span class="self">self</span>.complete_blocking_list(path, args)
     }
-
-    <span class="kw">async fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.capability();
-        <span class="kw">if </span>!capability.presign {
-            <span class="kw">return </span>new_capability_unsupported_error(Operation::Presign);
-        }
-
-        <span class="self">self</span>.inner.presign(path, args).<span class="kw">await
-    </span>}
-
-    <span class="kw">async fn </span>batch(<span class="kw-2">&amp;</span><span class="self">self</span>, args: OpBatch) -&gt; <span class="prelude-ty">Result</span>&lt;RpBatch&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.capability();
-        <span class="kw">if </span>!capability.batch {
-            <span class="kw">return </span>new_capability_unsupported_error(Operation::Batch);
-        }
-
-        <span class="self">self</span>.inner().batch(args).<span class="kw">await
-    </span>}
 }
 
 <span class="kw">pub enum </span>CompleteReader&lt;A: Accessor, R&gt; {
@@ -1736,17 +1720,11 @@
 
 <span class="kw">pub struct </span>CompleteWriter&lt;W&gt; {
     inner: <span class="prelude-ty">Option</span>&lt;W&gt;,
-    size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
-    written: u64,
 }
 
 <span class="kw">impl</span>&lt;W&gt; CompleteWriter&lt;W&gt; {
-    <span class="kw">pub fn </span>new(inner: W, size: <span class="prelude-ty">Option</span>&lt;u64&gt;) -&gt; CompleteWriter&lt;W&gt; {
-        CompleteWriter {
-            inner: <span class="prelude-val">Some</span>(inner),
-            size,
-            written: <span class="number">0</span>,
-        }
+    <span class="kw">pub fn </span>new(inner: W) -&gt; CompleteWriter&lt;W&gt; {
+        CompleteWriter { inner: <span class="prelude-val">Some</span>(inner) }
     }
 }
 
@@ -1767,82 +1745,35 @@
 <span class="kw">where
     </span>W: oio::Write,
 {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>n = bs.len();
-
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = <span class="self">self</span>.size {
-            <span class="kw">if </span><span class="self">self</span>.written + n <span class="kw">as </span>u64 &gt; size {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                    ErrorKind::ContentTruncated,
-                    <span class="kw-2">&amp;</span><span class="macro">format!</span>(
-                        <span class="string">&quot;writer got too much data, expect: {size}, actual: {}&quot;</span>,
-                        <span class="self">self</span>.written + n <span class="kw">as </span>u64
-                    ),
-                ));
-            }
-        }
-
+    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
         <span class="kw">let </span>w = <span class="self">self</span>.inner.as_mut().ok_or_else(|| {
             Error::new(ErrorKind::Unexpected, <span class="string">&quot;writer has been closed or aborted&quot;</span>)
         })<span class="question-mark">?</span>;
-        w.write(bs).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="self">self</span>.written += n <span class="kw">as </span>u64;
-        <span class="prelude-val">Ok</span>(())
+        <span class="kw">let </span>n = <span class="macro">ready!</span>(w.poll_write(cx, bs))<span class="question-mark">?</span>;
+
+        Poll::Ready(<span class="prelude-val">Ok</span>(n))
     }
 
-    <span class="kw">async fn </span>sink(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: u64, s: oio::Streamer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(total_size) = <span class="self">self</span>.size {
-            <span class="kw">if </span><span class="self">self</span>.written + size &gt; total_size {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                    ErrorKind::ContentTruncated,
-                    <span class="kw-2">&amp;</span><span class="macro">format!</span>(
-                        <span class="string">&quot;writer got too much data, expect: {size}, actual: {}&quot;</span>,
-                        <span class="self">self</span>.written + size
-                    ),
-                ));
-            }
-        }
-
-        <span class="kw">let </span>w = <span class="self">self</span>.inner.as_mut().ok_or_else(|| {
-            Error::new(ErrorKind::Unexpected, <span class="string">&quot;writer has been closed or aborted&quot;</span>)
-        })<span class="question-mark">?</span>;
-        w.sink(size, s).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="self">self</span>.written += size;
-        <span class="prelude-val">Ok</span>(())
-    }
-
-    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
         <span class="kw">let </span>w = <span class="self">self</span>.inner.as_mut().ok_or_else(|| {
             Error::new(ErrorKind::Unexpected, <span class="string">&quot;writer has been closed or aborted&quot;</span>)
         })<span class="question-mark">?</span>;
 
-        w.abort().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="macro">ready!</span>(w.poll_close(cx))<span class="question-mark">?</span>;
         <span class="self">self</span>.inner = <span class="prelude-val">None</span>;
 
-        <span class="prelude-val">Ok</span>(())
+        Poll::Ready(<span class="prelude-val">Ok</span>(()))
     }
 
-    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = <span class="self">self</span>.size {
-            <span class="kw">if </span><span class="self">self</span>.written &lt; size {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                    ErrorKind::ContentIncomplete,
-                    <span class="kw-2">&amp;</span><span class="macro">format!</span>(
-                        <span class="string">&quot;writer got too less data, expect: {size}, actual: {}&quot;</span>,
-                        <span class="self">self</span>.written
-                    ),
-                ));
-            }
-        }
-
+    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
         <span class="kw">let </span>w = <span class="self">self</span>.inner.as_mut().ok_or_else(|| {
             Error::new(ErrorKind::Unexpected, <span class="string">&quot;writer has been closed or aborted&quot;</span>)
         })<span class="question-mark">?</span>;
 
-        w.close().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="macro">ready!</span>(w.poll_abort(cx))<span class="question-mark">?</span>;
         <span class="self">self</span>.inner = <span class="prelude-val">None</span>;
 
-        <span class="prelude-val">Ok</span>(())
+        Poll::Ready(<span class="prelude-val">Ok</span>(()))
     }
 }
 
@@ -1850,43 +1781,16 @@
 <span class="kw">where
     </span>W: oio::BlockingWrite,
 {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>n = bs.len();
-
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = <span class="self">self</span>.size {
-            <span class="kw">if </span><span class="self">self</span>.written + n <span class="kw">as </span>u64 &gt; size {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                    ErrorKind::ContentTruncated,
-                    <span class="kw-2">&amp;</span><span class="macro">format!</span>(
-                        <span class="string">&quot;writer got too much data, expect: {size}, actual: {}&quot;</span>,
-                        <span class="self">self</span>.written + n <span class="kw">as </span>u64
-                    ),
-                ));
-            }
-        }
-
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>w = <span class="self">self</span>.inner.as_mut().ok_or_else(|| {
             Error::new(ErrorKind::Unexpected, <span class="string">&quot;writer has been closed or aborted&quot;</span>)
         })<span class="question-mark">?</span>;
+        <span class="kw">let </span>n = w.write(bs)<span class="question-mark">?</span>;
 
-        w.write(bs)<span class="question-mark">?</span>;
-        <span class="self">self</span>.written += n <span class="kw">as </span>u64;
-        <span class="prelude-val">Ok</span>(())
+        <span class="prelude-val">Ok</span>(n)
     }
 
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = <span class="self">self</span>.size {
-            <span class="kw">if </span><span class="self">self</span>.written &lt; size {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                    ErrorKind::ContentIncomplete,
-                    <span class="kw-2">&amp;</span><span class="macro">format!</span>(
-                        <span class="string">&quot;writer got too less data, expect: {size}, actual: {}&quot;</span>,
-                        <span class="self">self</span>.written
-                    ),
-                ));
-            }
-        }
-
         <span class="kw">let </span>w = <span class="self">self</span>.inner.as_mut().ok_or_else(|| {
             Error::new(ErrorKind::Unexpected, <span class="string">&quot;writer has been closed or aborted&quot;</span>)
         })<span class="question-mark">?</span>;
@@ -1897,61 +1801,8 @@
     }
 }
 
-<span class="kw">pub struct </span>CompleteAppender&lt;A&gt; {
-    inner: <span class="prelude-ty">Option</span>&lt;A&gt;,
-}
-
-<span class="kw">impl</span>&lt;A&gt; CompleteAppender&lt;A&gt; {
-    <span class="kw">pub fn </span>new(inner: A) -&gt; CompleteAppender&lt;A&gt; {
-        CompleteAppender { inner: <span class="prelude-val">Some</span>(inner) }
-    }
-}
-
-<span class="doccomment">/// Check if the appender has been closed while debug_assertions enabled.
-/// This code will never be executed in release mode.
-</span><span class="attr">#[cfg(debug_assertions)]
-</span><span class="kw">impl</span>&lt;A&gt; Drop <span class="kw">for </span>CompleteAppender&lt;A&gt; {
-    <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="kw">if </span><span class="self">self</span>.inner.is_some() {
-            <span class="comment">// Do we need to panic here?
-            </span><span class="macro">log::warn!</span>(<span class="string">&quot;appender has not been closed, must be a bug&quot;</span>)
-        }
-    }
-}
-
-<span class="attr">#[async_trait]
-</span><span class="kw">impl</span>&lt;A&gt; oio::Append <span class="kw">for </span>CompleteAppender&lt;A&gt;
-<span class="kw">where
-    </span>A: oio::Append,
-{
-    <span class="kw">async fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>a = <span class="self">self
-            </span>.inner
-            .as_mut()
-            .ok_or_else(|| Error::new(ErrorKind::Unexpected, <span class="string">&quot;appender has been closed&quot;</span>))<span class="question-mark">?</span>;
-
-        a.append(bs).<span class="kw">await
-    </span>}
-
-    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>a = <span class="self">self
-            </span>.inner
-            .as_mut()
-            .ok_or_else(|| Error::new(ErrorKind::Unexpected, <span class="string">&quot;appender has been closed&quot;</span>))<span class="question-mark">?</span>;
-
-        a.close().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="self">self</span>.inner = <span class="prelude-val">None</span>;
-        <span class="prelude-val">Ok</span>(())
-    }
-}
-
-<span class="kw">fn </span>new_capability_unsupported_error&lt;R&gt;(operation: Operation) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt; {
-    <span class="prelude-val">Err</span>(Error::new(ErrorKind::Unsupported, <span class="string">&quot;operation is not supported&quot;</span>).with_operation(operation))
-}
-
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span>std::collections::HashMap;
     <span class="kw">use </span>std::time::Duration;
 
     <span class="kw">use </span>async_trait::async_trait;
@@ -1960,33 +1811,6 @@
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
-    <span class="attr">#[derive(Default)]
-    </span><span class="kw">struct </span>MockBuilder {
-        capability: Capability,
-    }
-
-    <span class="kw">impl </span>MockBuilder {
-        <span class="kw">fn </span>with_capacity(<span class="kw-2">mut </span><span class="self">self</span>, capability: Capability) -&gt; <span class="self">Self </span>{
-            <span class="self">self</span>.capability = capability;
-            <span class="self">self
-        </span>}
-    }
-
-    <span class="kw">impl </span>Builder <span class="kw">for </span>MockBuilder {
-        <span class="kw">const </span>SCHEME: Scheme = Scheme::Custom(<span class="string">&quot;mock&quot;</span>);
-        <span class="kw">type </span>Accessor = MockService;
-
-        <span class="kw">fn </span>from_map(<span class="kw">_</span>: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-            <span class="self">Self</span>::default()
-        }
-
-        <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
-            <span class="prelude-val">Ok</span>(MockService {
-                capability: <span class="self">self</span>.capability,
-            })
-        }
-    }
-
     <span class="attr">#[derive(Debug)]
     </span><span class="kw">struct </span>MockService {
         capability: Capability,
@@ -1994,43 +1818,42 @@
 
     <span class="attr">#[async_trait]
     </span><span class="kw">impl </span>Accessor <span class="kw">for </span>MockService {
-        <span class="kw">type </span>Reader = ();
-        <span class="kw">type </span>BlockingReader = ();
-        <span class="kw">type </span>Writer = ();
-        <span class="kw">type </span>BlockingWriter = ();
-        <span class="kw">type </span>Appender = ();
-        <span class="kw">type </span>Pager = ();
-        <span class="kw">type </span>BlockingPager = ();
+        <span class="kw">type </span>Reader = oio::Reader;
+        <span class="kw">type </span>BlockingReader = oio::BlockingReader;
+        <span class="kw">type </span>Writer = oio::Writer;
+        <span class="kw">type </span>BlockingWriter = oio::BlockingWriter;
+        <span class="kw">type </span>Pager = oio::Pager;
+        <span class="kw">type </span>BlockingPager = oio::BlockingPager;
 
         <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
             <span class="kw">let </span><span class="kw-2">mut </span>info = AccessorInfo::default();
-            info.set_capability(<span class="self">self</span>.capability);
+            info.set_native_capability(<span class="self">self</span>.capability);
 
             info
         }
 
-        <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
-            <span class="prelude-val">Ok</span>(RpStat::new(Metadata::new(EntryMode::Unknown)))
+        <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
+            <span class="prelude-val">Ok</span>(RpCreateDir {})
         }
 
         <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-            <span class="prelude-val">Ok</span>((RpRead::new(<span class="number">0</span>), ()))
+            <span class="prelude-val">Ok</span>((RpRead::new(<span class="number">0</span>), Box::new(())))
         }
 
         <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
-            <span class="prelude-val">Ok</span>((RpWrite::new(), ()))
-        }
-
-        <span class="kw">async fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpAppend) -&gt; <span class="prelude-ty">Result</span>&lt;(RpAppend, <span class="self">Self</span>::Appender)&gt; {
-            <span class="prelude-val">Ok</span>((RpAppend::new(), ()))
+            <span class="prelude-val">Ok</span>((RpWrite::new(), Box::new(())))
         }
 
         <span class="kw">async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
             <span class="prelude-val">Ok</span>(RpCopy {})
         }
 
-        <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
-            <span class="prelude-val">Ok</span>(RpCreateDir {})
+        <span class="kw">async fn </span>rename(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
+            <span class="prelude-val">Ok</span>(RpRename {})
+        }
+
+        <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
+            <span class="prelude-val">Ok</span>(RpStat::new(Metadata::new(EntryMode::Unknown)))
         }
 
         <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
@@ -2038,11 +1861,7 @@
         }
 
         <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Pager)&gt; {
-            <span class="prelude-val">Ok</span>((RpList {}, ()))
-        }
-
-        <span class="kw">async fn </span>rename(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
-            <span class="prelude-val">Ok</span>(RpRename {})
+            <span class="prelude-val">Ok</span>((RpList {}, Box::new(())))
         }
 
         <span class="kw">async fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
@@ -2054,52 +1873,145 @@
         }
     }
 
-    <span class="doccomment">/// Perform the test against different capability preconditions.
-    </span><span class="macro">macro_rules! </span>capability_test {
-        (<span class="macro-nonterminal">$cap</span>:ident, |<span class="macro-nonterminal">$arg</span>:ident| { $(<span class="macro-nonterminal">$body</span>:tt)* }) =&gt; {
-            <span class="macro">paste::item! </span>{
-                <span class="attr">#[tokio::test]
-                </span><span class="kw">async fn </span>[&lt;test_capability_ <span class="macro-nonterminal">$cap</span>&gt;]() {
-                    <span class="kw">let </span>res_builder = |<span class="macro-nonterminal">$arg</span>: Operator| <span class="kw">async move </span>{
-                        <span class="kw">let </span>res = { $(<span class="macro-nonterminal">$body</span>)* };
-                        res.<span class="kw">await</span>.err()
-                    };
+    <span class="kw">fn </span>new_test_operator(capability: Capability) -&gt; Operator {
+        <span class="kw">let </span>srv = MockService { capability };
 
-                    <span class="kw">let </span>builder = MockBuilder::default().with_capacity(Capability {
-                        <span class="macro-nonterminal">$cap</span>: <span class="bool-val">false</span>,
-                        ..Default::default()
-                    });
-                    <span class="kw">let </span>op = Operator::new(builder).expect(<span class="string">&quot;should build&quot;</span>).finish();
-                    <span class="kw">let </span>res = res_builder(op.clone()).<span class="kw">await</span>;
-                    <span class="macro">assert_eq!</span>(res.expect(<span class="string">&quot;should not be None&quot;</span>).kind(), ErrorKind::Unsupported);
-
-                    <span class="kw">let </span>builder = MockBuilder::default().with_capacity(Capability {
-                        <span class="macro-nonterminal">$cap</span>: <span class="bool-val">true</span>,
-                        ..Default::default()
-                    });
-                    <span class="kw">let </span>op = Operator::new(builder).expect(<span class="string">&quot;should build&quot;</span>).finish();
-                    <span class="kw">let </span>res = res_builder(op.clone()).<span class="kw">await</span>;
-                    <span class="macro">assert!</span>(res.is_none());
-                }
-            }
-        };
+        Operator::from_inner(Arc::new(srv)).layer(CompleteLayer)
     }
 
-    <span class="macro">capability_test!</span>(stat, |op| { op.stat(<span class="string">&quot;/path/to/mock_file&quot;</span>) });
-    <span class="macro">capability_test!</span>(read, |op| { op.read(<span class="string">&quot;/path/to/mock_file&quot;</span>) });
-    <span class="macro">capability_test!</span>(write, |op| { op.writer(<span class="string">&quot;/path/to/mock_file&quot;</span>) });
-    <span class="macro">capability_test!</span>(append, |op| { op.appender(<span class="string">&quot;/path/to/mock_file&quot;</span>) });
-    <span class="macro">capability_test!</span>(create_dir, |op| { op.create_dir(<span class="string">&quot;/path/to/mock_dir/&quot;</span>) });
-    <span class="macro">capability_test!</span>(delete, |op| { op.delete(<span class="string">&quot;/path/to/mock_file&quot;</span>) });
-    <span class="macro">capability_test!</span>(copy, |op| {
-        op.copy(<span class="string">&quot;/path/to/mock_file&quot;</span>, <span class="string">&quot;/path/to/mock_file_2&quot;</span>)
-    });
-    <span class="macro">capability_test!</span>(rename, |op| {
-        op.rename(<span class="string">&quot;/path/to/mock_file&quot;</span>, <span class="string">&quot;/path/to/mock_file_2&quot;</span>)
-    });
-    <span class="macro">capability_test!</span>(list, |op| { op.lister(<span class="string">&quot;/path/to/mock_dir/&quot;</span>) });
-    <span class="macro">capability_test!</span>(presign, |op| {
-        op.presign_read(<span class="string">&quot;/path/to/mock_file&quot;</span>, Duration::from_secs(<span class="number">1</span>))
-    });
+    <span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_read() {
+        <span class="kw">let </span>op = new_test_operator(Capability::default());
+        <span class="kw">let </span>res = op.read(<span class="string">&quot;path&quot;</span>).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(res.is_err());
+        <span class="macro">assert_eq!</span>(res.unwrap_err().kind(), ErrorKind::Unsupported);
+
+        <span class="kw">let </span>op = new_test_operator(Capability {
+            read: <span class="bool-val">true</span>,
+            ..Default::default()
+        });
+        <span class="kw">let </span>res = op.read(<span class="string">&quot;path&quot;</span>).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(res.is_ok())
+    }
+
+    <span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_stat() {
+        <span class="kw">let </span>op = new_test_operator(Capability::default());
+        <span class="kw">let </span>res = op.stat(<span class="string">&quot;path&quot;</span>).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(res.is_err());
+        <span class="macro">assert_eq!</span>(res.unwrap_err().kind(), ErrorKind::Unsupported);
+
+        <span class="kw">let </span>op = new_test_operator(Capability {
+            stat: <span class="bool-val">true</span>,
+            ..Default::default()
+        });
+        <span class="kw">let </span>res = op.stat(<span class="string">&quot;path&quot;</span>).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(res.is_ok())
+    }
+
+    <span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_writer() {
+        <span class="kw">let </span>op = new_test_operator(Capability::default());
+        <span class="kw">let </span>res = op.write(<span class="string">&quot;path&quot;</span>, <span class="macro">vec!</span>[]).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(res.is_err());
+        <span class="macro">assert_eq!</span>(res.unwrap_err().kind(), ErrorKind::Unsupported);
+
+        <span class="kw">let </span>op = new_test_operator(Capability {
+            write: <span class="bool-val">true</span>,
+            ..Default::default()
+        });
+        <span class="kw">let </span>res = op.writer(<span class="string">&quot;path&quot;</span>).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(res.is_ok())
+    }
+
+    <span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_create_dir() {
+        <span class="kw">let </span>op = new_test_operator(Capability::default());
+        <span class="kw">let </span>res = op.create_dir(<span class="string">&quot;path/&quot;</span>).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(res.is_err());
+        <span class="macro">assert_eq!</span>(res.unwrap_err().kind(), ErrorKind::Unsupported);
+
+        <span class="kw">let </span>op = new_test_operator(Capability {
+            create_dir: <span class="bool-val">true</span>,
+            ..Default::default()
+        });
+        <span class="kw">let </span>res = op.create_dir(<span class="string">&quot;path/&quot;</span>).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(res.is_ok())
+    }
+
+    <span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_delete() {
+        <span class="kw">let </span>op = new_test_operator(Capability::default());
+        <span class="kw">let </span>res = op.delete(<span class="string">&quot;path&quot;</span>).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(res.is_err());
+        <span class="macro">assert_eq!</span>(res.unwrap_err().kind(), ErrorKind::Unsupported);
+
+        <span class="kw">let </span>op = new_test_operator(Capability {
+            delete: <span class="bool-val">true</span>,
+            ..Default::default()
+        });
+        <span class="kw">let </span>res = op.delete(<span class="string">&quot;path&quot;</span>).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(res.is_ok())
+    }
+
+    <span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_copy() {
+        <span class="kw">let </span>op = new_test_operator(Capability::default());
+        <span class="kw">let </span>res = op.copy(<span class="string">&quot;path_a&quot;</span>, <span class="string">&quot;path_b&quot;</span>).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(res.is_err());
+        <span class="macro">assert_eq!</span>(res.unwrap_err().kind(), ErrorKind::Unsupported);
+
+        <span class="kw">let </span>op = new_test_operator(Capability {
+            copy: <span class="bool-val">true</span>,
+            ..Default::default()
+        });
+        <span class="kw">let </span>res = op.copy(<span class="string">&quot;path_a&quot;</span>, <span class="string">&quot;path_b&quot;</span>).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(res.is_ok())
+    }
+
+    <span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_rename() {
+        <span class="kw">let </span>op = new_test_operator(Capability::default());
+        <span class="kw">let </span>res = op.rename(<span class="string">&quot;path_a&quot;</span>, <span class="string">&quot;path_b&quot;</span>).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(res.is_err());
+        <span class="macro">assert_eq!</span>(res.unwrap_err().kind(), ErrorKind::Unsupported);
+
+        <span class="kw">let </span>op = new_test_operator(Capability {
+            rename: <span class="bool-val">true</span>,
+            ..Default::default()
+        });
+        <span class="kw">let </span>res = op.rename(<span class="string">&quot;path_a&quot;</span>, <span class="string">&quot;path_b&quot;</span>).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(res.is_ok())
+    }
+
+    <span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_list() {
+        <span class="kw">let </span>op = new_test_operator(Capability::default());
+        <span class="kw">let </span>res = op.list(<span class="string">&quot;path/&quot;</span>).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(res.is_err());
+        <span class="macro">assert_eq!</span>(res.unwrap_err().kind(), ErrorKind::Unsupported);
+
+        <span class="kw">let </span>op = new_test_operator(Capability {
+            list: <span class="bool-val">true</span>,
+            ..Default::default()
+        });
+        <span class="kw">let </span>res = op.list(<span class="string">&quot;path/&quot;</span>).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(res.is_ok())
+    }
+
+    <span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_presign() {
+        <span class="kw">let </span>op = new_test_operator(Capability::default());
+        <span class="kw">let </span>res = op.presign_read(<span class="string">&quot;path&quot;</span>, Duration::from_secs(<span class="number">1</span>)).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(res.is_err());
+        <span class="macro">assert_eq!</span>(res.unwrap_err().kind(), ErrorKind::Unsupported);
+
+        <span class="kw">let </span>op = new_test_operator(Capability {
+            presign: <span class="bool-val">true</span>,
+            ..Default::default()
+        });
+        <span class="kw">let </span>res = op.presign_read(<span class="string">&quot;path&quot;</span>, Duration::from_secs(<span class="number">1</span>)).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(res.is_ok())
+    }
 }
 </code></pre></div></section></main></body></html>

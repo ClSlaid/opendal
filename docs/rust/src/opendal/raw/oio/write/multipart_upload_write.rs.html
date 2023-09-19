@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/raw/oio/write/multipart_upload_write.rs`."><title>multipart_upload_write.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-f3501f0f5ae15dfb.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.71.1 (eb26296b5 2023-08-03)" data-search-js="search-4926e5fc22a5646a.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../../../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../../../../static.files/source-script-11255107d0a65077.js"></script><script defer src="../../../../../source-files.js"></script><script defer src="../../../../../static.files/main-f0540c1d82cde29b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../../../opendal/index.html"><img class="rust-logo" src="../../../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/raw/oio/write/multipart_upload_write.rs`."><title>multipart_upload_write.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-9bb858ba049f1f21.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.72.0 (5680fa18f 2023-08-23)" data-channel="1.72.0" data-search-js="search-f6292fe389d70017.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ><script src="../../../../../static.files/storage-59fd9b8ccb335783.js"></script><script defer src="../../../../../static.files/source-script-106908c7a7964ba4.js"></script><script defer src="../../../../../source-files.js"></script><script defer src="../../../../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../../../opendal/index.html"><img class="rust-logo" src="../../../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -264,6 +264,65 @@
 <a href="#264" id="264">264</a>
 <a href="#265" id="265">265</a>
 <a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -281,29 +340,46 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>bytes::Bytes;
+</span><span class="kw">use </span>std::sync::Arc;
+<span class="kw">use </span>std::task::ready;
+<span class="kw">use </span>std::task::Context;
+<span class="kw">use </span>std::task::Poll;
+
+<span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>futures::future::BoxFuture;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="kw">const </span>DEFAULT_WRITE_MIN_SIZE: usize = <span class="number">8 </span>* <span class="number">1024 </span>* <span class="number">1024</span>;
-
 <span class="doccomment">/// MultipartUploadWrite is used to implement [`Write`] based on multipart
 /// uploads. By implementing MultipartUploadWrite, services don&#39;t need to
-/// care about the details of buffering and uploading parts.
+/// care about the details of uploading parts.
 ///
-/// The layout after adopting [`MultipartUploadWrite`]:
+/// # Architecture
+///
+/// The architecture after adopting [`MultipartUploadWrite`]:
 ///
 /// - Services impl `MultipartUploadWrite`
 /// - `MultipartUploadWriter` impl `Write`
 /// - Expose `MultipartUploadWriter` as `Accessor::Writer`
+///
+/// # Notes
+///
+/// `MultipartUploadWrite` has an oneshot optimization when `write` has been called only once:
+///
+/// ```no_build
+/// w.write(bs).await?;
+/// w.close().await?;
+/// ```
+///
+/// We will use `write_once` instead of starting a new multipart upload.
 </span><span class="attr">#[async_trait]
-</span><span class="kw">pub trait </span>MultipartUploadWrite: Send + Sync + Unpin {
-    <span class="doccomment">/// write_once write all data at once.
+</span><span class="kw">pub trait </span>MultipartUploadWrite: Send + Sync + Unpin + <span class="lifetime">&#39;static </span>{
+    <span class="doccomment">/// write_once is used to write the data to underlying storage at once.
     ///
-    /// MultipartUploadWriter will call this API when the size of data is
-    /// already known.
+    /// MultipartUploadWriter will call this API when:
+    ///
+    /// - All the data has been written to the buffer and we can perform the upload at once.
     </span><span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, body: AsyncBody) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 
     <span class="doccomment">/// initiate_part will call start a multipart upload and return the upload id.
@@ -344,6 +420,7 @@
 ///
 /// - `part_number` is the index of the part, starting from 0.
 /// - `etag` is the `ETag` of the part.
+</span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>MultipartUploadPart {
     <span class="doccomment">/// The number of the part, starting from 0.
     </span><span class="kw">pub </span>part_number: usize,
@@ -353,47 +430,38 @@
 
 <span class="doccomment">/// MultipartUploadWriter will implements [`Write`] based on multipart
 /// uploads.
-///
-/// ## TODO
-///
-/// - Add threshold for `write_once` to avoid unnecessary multipart uploads.
-/// - Allow users to switch to un-buffered mode if users write 16MiB every time.
 </span><span class="kw">pub struct </span>MultipartUploadWriter&lt;W: MultipartUploadWrite&gt; {
-    inner: W,
-    total_size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
+    state: State&lt;W&gt;,
 
-    upload_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    cache: <span class="prelude-ty">Option</span>&lt;oio::ChunkedBytes&gt;,
+    upload_id: <span class="prelude-ty">Option</span>&lt;Arc&lt;String&gt;&gt;,
     parts: Vec&lt;MultipartUploadPart&gt;,
-    buffer: oio::VectorCursor,
-    buffer_size: usize,
 }
+
+<span class="kw">enum </span>State&lt;W&gt; {
+    Idle(<span class="prelude-ty">Option</span>&lt;W&gt;),
+    Init(BoxFuture&lt;<span class="lifetime">&#39;static</span>, (W, <span class="prelude-ty">Result</span>&lt;String&gt;)&gt;),
+    Write(BoxFuture&lt;<span class="lifetime">&#39;static</span>, (W, <span class="prelude-ty">Result</span>&lt;MultipartUploadPart&gt;)&gt;),
+    Close(BoxFuture&lt;<span class="lifetime">&#39;static</span>, (W, <span class="prelude-ty">Result</span>&lt;()&gt;)&gt;),
+    Abort(BoxFuture&lt;<span class="lifetime">&#39;static</span>, (W, <span class="prelude-ty">Result</span>&lt;()&gt;)&gt;),
+}
+
+<span class="doccomment">/// # Safety
+///
+/// We will only take `&amp;mut Self` reference for State.
+</span><span class="kw">unsafe impl</span>&lt;S: MultipartUploadWrite&gt; Sync <span class="kw">for </span>State&lt;S&gt; {}
 
 <span class="kw">impl</span>&lt;W: MultipartUploadWrite&gt; MultipartUploadWriter&lt;W&gt; {
     <span class="doccomment">/// Create a new MultipartUploadWriter.
-    </span><span class="kw">pub fn </span>new(inner: W, total_size: <span class="prelude-ty">Option</span>&lt;u64&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(inner: W) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            inner,
-            total_size,
+            state: State::Idle(<span class="prelude-val">Some</span>(inner)),
 
+            cache: <span class="prelude-val">None</span>,
             upload_id: <span class="prelude-val">None</span>,
             parts: Vec::new(),
-            buffer: oio::VectorCursor::new(),
-            buffer_size: DEFAULT_WRITE_MIN_SIZE,
         }
     }
-
-    <span class="doccomment">/// Configure the write_min_size.
-    ///
-    /// write_min_size is used to control the size of internal buffer.
-    ///
-    /// MultipartUploadWriter will flush the buffer to upload a part when
-    /// the size of buffer is larger than write_min_size.
-    ///
-    /// This value is default to 8 MiB (as recommended by AWS).
-    </span><span class="kw">pub fn </span>with_write_min_size(<span class="kw-2">mut </span><span class="self">self</span>, v: usize) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.buffer_size = v;
-        <span class="self">self
-    </span>}
 }
 
 <span class="attr">#[async_trait]
@@ -401,133 +469,183 @@
 <span class="kw">where
     </span>W: MultipartUploadWrite,
 {
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>upload_id = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.upload_id {
-            <span class="prelude-val">Some</span>(upload_id) =&gt; upload_id,
-            <span class="prelude-val">None </span>=&gt; {
-                <span class="kw">if </span><span class="self">self</span>.total_size.unwrap_or_default() == bs.len() <span class="kw">as </span>u64 {
-                    <span class="kw">return </span><span class="self">self
-                        </span>.inner
-                        .write_once(bs.len() <span class="kw">as </span>u64, AsyncBody::Bytes(bs))
-                        .<span class="kw">await</span>;
+    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+        <span class="kw">loop </span>{
+            <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.state {
+                State::Idle(w) =&gt; {
+                    <span class="kw">match </span><span class="self">self</span>.upload_id.as_ref() {
+                        <span class="prelude-val">Some</span>(upload_id) =&gt; {
+                            <span class="kw">let </span>upload_id = upload_id.clone();
+                            <span class="kw">let </span>part_number = <span class="self">self</span>.parts.len();
+
+                            <span class="kw">let </span>bs = <span class="self">self</span>.cache.clone().expect(<span class="string">&quot;cache must be valid&quot;</span>).clone();
+                            <span class="kw">let </span>w = w.take().expect(<span class="string">&quot;writer must be valid&quot;</span>);
+                            <span class="self">self</span>.state = State::Write(Box::pin(<span class="kw">async move </span>{
+                                <span class="kw">let </span>size = bs.len();
+                                <span class="kw">let </span>part = w
+                                    .write_part(
+                                        <span class="kw-2">&amp;</span>upload_id,
+                                        part_number,
+                                        size <span class="kw">as </span>u64,
+                                        AsyncBody::ChunkedBytes(bs),
+                                    )
+                                    .<span class="kw">await</span>;
+
+                                (w, part)
+                            }));
+                        }
+                        <span class="prelude-val">None </span>=&gt; {
+                            <span class="comment">// Fill cache with the first write.
+                            </span><span class="kw">if </span><span class="self">self</span>.cache.is_none() {
+                                <span class="kw">let </span>size = bs.remaining();
+                                <span class="kw">let </span>cb = oio::ChunkedBytes::from_vec(bs.vectored_bytes(size));
+                                <span class="self">self</span>.cache = <span class="prelude-val">Some</span>(cb);
+                                <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(size));
+                            }
+
+                            <span class="kw">let </span>w = w.take().expect(<span class="string">&quot;writer must be valid&quot;</span>);
+                            <span class="self">self</span>.state = State::Init(Box::pin(<span class="kw">async move </span>{
+                                <span class="kw">let </span>upload_id = w.initiate_part().<span class="kw">await</span>;
+                                (w, upload_id)
+                            }));
+                        }
+                    }
                 }
+                State::Init(fut) =&gt; {
+                    <span class="kw">let </span>(w, upload_id) = <span class="macro">ready!</span>(fut.as_mut().poll(cx));
+                    <span class="self">self</span>.state = State::Idle(<span class="prelude-val">Some</span>(w));
+                    <span class="self">self</span>.upload_id = <span class="prelude-val">Some</span>(Arc::new(upload_id<span class="question-mark">?</span>));
+                }
+                State::Write(fut) =&gt; {
+                    <span class="kw">let </span>(w, part) = <span class="macro">ready!</span>(fut.as_mut().poll(cx));
+                    <span class="self">self</span>.state = State::Idle(<span class="prelude-val">Some</span>(w));
+                    <span class="self">self</span>.parts.push(part<span class="question-mark">?</span>);
 
-                <span class="kw">let </span>upload_id = <span class="self">self</span>.inner.initiate_part().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="self">self</span>.upload_id = <span class="prelude-val">Some</span>(upload_id);
-                <span class="self">self</span>.upload_id.as_deref().unwrap()
-            }
-        };
-
-        <span class="comment">// Ignore empty bytes
-        </span><span class="kw">if </span>bs.is_empty() {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
-        }
-
-        <span class="self">self</span>.buffer.push(bs);
-        <span class="comment">// Return directly if the buffer is not full
-        </span><span class="kw">if </span><span class="self">self</span>.buffer.len() &lt;= <span class="self">self</span>.buffer_size {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
-        }
-
-        <span class="kw">let </span>bs = <span class="self">self</span>.buffer.peak_at_least(<span class="self">self</span>.buffer_size);
-        <span class="kw">let </span>size = bs.len();
-
-        <span class="kw">match </span><span class="self">self
-            </span>.inner
-            .write_part(
-                upload_id,
-                <span class="self">self</span>.parts.len(),
-                size <span class="kw">as </span>u64,
-                AsyncBody::Bytes(bs),
-            )
-            .<span class="kw">await
-        </span>{
-            <span class="prelude-val">Ok</span>(part) =&gt; {
-                <span class="self">self</span>.buffer.take(size);
-                <span class="self">self</span>.parts.push(part);
-                <span class="prelude-val">Ok</span>(())
-            }
-            <span class="prelude-val">Err</span>(e) =&gt; {
-                <span class="comment">// If the upload fails, we should pop the given bs to make sure
-                // write is re-enter safe.
-                </span><span class="self">self</span>.buffer.pop();
-                <span class="prelude-val">Err</span>(e)
+                    <span class="comment">// Replace the cache when last write succeeded
+                    </span><span class="kw">let </span>size = bs.remaining();
+                    <span class="kw">let </span>cb = oio::ChunkedBytes::from_vec(bs.vectored_bytes(size));
+                    <span class="self">self</span>.cache = <span class="prelude-val">Some</span>(cb);
+                    <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(size));
+                }
+                State::Close(<span class="kw">_</span>) =&gt; {
+                    <span class="macro">unreachable!</span>(
+                        <span class="string">&quot;MultipartUploadWriter must not go into State::Close during poll_write&quot;
+                    </span>)
+                }
+                State::Abort(<span class="kw">_</span>) =&gt; {
+                    <span class="macro">unreachable!</span>(
+                        <span class="string">&quot;MultipartUploadWriter must not go into State::Abort during poll_write&quot;
+                    </span>)
+                }
             }
         }
     }
 
-    <span class="kw">async fn </span>sink(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: u64, s: oio::Streamer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">if </span>!<span class="self">self</span>.buffer.is_empty() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
-                ErrorKind::InvalidInput,
-                <span class="string">&quot;Writer::sink should not be used mixed with existing buffer&quot;</span>,
-            ));
-        }
-
-        <span class="kw">let </span>upload_id = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.upload_id {
-            <span class="prelude-val">Some</span>(upload_id) =&gt; upload_id,
-            <span class="prelude-val">None </span>=&gt; {
-                <span class="kw">if </span><span class="self">self</span>.total_size.unwrap_or_default() == size {
-                    <span class="kw">return </span><span class="self">self</span>.inner.write_once(size, AsyncBody::Stream(s)).<span class="kw">await</span>;
+    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
+        <span class="kw">loop </span>{
+            <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.state {
+                State::Idle(w) =&gt; {
+                    <span class="kw">let </span>w = w.take().expect(<span class="string">&quot;writer must be valid&quot;</span>);
+                    <span class="kw">match </span><span class="self">self</span>.upload_id.clone() {
+                        <span class="prelude-val">Some</span>(upload_id) =&gt; {
+                            <span class="kw">let </span>parts = <span class="self">self</span>.parts.clone();
+                            <span class="kw">match </span><span class="self">self</span>.cache.clone() {
+                                <span class="prelude-val">Some</span>(bs) =&gt; {
+                                    <span class="kw">let </span>upload_id = upload_id.clone();
+                                    <span class="self">self</span>.state = State::Write(Box::pin(<span class="kw">async move </span>{
+                                        <span class="kw">let </span>size = bs.len();
+                                        <span class="kw">let </span>part = w
+                                            .write_part(
+                                                <span class="kw-2">&amp;</span>upload_id,
+                                                parts.len(),
+                                                size <span class="kw">as </span>u64,
+                                                AsyncBody::ChunkedBytes(bs),
+                                            )
+                                            .<span class="kw">await</span>;
+                                        (w, part)
+                                    }));
+                                }
+                                <span class="prelude-val">None </span>=&gt; {
+                                    <span class="self">self</span>.state = State::Close(Box::pin(<span class="kw">async move </span>{
+                                        <span class="kw">let </span>res = w.complete_part(<span class="kw-2">&amp;</span>upload_id, <span class="kw-2">&amp;</span>parts).<span class="kw">await</span>;
+                                        (w, res)
+                                    }));
+                                }
+                            }
+                        }
+                        <span class="prelude-val">None </span>=&gt; <span class="kw">match </span><span class="self">self</span>.cache.clone() {
+                            <span class="prelude-val">Some</span>(bs) =&gt; {
+                                <span class="self">self</span>.state = State::Close(Box::pin(<span class="kw">async move </span>{
+                                    <span class="kw">let </span>size = bs.len();
+                                    <span class="kw">let </span>res = w
+                                        .write_once(size <span class="kw">as </span>u64, AsyncBody::ChunkedBytes(bs))
+                                        .<span class="kw">await</span>;
+                                    (w, res)
+                                }));
+                            }
+                            <span class="prelude-val">None </span>=&gt; <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(())),
+                        },
+                    }
                 }
+                State::Close(fut) =&gt; {
+                    <span class="kw">let </span>(w, res) = <span class="macro">futures::ready!</span>(fut.as_mut().poll(cx));
+                    <span class="self">self</span>.state = State::Idle(<span class="prelude-val">Some</span>(w));
+                    <span class="comment">// We should check res first before clean up cache.
+                    </span>res<span class="question-mark">?</span>;
 
-                <span class="kw">let </span>upload_id = <span class="self">self</span>.inner.initiate_part().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="self">self</span>.upload_id = <span class="prelude-val">Some</span>(upload_id);
-                <span class="self">self</span>.upload_id.as_deref().unwrap()
+                    <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
+                    <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(()));
+                }
+                State::Init(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+                    <span class="string">&quot;MultipartUploadWriter must not go into State::Init during poll_close&quot;
+                </span>),
+                State::Write(fut) =&gt; {
+                    <span class="kw">let </span>(w, part) = <span class="macro">ready!</span>(fut.as_mut().poll(cx));
+                    <span class="self">self</span>.state = State::Idle(<span class="prelude-val">Some</span>(w));
+                    <span class="self">self</span>.parts.push(part<span class="question-mark">?</span>);
+                    <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
+                }
+                State::Abort(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+                    <span class="string">&quot;MultipartUploadWriter must not go into State::Abort during poll_close&quot;
+                </span>),
             }
-        };
-
-        <span class="kw">let </span>part = <span class="self">self
-            </span>.inner
-            .write_part(upload_id, <span class="self">self</span>.parts.len(), size, AsyncBody::Stream(s))
-            .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="self">self</span>.parts.push(part);
-
-        <span class="prelude-val">Ok</span>(())
+        }
     }
 
-    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>upload_id = <span class="kw">if let </span><span class="prelude-val">Some</span>(upload_id) = <span class="kw-2">&amp;</span><span class="self">self</span>.upload_id {
-            upload_id
-        } <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
-        };
-
-        <span class="comment">// Make sure internal buffer has been flushed.
-        </span><span class="kw">if </span>!<span class="self">self</span>.buffer.is_empty() {
-            <span class="kw">let </span>bs = <span class="self">self</span>.buffer.peak_exact(<span class="self">self</span>.buffer.len());
-
-            <span class="kw">match </span><span class="self">self
-                </span>.inner
-                .write_part(
-                    upload_id,
-                    <span class="self">self</span>.parts.len(),
-                    bs.len() <span class="kw">as </span>u64,
-                    AsyncBody::Bytes(bs),
-                )
-                .<span class="kw">await
-            </span>{
-                <span class="prelude-val">Ok</span>(part) =&gt; {
-                    <span class="self">self</span>.buffer.clear();
-                    <span class="self">self</span>.parts.push(part);
+    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
+        <span class="kw">loop </span>{
+            <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.state {
+                State::Idle(w) =&gt; {
+                    <span class="kw">let </span>w = w.take().expect(<span class="string">&quot;writer must be valid&quot;</span>);
+                    <span class="kw">match </span><span class="self">self</span>.upload_id.clone() {
+                        <span class="prelude-val">Some</span>(upload_id) =&gt; {
+                            <span class="self">self</span>.state = State::Abort(Box::pin(<span class="kw">async move </span>{
+                                <span class="kw">let </span>res = w.abort_part(<span class="kw-2">&amp;</span>upload_id).<span class="kw">await</span>;
+                                (w, res)
+                            }));
+                        }
+                        <span class="prelude-val">None </span>=&gt; {
+                            <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
+                            <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(()));
+                        }
+                    }
                 }
-                <span class="prelude-val">Err</span>(e) =&gt; {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(e);
+                State::Abort(fut) =&gt; {
+                    <span class="kw">let </span>(w, res) = <span class="macro">futures::ready!</span>(fut.as_mut().poll(cx));
+                    <span class="self">self</span>.state = State::Idle(<span class="prelude-val">Some</span>(w));
+                    <span class="kw">return </span>Poll::Ready(res);
                 }
+                State::Init(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+                    <span class="string">&quot;MultipartUploadWriter must not go into State::Init during poll_abort&quot;
+                </span>),
+                State::Write(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+                    <span class="string">&quot;MultipartUploadWriter must not go into State::Write during poll_abort&quot;
+                </span>),
+                State::Close(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+                    <span class="string">&quot;MultipartUploadWriter must not go into State::Close during poll_abort&quot;
+                </span>),
             }
         }
-
-        <span class="self">self</span>.inner.complete_part(upload_id, <span class="kw-2">&amp;</span><span class="self">self</span>.parts).<span class="kw">await
-    </span>}
-
-    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>upload_id = <span class="kw">if let </span><span class="prelude-val">Some</span>(upload_id) = <span class="kw-2">&amp;</span><span class="self">self</span>.upload_id {
-            upload_id
-        } <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
-        };
-
-        <span class="self">self</span>.inner.abort_part(upload_id).<span class="kw">await
-    </span>}
+    }
 }
 </code></pre></div></section></main></body></html>
