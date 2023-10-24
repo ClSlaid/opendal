@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['len_95',['len',['../structopendal__bytes.html#a16abed2ad211c076650d1ea81772b851',1,'opendal_bytes']]],
-  ['lister_96',['lister',['../structopendal__result__list.html#a1388cb447f532ecd19ff9a13e09daced',1,'opendal_result_list']]]
+  ['inner_120',['inner',['../structopendal__entry.html#aa26d5cb8f16b95ee2f3b91f22254e597',1,'opendal_entry::inner()'],['../structopendal__lister.html#a50387dc1691da04cd020cc67df2c4295',1,'opendal_lister::inner()'],['../structopendal__metadata.html#afadf4e2bbfa3ee699d3c3d9c0a96a404',1,'opendal_metadata::inner()'],['../structopendal__operator__options.html#a0b4a1a2cd9074140b04836b822a04645',1,'opendal_operator_options::inner()'],['../structopendal__reader.html#a25070270d288274fc2fcb1e38d389718',1,'opendal_reader::inner()']]],
+  ['is_5fexist_121',['is_exist',['../structopendal__result__is__exist.html#abe145d68333ea78b438ef92a12d9d295',1,'opendal_result_is_exist']]]
 ];
