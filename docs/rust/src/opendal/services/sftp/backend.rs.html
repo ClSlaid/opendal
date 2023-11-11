@@ -563,28 +563,58 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::cmp::min;
-<span class="kw">use </span>std::collections::HashMap;
+</span><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::path::Path;
 <span class="kw">use </span>std::path::PathBuf;
+<span class="kw">use </span>std::pin::Pin;
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>futures::StreamExt;
 <span class="kw">use </span>log::debug;
 <span class="kw">use </span>openssh::KnownHosts;
 <span class="kw">use </span>openssh::SessionBuilder;
+<span class="kw">use </span>openssh_sftp_client::file::TokioCompatFile;
 <span class="kw">use </span>openssh_sftp_client::Sftp;
 <span class="kw">use </span>openssh_sftp_client::SftpOptions;
 
 <span class="kw">use </span><span class="kw">super</span>::error::is_not_found;
 <span class="kw">use </span><span class="kw">super</span>::error::is_sftp_protocol_error;
 <span class="kw">use </span><span class="kw">super</span>::pager::SftpPager;
-<span class="kw">use </span><span class="kw">super</span>::utils::SftpReader;
 <span class="kw">use </span><span class="kw">super</span>::writer::SftpWriter;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
+
+<span class="kw">use </span>serde::Deserialize;
+
+<span class="doccomment">/// Config for Sftpservices support.
+</span><span class="attr">#[derive(Default, Deserialize)]
+#[serde(default)]
+#[non_exhaustive]
+</span><span class="kw">pub struct </span>SftpConfig {
+    <span class="doccomment">/// endpoint of this backend
+    </span><span class="kw">pub </span>endpoint: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// root of this backend
+    </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// user of this backend
+    </span><span class="kw">pub </span>user: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// key of this backend
+    </span><span class="kw">pub </span>key: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// known_hosts_strategy of this backend
+    </span><span class="kw">pub </span>known_hosts_strategy: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// enable_copy of this backend
+    </span><span class="kw">pub </span>enable_copy: bool,
+}
+
+<span class="kw">impl </span>Debug <span class="kw">for </span>SftpConfig {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+        f.debug_struct(<span class="string">&quot;SftpConfig&quot;</span>)
+            .field(<span class="string">&quot;endpoint&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.endpoint)
+            .field(<span class="string">&quot;root&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root)
+            .finish_non_exhaustive()
+    }
+}
 
 <span class="doccomment">/// SFTP services support. (only works on unix)
 ///
@@ -598,19 +628,13 @@
 </span><span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">&quot;docs.md&quot;</span>)]
 #[derive(Default)]
 </span><span class="kw">pub struct </span>SftpBuilder {
-    endpoint: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    user: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    key: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    known_hosts_strategy: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    enable_copy: bool,
+    config: SftpConfig,
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>SftpBuilder {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        f.debug_struct(<span class="string">&quot;Builder&quot;</span>)
-            .field(<span class="string">&quot;endpoint&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.endpoint)
-            .field(<span class="string">&quot;root&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root)
+        f.debug_struct(<span class="string">&quot;SftpBuilder&quot;</span>)
+            .field(<span class="string">&quot;config&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.config)
             .finish()
     }
 }
@@ -618,7 +642,7 @@
 <span class="kw">impl </span>SftpBuilder {
     <span class="doccomment">/// set endpoint for sftp backend.
     </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.endpoint = <span class="kw">if </span>endpoint.is_empty() {
+        <span class="self">self</span>.config.endpoint = <span class="kw">if </span>endpoint.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
             <span class="prelude-val">Some</span>(endpoint.to_string())
@@ -630,7 +654,7 @@
     <span class="doccomment">/// set root path for sftp backend.
     /// It uses the default directory set by the remote `sftp-server` as default.
     </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.root = <span class="kw">if </span>root.is_empty() {
+        <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
             <span class="prelude-val">Some</span>(root.to_string())
@@ -641,7 +665,7 @@
 
     <span class="doccomment">/// set user for sftp backend.
     </span><span class="kw">pub fn </span>user(<span class="kw-2">&amp;mut </span><span class="self">self</span>, user: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.user = <span class="kw">if </span>user.is_empty() {
+        <span class="self">self</span>.config.user = <span class="kw">if </span>user.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
             <span class="prelude-val">Some</span>(user.to_string())
@@ -652,7 +676,7 @@
 
     <span class="doccomment">/// set key path for sftp backend.
     </span><span class="kw">pub fn </span>key(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.key = <span class="kw">if </span>key.is_empty() {
+        <span class="self">self</span>.config.key = <span class="kw">if </span>key.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
             <span class="prelude-val">Some</span>(key.to_string())
@@ -667,7 +691,7 @@
     /// - Accept
     /// - Add
     </span><span class="kw">pub fn </span>known_hosts_strategy(<span class="kw-2">&amp;mut </span><span class="self">self</span>, strategy: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.known_hosts_strategy = <span class="kw">if </span>strategy.is_empty() {
+        <span class="self">self</span>.config.known_hosts_strategy = <span class="kw">if </span>strategy.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
             <span class="prelude-val">Some</span>(strategy.to_string())
@@ -679,7 +703,7 @@
     <span class="doccomment">/// set enable_copy for sftp backend.
     /// It requires the server supports copy-file extension.
     </span><span class="kw">pub fn </span>enable_copy(<span class="kw-2">&amp;mut </span><span class="self">self</span>, enable_copy: bool) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.enable_copy = enable_copy;
+        <span class="self">self</span>.config.enable_copy = enable_copy;
 
         <span class="self">self
     </span>}
@@ -691,23 +715,24 @@
 
     <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
         <span class="macro">debug!</span>(<span class="string">&quot;sftp backend build started: {:?}&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>);
-        <span class="kw">let </span>endpoint = <span class="kw">match </span><span class="self">self</span>.endpoint.clone() {
+        <span class="kw">let </span>endpoint = <span class="kw">match </span><span class="self">self</span>.config.endpoint.clone() {
             <span class="prelude-val">Some</span>(v) =&gt; v,
             <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::ConfigInvalid, <span class="string">&quot;endpoint is empty&quot;</span>)),
         };
 
-        <span class="kw">let </span>user = <span class="kw">match </span><span class="self">self</span>.user.clone() {
+        <span class="kw">let </span>user = <span class="kw">match </span><span class="self">self</span>.config.user.clone() {
             <span class="prelude-val">Some</span>(v) =&gt; v,
             <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::ConfigInvalid, <span class="string">&quot;user is empty&quot;</span>)),
         };
 
         <span class="kw">let </span>root = <span class="self">self
-            </span>.root
+            </span>.config
+            .root
             .clone()
             .map(|r| normalize_root(r.as_str()))
             .unwrap_or_default();
 
-        <span class="kw">let </span>known_hosts_strategy = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.known_hosts_strategy {
+        <span class="kw">let </span>known_hosts_strategy = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.config.known_hosts_strategy {
             <span class="prelude-val">Some</span>(v) =&gt; {
                 <span class="kw">let </span>v = v.to_lowercase();
                 <span class="kw">if </span>v == <span class="string">&quot;strict&quot; </span>{
@@ -732,24 +757,18 @@
             endpoint,
             root,
             user,
-            key: <span class="self">self</span>.key.clone(),
+            key: <span class="self">self</span>.config.key.clone(),
             known_hosts_strategy,
-            copyable: <span class="self">self</span>.enable_copy,
+            copyable: <span class="self">self</span>.config.enable_copy,
             client: tokio::sync::OnceCell::new(),
         })
     }
 
     <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = SftpBuilder::default();
-
-        map.get(<span class="string">&quot;root&quot;</span>).map(|v| builder.root(v));
-        map.get(<span class="string">&quot;endpoint&quot;</span>).map(|v| builder.endpoint(v));
-        map.get(<span class="string">&quot;user&quot;</span>).map(|v| builder.user(v));
-        map.get(<span class="string">&quot;key&quot;</span>).map(|v| builder.key(v));
-        map.get(<span class="string">&quot;known_hosts_strategy&quot;</span>)
-            .map(|v| builder.known_hosts_strategy(v));
-
-        builder
+        SftpBuilder {
+            config: SftpConfig::deserialize(ConfigDeserializer::new(map))
+                .expect(<span class="string">&quot;config deserialize must succeed&quot;</span>),
+        }
     }
 }
 
@@ -772,7 +791,7 @@
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>Accessor <span class="kw">for </span>SftpBackend {
-    <span class="kw">type </span>Reader = SftpReader;
+    <span class="kw">type </span>Reader = oio::TokioReader&lt;Pin&lt;Box&lt;TokioCompatFile&gt;&gt;&gt;;
     <span class="kw">type </span>BlockingReader = ();
     <span class="kw">type </span>Writer = SftpWriter;
     <span class="kw">type </span>BlockingWriter = ();
@@ -787,7 +806,6 @@
                 stat: <span class="bool-val">true</span>,
 
                 read: <span class="bool-val">true</span>,
-                read_with_range: <span class="bool-val">true</span>,
                 read_can_seek: <span class="bool-val">true</span>,
 
                 write: <span class="bool-val">true</span>,
@@ -798,7 +816,7 @@
 
                 list: <span class="bool-val">true</span>,
                 list_with_limit: <span class="bool-val">true</span>,
-                list_with_delimiter_slash: <span class="bool-val">true</span>,
+                list_without_recursive: <span class="bool-val">true</span>,
 
                 copy: <span class="self">self</span>.copyable,
                 rename: <span class="bool-val">true</span>,
@@ -832,42 +850,24 @@
         <span class="kw">return </span><span class="prelude-val">Ok</span>(RpCreateDir::default());
     }
 
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
         <span class="kw">let </span>client = <span class="self">self</span>.connect().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>fs = client.fs();
         fs.set_cwd(<span class="kw-2">&amp;</span><span class="self">self</span>.root);
         <span class="kw">let </span>path = fs.canonicalize(path).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span><span class="kw-2">mut </span>file = client.open(path.as_path()).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>f = client.open(path.as_path()).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span>total_length = file.metadata().<span class="kw">await</span><span class="question-mark">?</span>.len().ok_or(Error::new(
-            ErrorKind::NotFound,
-            <span class="macro">format!</span>(<span class="string">&quot;file not found: {}&quot;</span>, path.to_str().unwrap()).as_str(),
-        ))<span class="question-mark">?</span>;
+        <span class="comment">// Sorry for the ugly code...
+        //
+        // - `f` is a openssh file.
+        // - `TokioCompatFile::new(f)` makes it implements tokio AsyncRead + AsyncSeek for openssh File.
+        // - `Box::pin(x)` to make sure this reader implements `Unpin`, since `TokioCompatFile` is not.
+        // - `oio::TokioReader::new(x)` makes it a `oio::TokioReader` which implements `oio::Read`.
+        </span><span class="kw">let </span>r = oio::TokioReader::new(Box::pin(TokioCompatFile::new(f)));
 
-        <span class="kw">let </span>br = args.range();
-        <span class="kw">let </span>(start, end) = <span class="kw">match </span>(br.offset(), br.size()) {
-            <span class="comment">// Read a specific range.
-            </span>(<span class="prelude-val">Some</span>(offset), <span class="prelude-val">Some</span>(size)) =&gt; (offset, min(offset + size, total_length)),
-            <span class="comment">// Read from offset.
-            </span>(<span class="prelude-val">Some</span>(offset), <span class="prelude-val">None</span>) =&gt; (offset, total_length),
-            <span class="comment">// Read the last size bytes.
-            </span>(<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(size)) =&gt; (
-                <span class="kw">if </span>total_length &gt; size {
-                    total_length - size
-                } <span class="kw">else </span>{
-                    <span class="number">0
-                </span>},
-                total_length,
-            ),
-            <span class="comment">// Read the whole file.
-            </span>(<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; (<span class="number">0</span>, total_length),
-        };
-
-        <span class="kw">let </span>r = SftpReader::new(file, start, end).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="prelude-val">Ok</span>((RpRead::new(end - start), r))
+        <span class="prelude-val">Ok</span>((RpRead::new(), r))
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, op: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
