@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/gdrive/core.rs`."><title>core.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/gdrive/core.rs`."><title>core.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -455,6 +453,7 @@
 <a href="#453" id="453">453</a>
 <a href="#454" id="454">454</a>
 <a href="#455" id="455">455</a>
+<a href="#456" id="456">456</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -476,8 +475,8 @@
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>bytes;
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>chrono::DateTime;
 <span class="kw">use </span>chrono::Utc;
@@ -491,9 +490,7 @@
 
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::types::Result;
-<span class="kw">use </span><span class="kw">crate</span>::Error;
-<span class="kw">use </span><span class="kw">crate</span>::ErrorKind;
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">pub struct </span>GdriveCore {
     <span class="kw">pub </span>root: String,
@@ -515,11 +512,11 @@
 }
 
 <span class="kw">impl </span>GdriveCore {
-    <span class="kw">pub async fn </span>gdrive_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>gdrive_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>file_id = <span class="self">self</span>.path_cache.get(<span class="kw-2">&amp;</span>path).<span class="kw">await</span><span class="question-mark">?</span>.ok_or(Error::new(
             ErrorKind::NotFound,
-            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"path not found: {}"</span>, path),
+            <span class="macro">format!</span>(<span class="string">"path not found: {}"</span>, path),
         ))<span class="question-mark">?</span>;
 
         <span class="comment">// The file metadata in the Google Drive API is very complex.
@@ -528,18 +525,18 @@
             <span class="string">"https://www.googleapis.com/drive/v3/files/{}?fields=id,name,mimeType,size,modifiedTime"</span>,
             file_id
         ))
-            .body(AsyncBody::Empty)
+            .body(Buffer::new())
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>gdrive_get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>gdrive_get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, range: BytesRange) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;HttpBody&gt;&gt; {
         <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
         <span class="kw">let </span>path_id = <span class="self">self</span>.path_cache.get(<span class="kw-2">&amp;</span>path).<span class="kw">await</span><span class="question-mark">?</span>.ok_or(Error::new(
             ErrorKind::NotFound,
-            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"path not found: {}"</span>, path),
+            <span class="macro">format!</span>(<span class="string">"path not found: {}"</span>, path),
         ))<span class="question-mark">?</span>;
 
         <span class="kw">let </span>url: String = <span class="macro">format!</span>(
@@ -548,11 +545,12 @@
         );
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::get(<span class="kw-2">&amp;</span>url)
-            .body(AsyncBody::Empty)
+            .header(header::RANGE, range.to_header())
+            .body(Buffer::new())
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="self">self</span>.client.send(req).<span class="kw">await
+        <span class="self">self</span>.client.fetch(req).<span class="kw">await
     </span>}
 
     <span class="kw">pub async fn </span>gdrive_list(
@@ -560,7 +558,7 @@
         file_id: <span class="kw-2">&amp;</span>str,
         page_size: i32,
         next_page_token: <span class="kw-2">&amp;</span>str,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>q = <span class="macro">format!</span>(<span class="string">"'{}' in parents and trashed = false"</span>, file_id);
         <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(
             <span class="string">"https://www.googleapis.com/drive/v3/files?pageSize={}&amp;q={}"</span>,
@@ -572,7 +570,7 @@
         };
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::get(<span class="kw-2">&amp;</span>url)
-            .body(AsyncBody::Empty)
+            .body(Buffer::new())
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -584,10 +582,10 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         source: <span class="kw-2">&amp;</span>str,
         target: <span class="kw-2">&amp;</span>str,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>source_file_id = <span class="self">self</span>.path_cache.get(source).<span class="kw">await</span><span class="question-mark">?</span>.ok_or(Error::new(
             ErrorKind::NotFound,
-            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"source path not found: {}"</span>, source),
+            <span class="macro">format!</span>(<span class="string">"source path not found: {}"</span>, source),
         ))<span class="question-mark">?</span>;
         <span class="kw">let </span>source_parent = get_parent(source);
         <span class="kw">let </span>source_parent_id = <span class="self">self
@@ -610,7 +608,7 @@
             source_file_id
         );
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::patch(url)
-            .body(AsyncBody::Bytes(Bytes::from(metadata.to_string())))
+            .body(Buffer::from(Bytes::from(metadata.to_string())))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -618,7 +616,7 @@
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>gdrive_trash(<span class="kw-2">&amp;</span><span class="self">self</span>, file_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>gdrive_trash(<span class="kw-2">&amp;</span><span class="self">self</span>, file_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"https://www.googleapis.com/drive/v3/files/{}"</span>, file_id);
 
         <span class="kw">let </span>body = serde_json::to_vec(<span class="kw-2">&amp;</span><span class="macro">json!</span>({
@@ -627,7 +625,7 @@
         .map_err(new_json_serialize_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::patch(<span class="kw-2">&amp;</span>url)
-            .body(AsyncBody::Bytes(Bytes::from(body)))
+            .body(Buffer::from(Bytes::from(body)))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -640,8 +638,8 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
         size: u64,
-        body: Bytes,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+        body: Buffer,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>parent = <span class="self">self</span>.path_cache.ensure_dir(get_parent(path)).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>url = <span class="string">"https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart"</span>;
@@ -690,8 +688,8 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         file_id: <span class="kw-2">&amp;</span>str,
         size: u64,
-        body: Bytes,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+        body: Buffer,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>url = <span class="macro">format!</span>(
             <span class="string">"https://www.googleapis.com/upload/drive/v3/files/{}?uploadType=media"</span>,
             file_id
@@ -701,7 +699,7 @@
             .header(header::CONTENT_TYPE, <span class="string">"application/octet-stream"</span>)
             .header(header::CONTENT_LENGTH, size)
             .header(<span class="string">"X-Upload-Content-Length"</span>, size)
-            .body(AsyncBody::Bytes(body))
+            .body(body)
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -759,7 +757,8 @@
 
         {
             <span class="kw">let </span>req = Request::post(url)
-                .body(AsyncBody::Empty)
+                .header(header::CONTENT_LENGTH, <span class="number">0</span>)
+                .body(Buffer::new())
                 .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
             <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -767,15 +766,17 @@
 
             <span class="kw">match </span>status {
                 StatusCode::OK =&gt; {
-                    <span class="kw">let </span>resp_body = <span class="kw-2">&amp;</span>resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                    <span class="kw">let </span>token = serde_json::from_slice::&lt;GdriveTokenResponse&gt;(resp_body)
+                    <span class="kw">let </span>resp_body = resp.into_body();
+                    <span class="kw">let </span>token: GdriveTokenResponse = serde_json::from_reader(resp_body.reader())
                         .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
-                    <span class="self">self</span>.access_token = token.access_token.clone();
-                    <span class="self">self</span>.expires_in = Utc::now() + chrono::Duration::seconds(token.expires_in)
-                        - chrono::Duration::seconds(<span class="number">120</span>);
+                    <span class="self">self</span>.access_token.clone_from(<span class="kw-2">&amp;</span>token.access_token);
+                    <span class="self">self</span>.expires_in = Utc::now()
+                        + chrono::TimeDelta::try_seconds(token.expires_in)
+                            .expect(<span class="string">"expires_in must be valid seconds"</span>)
+                        - chrono::TimeDelta::try_seconds(<span class="number">120</span>).expect(<span class="string">"120 must be valid seconds"</span>);
                 }
                 <span class="kw">_ </span>=&gt; {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
                 }
             }
         }
@@ -799,9 +800,7 @@
     }
 }
 
-<span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-#[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-</span><span class="kw">impl </span>PathQuery <span class="kw">for </span>GdrivePathQuery {
+<span class="kw">impl </span>PathQuery <span class="kw">for </span>GdrivePathQuery {
     <span class="kw">async fn </span>root(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
         <span class="prelude-val">Ok</span>(<span class="string">"root"</span>.to_string())
     }
@@ -826,7 +825,7 @@
         );
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::get(<span class="kw-2">&amp;</span>url)
-            .body(AsyncBody::Empty)
+            .body(Buffer::new())
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.signer.lock().<span class="kw">await</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -836,9 +835,9 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>body = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>body = resp.into_body();
                 <span class="kw">let </span>meta: GdriveFileList =
-                    serde_json::from_slice(<span class="kw-2">&amp;</span>body).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                    serde_json::from_reader(body.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
 
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(f) = meta.files.first() {
                     <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(f.id.clone()))
@@ -846,7 +845,7 @@
                     <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
                 }
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -863,18 +862,19 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::post(url)
             .header(header::CONTENT_TYPE, <span class="string">"application/json"</span>)
-            .body(AsyncBody::Bytes(Bytes::from(content)))
+            .body(Buffer::from(Bytes::from(content)))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.signer.lock().<span class="kw">await</span>.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">if </span>!resp.status().is_success() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
         }
 
-        <span class="kw">let </span>body = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>file: GdriveFile = serde_json::from_slice(<span class="kw-2">&amp;</span>body).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>body = resp.into_body();
+        <span class="kw">let </span>file: GdriveFile =
+            serde_json::from_reader(body.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(file.id)
     }
 }

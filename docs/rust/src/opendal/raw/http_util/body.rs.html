@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/raw/http_util/body.rs`."><title>body.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/raw/http_util/body.rs`."><title>body.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -119,123 +117,6 @@
 <a href="#117" id="117">117</a>
 <a href="#118" id="118">118</a>
 <a href="#119" id="119">119</a>
-<a href="#120" id="120">120</a>
-<a href="#121" id="121">121</a>
-<a href="#122" id="122">122</a>
-<a href="#123" id="123">123</a>
-<a href="#124" id="124">124</a>
-<a href="#125" id="125">125</a>
-<a href="#126" id="126">126</a>
-<a href="#127" id="127">127</a>
-<a href="#128" id="128">128</a>
-<a href="#129" id="129">129</a>
-<a href="#130" id="130">130</a>
-<a href="#131" id="131">131</a>
-<a href="#132" id="132">132</a>
-<a href="#133" id="133">133</a>
-<a href="#134" id="134">134</a>
-<a href="#135" id="135">135</a>
-<a href="#136" id="136">136</a>
-<a href="#137" id="137">137</a>
-<a href="#138" id="138">138</a>
-<a href="#139" id="139">139</a>
-<a href="#140" id="140">140</a>
-<a href="#141" id="141">141</a>
-<a href="#142" id="142">142</a>
-<a href="#143" id="143">143</a>
-<a href="#144" id="144">144</a>
-<a href="#145" id="145">145</a>
-<a href="#146" id="146">146</a>
-<a href="#147" id="147">147</a>
-<a href="#148" id="148">148</a>
-<a href="#149" id="149">149</a>
-<a href="#150" id="150">150</a>
-<a href="#151" id="151">151</a>
-<a href="#152" id="152">152</a>
-<a href="#153" id="153">153</a>
-<a href="#154" id="154">154</a>
-<a href="#155" id="155">155</a>
-<a href="#156" id="156">156</a>
-<a href="#157" id="157">157</a>
-<a href="#158" id="158">158</a>
-<a href="#159" id="159">159</a>
-<a href="#160" id="160">160</a>
-<a href="#161" id="161">161</a>
-<a href="#162" id="162">162</a>
-<a href="#163" id="163">163</a>
-<a href="#164" id="164">164</a>
-<a href="#165" id="165">165</a>
-<a href="#166" id="166">166</a>
-<a href="#167" id="167">167</a>
-<a href="#168" id="168">168</a>
-<a href="#169" id="169">169</a>
-<a href="#170" id="170">170</a>
-<a href="#171" id="171">171</a>
-<a href="#172" id="172">172</a>
-<a href="#173" id="173">173</a>
-<a href="#174" id="174">174</a>
-<a href="#175" id="175">175</a>
-<a href="#176" id="176">176</a>
-<a href="#177" id="177">177</a>
-<a href="#178" id="178">178</a>
-<a href="#179" id="179">179</a>
-<a href="#180" id="180">180</a>
-<a href="#181" id="181">181</a>
-<a href="#182" id="182">182</a>
-<a href="#183" id="183">183</a>
-<a href="#184" id="184">184</a>
-<a href="#185" id="185">185</a>
-<a href="#186" id="186">186</a>
-<a href="#187" id="187">187</a>
-<a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
-<a href="#194" id="194">194</a>
-<a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a>
-<a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
-<a href="#200" id="200">200</a>
-<a href="#201" id="201">201</a>
-<a href="#202" id="202">202</a>
-<a href="#203" id="203">203</a>
-<a href="#204" id="204">204</a>
-<a href="#205" id="205">205</a>
-<a href="#206" id="206">206</a>
-<a href="#207" id="207">207</a>
-<a href="#208" id="208">208</a>
-<a href="#209" id="209">209</a>
-<a href="#210" id="210">210</a>
-<a href="#211" id="211">211</a>
-<a href="#212" id="212">212</a>
-<a href="#213" id="213">213</a>
-<a href="#214" id="214">214</a>
-<a href="#215" id="215">215</a>
-<a href="#216" id="216">216</a>
-<a href="#217" id="217">217</a>
-<a href="#218" id="218">218</a>
-<a href="#219" id="219">219</a>
-<a href="#220" id="220">220</a>
-<a href="#221" id="221">221</a>
-<a href="#222" id="222">222</a>
-<a href="#223" id="223">223</a>
-<a href="#224" id="224">224</a>
-<a href="#225" id="225">225</a>
-<a href="#226" id="226">226</a>
-<a href="#227" id="227">227</a>
-<a href="#228" id="228">228</a>
-<a href="#229" id="229">229</a>
-<a href="#230" id="230">230</a>
-<a href="#231" id="231">231</a>
-<a href="#232" id="232">232</a>
-<a href="#233" id="233">233</a>
-<a href="#234" id="234">234</a>
-<a href="#235" id="235">235</a>
-<a href="#236" id="236">236</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -253,223 +134,106 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::cmp::min;
-<span class="kw">use </span>std::cmp::Ordering;
-<span class="kw">use </span>std::io;
-<span class="kw">use </span>std::task::ready;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
+</span><span class="kw">use </span>std::cmp::Ordering;
 
-<span class="kw">use </span>bytes::Buf;
-<span class="kw">use </span>bytes::BufMut;
-<span class="kw">use </span>bytes::Bytes;
+<span class="kw">use </span>futures::Stream;
+<span class="kw">use </span>futures::StreamExt;
+<span class="kw">use </span>oio::Read;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Body used in async HTTP requests.
-</span><span class="attr">#[derive(Default)]
-</span><span class="kw">pub enum </span>AsyncBody {
-    <span class="doccomment">/// An empty body.
-    </span><span class="attr">#[default]
-    </span>Empty,
-    <span class="doccomment">/// Body with bytes.
-    </span>Bytes(Bytes),
-    <span class="doccomment">/// Body with chunked bytes.
-    ///
-    /// This is nearly the same with stream, but we can save an extra box.
-    </span>ChunkedBytes(oio::ChunkedBytes),
-    <span class="doccomment">/// Body with stream.
-    </span>Stream(oio::Streamer),
-}
-
-<span class="doccomment">/// IncomingAsyncBody carries the content returned by remote servers.
+<span class="doccomment">/// HttpBody is the streaming body that opendal's HttpClient returned.
 ///
-/// # Notes
-///
-/// Client SHOULD NEVER construct this body.
-</span><span class="kw">pub struct </span>IncomingAsyncBody {
-    <span class="doccomment">/// # TODO
-    ///
-    /// hyper returns `impl Stream&lt;Item = crate::Result&lt;Bytes&gt;&gt;` but we can't
-    /// write the types in stable. So we will box here.
-    ///
-    /// After [TAIT](https://rust-lang.github.io/rfcs/2515-type_alias_impl_trait.html)
-    /// has been stable, we can change `IncomingAsyncBody` into `IncomingAsyncBody&lt;S&gt;`.
-    </span>inner: oio::Streamer,
+/// It implements the `oio::Read` trait, service implementors can return it as
+/// `Access::Read`.
+</span><span class="kw">pub struct </span>HttpBody {
+    <span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
+    </span>stream: Box&lt;<span class="kw">dyn </span>Stream&lt;Item = <span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt; + Send + Sync + Unpin + <span class="lifetime">'static</span>&gt;,
+    <span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
+    </span>stream: Box&lt;<span class="kw">dyn </span>Stream&lt;Item = <span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt; + Unpin + <span class="lifetime">'static</span>&gt;,
     size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
     consumed: u64,
-    chunk: <span class="prelude-ty">Option</span>&lt;Bytes&gt;,
 }
 
-<span class="kw">impl </span>IncomingAsyncBody {
-    <span class="doccomment">/// Construct a new incoming async body
-    </span><span class="kw">pub fn </span>new(s: oio::Streamer, size: <span class="prelude-ty">Option</span>&lt;u64&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            inner: s,
+<span class="doccomment">/// # Safety
+///
+/// HttpBody is send on non wasm32 targets.
+</span><span class="kw">unsafe impl </span>Send <span class="kw">for </span>HttpBody {}
+
+<span class="doccomment">/// # Safety
+///
+/// HttpBody is sync on non wasm32 targets.
+</span><span class="kw">unsafe impl </span>Sync <span class="kw">for </span>HttpBody {}
+
+<span class="kw">impl </span>HttpBody {
+    <span class="doccomment">/// Create a new `HttpBody` with given stream and optional size.
+    </span><span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
+    </span><span class="kw">pub fn </span>new&lt;S&gt;(stream: S, size: <span class="prelude-ty">Option</span>&lt;u64&gt;) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>S: Stream&lt;Item = <span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt; + Send + Sync + Unpin + <span class="lifetime">'static</span>,
+    {
+        HttpBody {
+            stream: Box::new(stream),
             size,
             consumed: <span class="number">0</span>,
-            chunk: <span class="prelude-val">None</span>,
         }
     }
 
-    <span class="doccomment">/// Create an empty IncomingAsyncBody.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>empty() -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            inner: Box::new(()),
-            size: <span class="prelude-val">Some</span>(<span class="number">0</span>),
+    <span class="doccomment">/// Create a new `HttpBody` with given stream and optional size.
+    </span><span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
+    </span><span class="kw">pub fn </span>new&lt;S&gt;(stream: S, size: <span class="prelude-ty">Option</span>&lt;u64&gt;) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>S: Stream&lt;Item = <span class="prelude-ty">Result</span>&lt;Buffer&gt;&gt; + Unpin + <span class="lifetime">'static</span>,
+    {
+        HttpBody {
+            stream: Box::new(stream),
+            size,
             consumed: <span class="number">0</span>,
-            chunk: <span class="prelude-val">None</span>,
         }
     }
 
-    <span class="doccomment">/// Consume the entire body.
-    </span><span class="kw">pub async fn </span>consume(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">use </span>oio::ReadExt;
-
-        <span class="kw">while let </span><span class="prelude-val">Some</span>(bs) = <span class="self">self</span>.next().<span class="kw">await </span>{
-            bs.map_err(|err| {
-                Error::new(ErrorKind::Unexpected, <span class="string">"fetch bytes from stream"</span>)
-                    .with_operation(<span class="string">"http_util::IncomingAsyncBody::consume"</span>)
-                    .set_source(err)
-            })<span class="question-mark">?</span>;
-        }
-
-        <span class="prelude-val">Ok</span>(())
-    }
-
-    <span class="doccomment">/// Consume the response to bytes.
-    ///
-    /// This code is inspired from hyper's [`to_bytes`](https://docs.rs/hyper/0.14.23/hyper/body/fn.to_bytes.html).
-    </span><span class="kw">pub async fn </span>bytes(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&gt; {
-        <span class="kw">use </span>oio::ReadExt;
-
-        <span class="comment">// If there's only 1 chunk, we can just return Buf::to_bytes()
-        </span><span class="kw">let </span>first = <span class="kw">if let </span><span class="prelude-val">Some</span>(buf) = <span class="self">self</span>.next().<span class="kw">await </span>{
-            buf<span class="question-mark">?
-        </span>} <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(Bytes::new());
+    <span class="doccomment">/// Check if the consumed data is equal to the expected content length.
+    </span><span class="attr">#[inline]
+    </span><span class="kw">fn </span>check(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span><span class="prelude-val">Some</span>(expect) = <span class="self">self</span>.size <span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         };
 
-        <span class="kw">let </span>second = <span class="kw">if let </span><span class="prelude-val">Some</span>(buf) = <span class="self">self</span>.next().<span class="kw">await </span>{
-            buf<span class="question-mark">?
-        </span>} <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(first);
-        };
-
-        <span class="comment">// With more than 1 buf, we gotta flatten into a Vec first.
-        </span><span class="kw">let </span>cap = <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = <span class="self">self</span>.size {
-            <span class="comment">// The convert from u64 to usize could fail, but it's unlikely.
-            // Let's just make it overflow.
-            </span>size <span class="kw">as </span>usize
-        } <span class="kw">else </span>{
-            <span class="comment">// It's highly possible that we have more data to read.
-            // Add extra 16K buffer to avoid another allocation.
-            </span>first.remaining() + second.remaining() + <span class="number">16 </span>* <span class="number">1024
-        </span>};
-        <span class="kw">let </span><span class="kw-2">mut </span>vec = Vec::with_capacity(cap);
-        vec.put(first);
-        vec.put(second);
-
-        <span class="kw">while let </span><span class="prelude-val">Some</span>(buf) = <span class="self">self</span>.next().<span class="kw">await </span>{
-            vec.put(buf<span class="question-mark">?</span>);
-        }
-
-        <span class="prelude-val">Ok</span>(vec.into())
-    }
-
-    <span class="attr">#[inline]
-    </span><span class="kw">fn </span>check(expect: u64, actual: u64) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>actual = <span class="self">self</span>.consumed;
         <span class="kw">match </span>actual.cmp(<span class="kw-2">&amp;</span>expect) {
             Ordering::Equal =&gt; <span class="prelude-val">Ok</span>(()),
             Ordering::Less =&gt; <span class="prelude-val">Err</span>(Error::new(
-                ErrorKind::ContentIncomplete,
-                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"reader got too little data, expect: {expect}, actual: {actual}"</span>),
+                ErrorKind::Unexpected,
+                <span class="macro">format!</span>(<span class="string">"http response got too little data, expect: {expect}, actual: {actual}"</span>),
             )
             .set_temporary()),
             Ordering::Greater =&gt; <span class="prelude-val">Err</span>(Error::new(
-                ErrorKind::ContentTruncated,
-                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"reader got too much data, expect: {expect}, actual: {actual}"</span>),
+                ErrorKind::Unexpected,
+                <span class="macro">format!</span>(<span class="string">"http response got too much data, expect: {expect}, actual: {actual}"</span>),
             )
             .set_temporary()),
         }
     }
+
+    <span class="doccomment">/// Read all data from the stream.
+    </span><span class="kw">pub async fn </span>to_buffer(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="self">self</span>.read_all().<span class="kw">await
+    </span>}
 }
 
-<span class="kw">impl </span>oio::Read <span class="kw">for </span>IncomingAsyncBody {
-    <span class="kw">fn </span>poll_read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, <span class="kw-2">mut </span>buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="kw">if </span>buf.is_empty() || <span class="self">self</span>.size == <span class="prelude-val">Some</span>(<span class="number">0</span>) {
-            <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(<span class="number">0</span>));
-        }
-
-        <span class="comment">// Avoid extra poll of next if we already have chunks.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>bs = <span class="kw">if let </span><span class="prelude-val">Some</span>(chunk) = <span class="self">self</span>.chunk.take() {
-            chunk
-        } <span class="kw">else </span>{
-            <span class="kw">loop </span>{
-                <span class="kw">match </span><span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_next(cx)) {
-                    <span class="comment">// It's possible for underlying stream to return empty bytes, we should continue
-                    // to fetch next one.
-                    </span><span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(bs)) <span class="kw">if </span>bs.is_empty() =&gt; <span class="kw">continue</span>,
-                    <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(bs)) =&gt; {
-                        <span class="self">self</span>.consumed += bs.len() <span class="kw">as </span>u64;
-                        <span class="kw">break </span>bs;
-                    }
-                    <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)) =&gt; <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(err)),
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = <span class="self">self</span>.size {
-                            <span class="self">Self</span>::check(size, <span class="self">self</span>.consumed)<span class="question-mark">?</span>;
-                        }
-                        <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(<span class="number">0</span>));
-                    }
-                }
+<span class="kw">impl </span>oio::Read <span class="kw">for </span>HttpBody {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">match </span><span class="self">self</span>.stream.next().<span class="kw">await</span>.transpose()<span class="question-mark">? </span>{
+            <span class="prelude-val">Some</span>(buf) =&gt; {
+                <span class="self">self</span>.consumed += buf.len() <span class="kw">as </span>u64;
+                <span class="prelude-val">Ok</span>(buf)
             }
-        };
-
-        <span class="kw">let </span>amt = min(bs.len(), buf.len());
-        buf.put_slice(<span class="kw-2">&amp;</span>bs[..amt]);
-        bs.advance(amt);
-        <span class="kw">if </span>!bs.is_empty() {
-            <span class="self">self</span>.chunk = <span class="prelude-val">Some</span>(bs);
-        }
-
-        Poll::Ready(<span class="prelude-val">Ok</span>(amt))
-    }
-
-    <span class="kw">fn </span>poll_seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, pos: io::SeekFrom) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;u64&gt;&gt; {
-        <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>) = (cx, pos);
-
-        Poll::Ready(<span class="prelude-val">Err</span>(Error::new(
-            ErrorKind::Unsupported,
-            <span class="string">"output reader doesn't support seeking"</span>,
-        )))
-    }
-
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;&gt; {
-        <span class="kw">if </span><span class="self">self</span>.size == <span class="prelude-val">Some</span>(<span class="number">0</span>) {
-            <span class="kw">return </span>Poll::Ready(<span class="prelude-val">None</span>);
-        }
-
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(bs) = <span class="self">self</span>.chunk.take() {
-            <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(bs)));
-        }
-
-        <span class="kw">let </span>res = <span class="kw">match </span><span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_next(cx)) {
-            <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(bs)) =&gt; {
-                <span class="self">self</span>.consumed += bs.len() <span class="kw">as </span>u64;
-                <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(bs))
-            }
-            <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)) =&gt; <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)),
             <span class="prelude-val">None </span>=&gt; {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = <span class="self">self</span>.size {
-                    <span class="self">Self</span>::check(size, <span class="self">self</span>.consumed)<span class="question-mark">?</span>;
-                }
-
-                <span class="prelude-val">None
-            </span>}
-        };
-
-        Poll::Ready(res)
+                <span class="self">self</span>.check()<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(Buffer::new())
+            }
+        }
     }
 }
 </code></pre></div></section></main></body></html>

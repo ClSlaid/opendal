@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/layers/prometheus.rs`."><title>prometheus.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/layers/prometheus.rs`."><title>prometheus.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -542,351 +540,6 @@
 <a href="#540" id="540">540</a>
 <a href="#541" id="541">541</a>
 <a href="#542" id="542">542</a>
-<a href="#543" id="543">543</a>
-<a href="#544" id="544">544</a>
-<a href="#545" id="545">545</a>
-<a href="#546" id="546">546</a>
-<a href="#547" id="547">547</a>
-<a href="#548" id="548">548</a>
-<a href="#549" id="549">549</a>
-<a href="#550" id="550">550</a>
-<a href="#551" id="551">551</a>
-<a href="#552" id="552">552</a>
-<a href="#553" id="553">553</a>
-<a href="#554" id="554">554</a>
-<a href="#555" id="555">555</a>
-<a href="#556" id="556">556</a>
-<a href="#557" id="557">557</a>
-<a href="#558" id="558">558</a>
-<a href="#559" id="559">559</a>
-<a href="#560" id="560">560</a>
-<a href="#561" id="561">561</a>
-<a href="#562" id="562">562</a>
-<a href="#563" id="563">563</a>
-<a href="#564" id="564">564</a>
-<a href="#565" id="565">565</a>
-<a href="#566" id="566">566</a>
-<a href="#567" id="567">567</a>
-<a href="#568" id="568">568</a>
-<a href="#569" id="569">569</a>
-<a href="#570" id="570">570</a>
-<a href="#571" id="571">571</a>
-<a href="#572" id="572">572</a>
-<a href="#573" id="573">573</a>
-<a href="#574" id="574">574</a>
-<a href="#575" id="575">575</a>
-<a href="#576" id="576">576</a>
-<a href="#577" id="577">577</a>
-<a href="#578" id="578">578</a>
-<a href="#579" id="579">579</a>
-<a href="#580" id="580">580</a>
-<a href="#581" id="581">581</a>
-<a href="#582" id="582">582</a>
-<a href="#583" id="583">583</a>
-<a href="#584" id="584">584</a>
-<a href="#585" id="585">585</a>
-<a href="#586" id="586">586</a>
-<a href="#587" id="587">587</a>
-<a href="#588" id="588">588</a>
-<a href="#589" id="589">589</a>
-<a href="#590" id="590">590</a>
-<a href="#591" id="591">591</a>
-<a href="#592" id="592">592</a>
-<a href="#593" id="593">593</a>
-<a href="#594" id="594">594</a>
-<a href="#595" id="595">595</a>
-<a href="#596" id="596">596</a>
-<a href="#597" id="597">597</a>
-<a href="#598" id="598">598</a>
-<a href="#599" id="599">599</a>
-<a href="#600" id="600">600</a>
-<a href="#601" id="601">601</a>
-<a href="#602" id="602">602</a>
-<a href="#603" id="603">603</a>
-<a href="#604" id="604">604</a>
-<a href="#605" id="605">605</a>
-<a href="#606" id="606">606</a>
-<a href="#607" id="607">607</a>
-<a href="#608" id="608">608</a>
-<a href="#609" id="609">609</a>
-<a href="#610" id="610">610</a>
-<a href="#611" id="611">611</a>
-<a href="#612" id="612">612</a>
-<a href="#613" id="613">613</a>
-<a href="#614" id="614">614</a>
-<a href="#615" id="615">615</a>
-<a href="#616" id="616">616</a>
-<a href="#617" id="617">617</a>
-<a href="#618" id="618">618</a>
-<a href="#619" id="619">619</a>
-<a href="#620" id="620">620</a>
-<a href="#621" id="621">621</a>
-<a href="#622" id="622">622</a>
-<a href="#623" id="623">623</a>
-<a href="#624" id="624">624</a>
-<a href="#625" id="625">625</a>
-<a href="#626" id="626">626</a>
-<a href="#627" id="627">627</a>
-<a href="#628" id="628">628</a>
-<a href="#629" id="629">629</a>
-<a href="#630" id="630">630</a>
-<a href="#631" id="631">631</a>
-<a href="#632" id="632">632</a>
-<a href="#633" id="633">633</a>
-<a href="#634" id="634">634</a>
-<a href="#635" id="635">635</a>
-<a href="#636" id="636">636</a>
-<a href="#637" id="637">637</a>
-<a href="#638" id="638">638</a>
-<a href="#639" id="639">639</a>
-<a href="#640" id="640">640</a>
-<a href="#641" id="641">641</a>
-<a href="#642" id="642">642</a>
-<a href="#643" id="643">643</a>
-<a href="#644" id="644">644</a>
-<a href="#645" id="645">645</a>
-<a href="#646" id="646">646</a>
-<a href="#647" id="647">647</a>
-<a href="#648" id="648">648</a>
-<a href="#649" id="649">649</a>
-<a href="#650" id="650">650</a>
-<a href="#651" id="651">651</a>
-<a href="#652" id="652">652</a>
-<a href="#653" id="653">653</a>
-<a href="#654" id="654">654</a>
-<a href="#655" id="655">655</a>
-<a href="#656" id="656">656</a>
-<a href="#657" id="657">657</a>
-<a href="#658" id="658">658</a>
-<a href="#659" id="659">659</a>
-<a href="#660" id="660">660</a>
-<a href="#661" id="661">661</a>
-<a href="#662" id="662">662</a>
-<a href="#663" id="663">663</a>
-<a href="#664" id="664">664</a>
-<a href="#665" id="665">665</a>
-<a href="#666" id="666">666</a>
-<a href="#667" id="667">667</a>
-<a href="#668" id="668">668</a>
-<a href="#669" id="669">669</a>
-<a href="#670" id="670">670</a>
-<a href="#671" id="671">671</a>
-<a href="#672" id="672">672</a>
-<a href="#673" id="673">673</a>
-<a href="#674" id="674">674</a>
-<a href="#675" id="675">675</a>
-<a href="#676" id="676">676</a>
-<a href="#677" id="677">677</a>
-<a href="#678" id="678">678</a>
-<a href="#679" id="679">679</a>
-<a href="#680" id="680">680</a>
-<a href="#681" id="681">681</a>
-<a href="#682" id="682">682</a>
-<a href="#683" id="683">683</a>
-<a href="#684" id="684">684</a>
-<a href="#685" id="685">685</a>
-<a href="#686" id="686">686</a>
-<a href="#687" id="687">687</a>
-<a href="#688" id="688">688</a>
-<a href="#689" id="689">689</a>
-<a href="#690" id="690">690</a>
-<a href="#691" id="691">691</a>
-<a href="#692" id="692">692</a>
-<a href="#693" id="693">693</a>
-<a href="#694" id="694">694</a>
-<a href="#695" id="695">695</a>
-<a href="#696" id="696">696</a>
-<a href="#697" id="697">697</a>
-<a href="#698" id="698">698</a>
-<a href="#699" id="699">699</a>
-<a href="#700" id="700">700</a>
-<a href="#701" id="701">701</a>
-<a href="#702" id="702">702</a>
-<a href="#703" id="703">703</a>
-<a href="#704" id="704">704</a>
-<a href="#705" id="705">705</a>
-<a href="#706" id="706">706</a>
-<a href="#707" id="707">707</a>
-<a href="#708" id="708">708</a>
-<a href="#709" id="709">709</a>
-<a href="#710" id="710">710</a>
-<a href="#711" id="711">711</a>
-<a href="#712" id="712">712</a>
-<a href="#713" id="713">713</a>
-<a href="#714" id="714">714</a>
-<a href="#715" id="715">715</a>
-<a href="#716" id="716">716</a>
-<a href="#717" id="717">717</a>
-<a href="#718" id="718">718</a>
-<a href="#719" id="719">719</a>
-<a href="#720" id="720">720</a>
-<a href="#721" id="721">721</a>
-<a href="#722" id="722">722</a>
-<a href="#723" id="723">723</a>
-<a href="#724" id="724">724</a>
-<a href="#725" id="725">725</a>
-<a href="#726" id="726">726</a>
-<a href="#727" id="727">727</a>
-<a href="#728" id="728">728</a>
-<a href="#729" id="729">729</a>
-<a href="#730" id="730">730</a>
-<a href="#731" id="731">731</a>
-<a href="#732" id="732">732</a>
-<a href="#733" id="733">733</a>
-<a href="#734" id="734">734</a>
-<a href="#735" id="735">735</a>
-<a href="#736" id="736">736</a>
-<a href="#737" id="737">737</a>
-<a href="#738" id="738">738</a>
-<a href="#739" id="739">739</a>
-<a href="#740" id="740">740</a>
-<a href="#741" id="741">741</a>
-<a href="#742" id="742">742</a>
-<a href="#743" id="743">743</a>
-<a href="#744" id="744">744</a>
-<a href="#745" id="745">745</a>
-<a href="#746" id="746">746</a>
-<a href="#747" id="747">747</a>
-<a href="#748" id="748">748</a>
-<a href="#749" id="749">749</a>
-<a href="#750" id="750">750</a>
-<a href="#751" id="751">751</a>
-<a href="#752" id="752">752</a>
-<a href="#753" id="753">753</a>
-<a href="#754" id="754">754</a>
-<a href="#755" id="755">755</a>
-<a href="#756" id="756">756</a>
-<a href="#757" id="757">757</a>
-<a href="#758" id="758">758</a>
-<a href="#759" id="759">759</a>
-<a href="#760" id="760">760</a>
-<a href="#761" id="761">761</a>
-<a href="#762" id="762">762</a>
-<a href="#763" id="763">763</a>
-<a href="#764" id="764">764</a>
-<a href="#765" id="765">765</a>
-<a href="#766" id="766">766</a>
-<a href="#767" id="767">767</a>
-<a href="#768" id="768">768</a>
-<a href="#769" id="769">769</a>
-<a href="#770" id="770">770</a>
-<a href="#771" id="771">771</a>
-<a href="#772" id="772">772</a>
-<a href="#773" id="773">773</a>
-<a href="#774" id="774">774</a>
-<a href="#775" id="775">775</a>
-<a href="#776" id="776">776</a>
-<a href="#777" id="777">777</a>
-<a href="#778" id="778">778</a>
-<a href="#779" id="779">779</a>
-<a href="#780" id="780">780</a>
-<a href="#781" id="781">781</a>
-<a href="#782" id="782">782</a>
-<a href="#783" id="783">783</a>
-<a href="#784" id="784">784</a>
-<a href="#785" id="785">785</a>
-<a href="#786" id="786">786</a>
-<a href="#787" id="787">787</a>
-<a href="#788" id="788">788</a>
-<a href="#789" id="789">789</a>
-<a href="#790" id="790">790</a>
-<a href="#791" id="791">791</a>
-<a href="#792" id="792">792</a>
-<a href="#793" id="793">793</a>
-<a href="#794" id="794">794</a>
-<a href="#795" id="795">795</a>
-<a href="#796" id="796">796</a>
-<a href="#797" id="797">797</a>
-<a href="#798" id="798">798</a>
-<a href="#799" id="799">799</a>
-<a href="#800" id="800">800</a>
-<a href="#801" id="801">801</a>
-<a href="#802" id="802">802</a>
-<a href="#803" id="803">803</a>
-<a href="#804" id="804">804</a>
-<a href="#805" id="805">805</a>
-<a href="#806" id="806">806</a>
-<a href="#807" id="807">807</a>
-<a href="#808" id="808">808</a>
-<a href="#809" id="809">809</a>
-<a href="#810" id="810">810</a>
-<a href="#811" id="811">811</a>
-<a href="#812" id="812">812</a>
-<a href="#813" id="813">813</a>
-<a href="#814" id="814">814</a>
-<a href="#815" id="815">815</a>
-<a href="#816" id="816">816</a>
-<a href="#817" id="817">817</a>
-<a href="#818" id="818">818</a>
-<a href="#819" id="819">819</a>
-<a href="#820" id="820">820</a>
-<a href="#821" id="821">821</a>
-<a href="#822" id="822">822</a>
-<a href="#823" id="823">823</a>
-<a href="#824" id="824">824</a>
-<a href="#825" id="825">825</a>
-<a href="#826" id="826">826</a>
-<a href="#827" id="827">827</a>
-<a href="#828" id="828">828</a>
-<a href="#829" id="829">829</a>
-<a href="#830" id="830">830</a>
-<a href="#831" id="831">831</a>
-<a href="#832" id="832">832</a>
-<a href="#833" id="833">833</a>
-<a href="#834" id="834">834</a>
-<a href="#835" id="835">835</a>
-<a href="#836" id="836">836</a>
-<a href="#837" id="837">837</a>
-<a href="#838" id="838">838</a>
-<a href="#839" id="839">839</a>
-<a href="#840" id="840">840</a>
-<a href="#841" id="841">841</a>
-<a href="#842" id="842">842</a>
-<a href="#843" id="843">843</a>
-<a href="#844" id="844">844</a>
-<a href="#845" id="845">845</a>
-<a href="#846" id="846">846</a>
-<a href="#847" id="847">847</a>
-<a href="#848" id="848">848</a>
-<a href="#849" id="849">849</a>
-<a href="#850" id="850">850</a>
-<a href="#851" id="851">851</a>
-<a href="#852" id="852">852</a>
-<a href="#853" id="853">853</a>
-<a href="#854" id="854">854</a>
-<a href="#855" id="855">855</a>
-<a href="#856" id="856">856</a>
-<a href="#857" id="857">857</a>
-<a href="#858" id="858">858</a>
-<a href="#859" id="859">859</a>
-<a href="#860" id="860">860</a>
-<a href="#861" id="861">861</a>
-<a href="#862" id="862">862</a>
-<a href="#863" id="863">863</a>
-<a href="#864" id="864">864</a>
-<a href="#865" id="865">865</a>
-<a href="#866" id="866">866</a>
-<a href="#867" id="867">867</a>
-<a href="#868" id="868">868</a>
-<a href="#869" id="869">869</a>
-<a href="#870" id="870">870</a>
-<a href="#871" id="871">871</a>
-<a href="#872" id="872">872</a>
-<a href="#873" id="873">873</a>
-<a href="#874" id="874">874</a>
-<a href="#875" id="875">875</a>
-<a href="#876" id="876">876</a>
-<a href="#877" id="877">877</a>
-<a href="#878" id="878">878</a>
-<a href="#879" id="879">879</a>
-<a href="#880" id="880">880</a>
-<a href="#881" id="881">881</a>
-<a href="#882" id="882">882</a>
-<a href="#883" id="883">883</a>
-<a href="#884" id="884">884</a>
-<a href="#885" id="885">885</a>
-<a href="#886" id="886">886</a>
-<a href="#887" id="887">887</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -904,874 +557,529 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::fmt::Debug;
-<span class="kw">use </span>std::fmt::Formatter;
-<span class="kw">use </span>std::io;
-<span class="kw">use </span>std::sync::Arc;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
+</span><span class="kw">use </span>std::sync::Arc;
+<span class="kw">use </span>std::time::Duration;
 
-<span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>bytes::Bytes;
-<span class="kw">use </span>futures::FutureExt;
-<span class="kw">use </span>futures::TryFutureExt;
-<span class="kw">use </span>log::debug;
 <span class="kw">use </span>prometheus::core::AtomicU64;
 <span class="kw">use </span>prometheus::core::GenericCounterVec;
 <span class="kw">use </span>prometheus::exponential_buckets;
 <span class="kw">use </span>prometheus::histogram_opts;
-<span class="kw">use </span>prometheus::register_histogram_vec_with_registry;
-<span class="kw">use </span>prometheus::register_int_counter_vec_with_registry;
 <span class="kw">use </span>prometheus::HistogramVec;
+<span class="kw">use </span>prometheus::Opts;
 <span class="kw">use </span>prometheus::Registry;
 
-<span class="kw">use </span><span class="kw">crate</span>::raw::Accessor;
+<span class="kw">use </span><span class="kw">crate</span>::layers::observe;
+<span class="kw">use </span><span class="kw">crate</span>::raw::Access;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Add [prometheus](https://docs.rs/prometheus) for every operations.
+<span class="doccomment">/// Add [prometheus](https://docs.rs/prometheus) for every operation.
 ///
 /// # Prometheus Metrics
 ///
-/// In this section, we will introduce three metrics that are currently being exported by our project. These metrics are essential for understanding the behavior and performance of our applications.
-///
-///
-/// | Metric Name             | Type     | Description                                       | Labels              |
-/// |-------------------------|----------|---------------------------------------------------|---------------------|
-/// | requests_total          | Counter  | Total times of 'create' operation being called   | scheme, operation   |
-/// | requests_duration_seconds | Histogram | Histogram of the time spent on specific operation | scheme, operation   |
-/// | bytes_total             | Histogram | Total size                                        | scheme, operation   |
-///
+/// We provide several metrics, please see the documentation of [`observe`] module.
 /// For a more detailed explanation of these metrics and how they are used, please refer to the [Prometheus documentation](https://prometheus.io/docs/introduction/overview/).
-///
-/// # Histogram Configuration
-///
-/// The metric buckets for these histograms are automatically generated based on the `exponential_buckets(0.01, 2.0, 16)` configuration.
 ///
 /// # Examples
 ///
+/// ```no_run
+/// # use log::debug;
+/// # use log::info;
+/// # use opendal::layers::PrometheusLayer;
+/// # use opendal::services;
+/// # use opendal::Operator;
+/// # use opendal::Result;
+/// # use prometheus::Encoder;
+///
+/// # #[tokio::main]
+/// # async fn main() -&gt; Result&lt;()&gt; {
+/// let registry = prometheus::default_registry();
+///
+/// let op = Operator::new(services::Memory::default())?
+///     .layer(
+///         PrometheusLayer::builder()
+///             .register(registry)
+///             .expect("register metrics successfully"),
+///     )
+///     .finish();
+/// debug!("operator: {op:?}");
+///
+/// // Write data into object test.
+/// op.write("test", "Hello, World!").await?;
+/// // Read data from object.
+/// let bs = op.read("test").await?;
+/// info!("content: {}", String::from_utf8_lossy(&amp;bs.to_bytes()));
+///
+/// // Get object metadata.
+/// let meta = op.stat("test").await?;
+/// info!("meta: {:?}", meta);
+///
+/// // Export prometheus metrics.
+/// let mut buffer = Vec::&lt;u8&gt;::new();
+/// let encoder = prometheus::TextEncoder::new();
+/// encoder.encode(&amp;prometheus::gather(), &amp;mut buffer).unwrap();
+/// println!("## Prometheus Metrics");
+/// println!("{}", String::from_utf8(buffer.clone()).unwrap());
+///
+/// Ok(())
+/// # }
 /// ```
-/// use log::debug;
-/// use log::info;
-/// use opendal::layers::PrometheusLayer;
-/// use opendal::services;
-/// use opendal::Operator;
-/// use opendal::Result;
-/// use prometheus::Encoder;
-///
-/// /// Visit [`opendal::services`] for more service related config.
-/// /// Visit [`opendal::Operator`] for more operator level APIs.
-/// #[tokio::main]
-/// async fn main() -&gt; Result&lt;()&gt; {
-///     // Pick a builder and configure it.
-///     let builder = services::Memory::default();
-///     let registry = prometheus::default_registry();
-///
-///     let op = Operator::new(builder)
-///         .expect("must init")
-///         .layer(PrometheusLayer::with_registry(registry.clone()))
-///         .finish();
-///     debug!("operator: {op:?}");
-///
-///     // Write data into object test.
-///     op.write("test", "Hello, World!").await?;
-///     // Read data from object.
-///     let bs = op.read("test").await?;
-///     info!("content: {}", String::from_utf8_lossy(&amp;bs));
-///
-///     // Get object metadata.
-///     let meta = op.stat("test").await?;
-///     info!("meta: {:?}", meta);
-///
-///     // Export prometheus metrics.
-///     let mut buffer = Vec::&lt;u8&gt;::new();
-///     let encoder = prometheus::TextEncoder::new();
-///     encoder.encode(&amp;prometheus::gather(), &amp;mut buffer).unwrap();
-///     println!("## Prometheus Metrics");
-///     println!("{}", String::from_utf8(buffer.clone()).unwrap());
-///     Ok(())
-/// }
-/// ```
-</span><span class="attr">#[derive(Default, Debug, Clone)]
+</span><span class="attr">#[derive(Clone, Debug)]
 </span><span class="kw">pub struct </span>PrometheusLayer {
-    registry: Registry,
-    requests_duration_seconds_buckets: Vec&lt;f64&gt;,
-    bytes_total_buckets: Vec&lt;f64&gt;,
-    path_label_level: usize,
+    interceptor: PrometheusInterceptor,
 }
 
 <span class="kw">impl </span>PrometheusLayer {
-    <span class="doccomment">/// create PrometheusLayer by incoming registry.
-    </span><span class="kw">pub fn </span>with_registry(registry: Registry) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            registry,
-            requests_duration_seconds_buckets: exponential_buckets(<span class="number">0.01</span>, <span class="number">2.0</span>, <span class="number">16</span>).unwrap(),
-            bytes_total_buckets: exponential_buckets(<span class="number">0.01</span>, <span class="number">2.0</span>, <span class="number">16</span>).unwrap(),
-            path_label_level: <span class="number">0</span>,
-        }
-    }
-
-    <span class="doccomment">/// set buckets for requests_duration_seconds
-    </span><span class="kw">pub fn </span>requests_duration_seconds_buckets(<span class="kw-2">mut </span><span class="self">self</span>, buckets: Vec&lt;f64&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">if </span>!buckets.is_empty() {
-            <span class="self">self</span>.requests_duration_seconds_buckets = buckets;
-        }
-        <span class="self">self
-    </span>}
-
-    <span class="doccomment">/// set buckets for bytes_total
-    </span><span class="kw">pub fn </span>bytes_total_buckets(<span class="kw-2">mut </span><span class="self">self</span>, buckets: Vec&lt;f64&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">if </span>!buckets.is_empty() {
-            <span class="self">self</span>.bytes_total_buckets = buckets;
-        }
-        <span class="self">self
-    </span>}
-
-    <span class="doccomment">/// set path label level
-    /// 0: no path label, the path label will be the ""
-    /// &gt;0: the path label will be the path split by "/" and get the last n level, like "/abc/def/ghi", if n=1, the path label will be "/abc"
-    </span><span class="kw">pub fn </span>enable_path_label(<span class="kw-2">mut </span><span class="self">self</span>, level: usize) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.path_label_level = level;
-        <span class="self">self
-    </span>}
-}
-
-<span class="kw">impl</span>&lt;A: Accessor&gt; Layer&lt;A&gt; <span class="kw">for </span>PrometheusLayer {
-    <span class="kw">type </span>LayeredAccessor = PrometheusAccessor&lt;A&gt;;
-
-    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccessor {
-        <span class="kw">let </span>meta = inner.info();
-        <span class="kw">let </span>scheme = meta.scheme();
-
-        PrometheusAccessor {
-            inner,
-            stats: Arc::new(PrometheusMetrics::new(
-                <span class="self">self</span>.registry.clone(),
-                <span class="self">self</span>.requests_duration_seconds_buckets.clone(),
-                <span class="self">self</span>.bytes_total_buckets.clone(),
-                <span class="self">self</span>.path_label_level,
-            )),
-            scheme,
-        }
+    <span class="doccomment">/// Create a [`PrometheusLayerBuilder`] to set the configuration of metrics.
+    ///
+    /// # Default Configuration
+    ///
+    /// - `operation_duration_seconds_buckets`: `exponential_buckets(0.01, 2.0, 16)`
+    /// - `operation_bytes_buckets`: `exponential_buckets(1.0, 2.0, 16)`
+    /// - `path_label`: `0`
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use log::debug;
+    /// # use opendal::layers::PrometheusLayer;
+    /// # use opendal::services;
+    /// # use opendal::Operator;
+    /// # use opendal::Result;
+    /// #
+    /// # #[tokio::main]
+    /// # async fn main() -&gt; Result&lt;()&gt; {
+    /// // Pick a builder and configure it.
+    /// let builder = services::Memory::default();
+    /// let registry = prometheus::default_registry();
+    ///
+    /// let duration_seconds_buckets = prometheus::exponential_buckets(0.01, 2.0, 16).unwrap();
+    /// let bytes_buckets = prometheus::exponential_buckets(1.0, 2.0, 16).unwrap();
+    /// let op = Operator::new(builder)?
+    ///     .layer(
+    ///         PrometheusLayer::builder()
+    ///             .operation_duration_seconds_buckets(duration_seconds_buckets)
+    ///             .operation_bytes_buckets(bytes_buckets)
+    ///             .path_label(0)
+    ///             .register(registry)
+    ///             .expect("register metrics successfully"),
+    ///     )
+    ///     .finish();
+    /// debug!("operator: {op:?}");
+    ///
+    /// Ok(())
+    /// # }
+    /// ```
+    </span><span class="kw">pub fn </span>builder() -&gt; PrometheusLayerBuilder {
+        <span class="kw">let </span>operation_duration_seconds_buckets = exponential_buckets(<span class="number">0.01</span>, <span class="number">2.0</span>, <span class="number">16</span>).unwrap();
+        <span class="kw">let </span>operation_bytes_buckets = exponential_buckets(<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">16</span>).unwrap();
+        <span class="kw">let </span>path_label_level = <span class="number">0</span>;
+        PrometheusLayerBuilder::new(
+            operation_duration_seconds_buckets,
+            operation_bytes_buckets,
+            path_label_level,
+        )
     }
 }
 
-<span class="doccomment">/// [`PrometheusMetrics`] provide the performance and IO metrics.
-</span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>PrometheusMetrics {
-    <span class="doccomment">/// Total times of the specific operation be called.
-    </span><span class="kw">pub </span>requests_total: GenericCounterVec&lt;AtomicU64&gt;,
-    <span class="doccomment">/// Latency of the specific operation be called.
-    </span><span class="kw">pub </span>requests_duration_seconds: HistogramVec,
-    <span class="doccomment">/// Size of the specific metrics.
-    </span><span class="kw">pub </span>bytes_total: HistogramVec,
-    <span class="doccomment">/// The Path Level we will keep in the path label.
-    </span><span class="kw">pub </span>path_label_level: usize,
+<span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>PrometheusLayer {
+    <span class="kw">type </span>LayeredAccess = observe::MetricsAccessor&lt;A, PrometheusInterceptor&gt;;
+
+    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess {
+        observe::MetricsLayer::new(<span class="self">self</span>.interceptor.clone()).layer(inner)
+    }
 }
 
-<span class="kw">impl </span>PrometheusMetrics {
-    <span class="doccomment">/// new with prometheus register.
-    </span><span class="kw">pub fn </span>new(
-        registry: Registry,
-        requests_duration_seconds_buckets: Vec&lt;f64&gt;,
-        bytes_total_buckets: Vec&lt;f64&gt;,
+<span class="doccomment">/// [`PrometheusLayerBuilder`] is a config builder to build a [`PrometheusLayer`].
+</span><span class="kw">pub struct </span>PrometheusLayerBuilder {
+    operation_duration_seconds_buckets: Vec&lt;f64&gt;,
+    operation_bytes_buckets: Vec&lt;f64&gt;,
+    path_label_level: usize,
+}
+
+<span class="kw">impl </span>PrometheusLayerBuilder {
+    <span class="kw">fn </span>new(
+        operation_duration_seconds_buckets: Vec&lt;f64&gt;,
+        operation_bytes_buckets: Vec&lt;f64&gt;,
         path_label_level: usize,
     ) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>labels = <span class="kw">if </span>path_label_level &gt; <span class="number">0 </span>{
-            <span class="macro">vec!</span>[<span class="string">"scheme"</span>, <span class="string">"operation"</span>, <span class="string">"path"</span>]
-        } <span class="kw">else </span>{
-            <span class="macro">vec!</span>[<span class="string">"scheme"</span>, <span class="string">"operation"</span>]
-        };
-        <span class="kw">let </span>requests_total = <span class="macro">register_int_counter_vec_with_registry!</span>(
-            <span class="string">"requests_total"</span>,
-            <span class="string">"Total times of create be called"</span>,
-            <span class="kw-2">&amp;</span>labels,
-            registry
-        )
-        .unwrap();
-        <span class="kw">let </span>opts = <span class="macro">histogram_opts!</span>(
-            <span class="string">"requests_duration_seconds"</span>,
-            <span class="string">"Histogram of the time spent on specific operation"</span>,
-            requests_duration_seconds_buckets
-        );
-
-        <span class="kw">let </span>requests_duration_seconds =
-            <span class="macro">register_histogram_vec_with_registry!</span>(opts, <span class="kw-2">&amp;</span>labels, registry).unwrap();
-
-        <span class="kw">let </span>opts = <span class="macro">histogram_opts!</span>(<span class="string">"bytes_total"</span>, <span class="string">"Total size of "</span>, bytes_total_buckets);
-        <span class="kw">let </span>bytes_total = <span class="macro">register_histogram_vec_with_registry!</span>(opts, <span class="kw-2">&amp;</span>labels, registry).unwrap();
-
         <span class="self">Self </span>{
-            requests_total,
-            requests_duration_seconds,
-            bytes_total,
+            operation_duration_seconds_buckets,
+            operation_bytes_buckets,
             path_label_level,
         }
     }
 
-    <span class="doccomment">/// error handling is the cold path, so we will not init error counters
-    /// in advance.
-    </span><span class="attr">#[inline]
-    </span><span class="kw">fn </span>increment_errors_total(<span class="kw-2">&amp;</span><span class="self">self</span>, op: Operation, kind: ErrorKind) {
-        <span class="macro">debug!</span>(
-            <span class="string">"Prometheus statistics metrics error, operation {} error {}"</span>,
-            op.into_static(),
-            kind.into_static()
-        );
+    <span class="doccomment">/// Set buckets for `operation_duration_seconds` histogram.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use log::debug;
+    /// # use opendal::layers::PrometheusLayer;
+    /// # use opendal::services;
+    /// # use opendal::Operator;
+    /// # use opendal::Result;
+    /// #
+    /// # #[tokio::main]
+    /// # async fn main() -&gt; Result&lt;()&gt; {
+    /// // Pick a builder and configure it.
+    /// let builder = services::Memory::default();
+    /// let registry = prometheus::default_registry();
+    ///
+    /// let buckets = prometheus::exponential_buckets(0.01, 2.0, 16).unwrap();
+    /// let op = Operator::new(builder)?
+    ///     .layer(
+    ///         PrometheusLayer::builder()
+    ///             .operation_duration_seconds_buckets(buckets)
+    ///             .register(registry)
+    ///             .expect("register metrics successfully"),
+    ///     )
+    ///     .finish();
+    /// debug!("operator: {op:?}");
+    ///
+    /// Ok(())
+    /// # }
+    /// ```
+    </span><span class="kw">pub fn </span>operation_duration_seconds_buckets(<span class="kw-2">mut </span><span class="self">self</span>, buckets: Vec&lt;f64&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">if </span>!buckets.is_empty() {
+            <span class="self">self</span>.operation_duration_seconds_buckets = buckets;
+        }
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Set buckets for `operation_bytes` histogram.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use log::debug;
+    /// # use opendal::layers::PrometheusLayer;
+    /// # use opendal::services;
+    /// # use opendal::Operator;
+    /// # use opendal::Result;
+    /// #
+    /// # #[tokio::main]
+    /// # async fn main() -&gt; Result&lt;()&gt; {
+    /// // Pick a builder and configure it.
+    /// let builder = services::Memory::default();
+    /// let registry = prometheus::default_registry();
+    ///
+    /// let buckets = prometheus::exponential_buckets(1.0, 2.0, 16).unwrap();
+    /// let op = Operator::new(builder)?
+    ///     .layer(
+    ///         PrometheusLayer::builder()
+    ///             .operation_bytes_buckets(buckets)
+    ///             .register(registry)
+    ///             .expect("register metrics successfully"),
+    ///     )
+    ///     .finish();
+    /// debug!("operator: {op:?}");
+    ///
+    /// Ok(())
+    /// # }
+    /// ```
+    </span><span class="kw">pub fn </span>operation_bytes_buckets(<span class="kw-2">mut </span><span class="self">self</span>, buckets: Vec&lt;f64&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">if </span>!buckets.is_empty() {
+            <span class="self">self</span>.operation_bytes_buckets = buckets;
+        }
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Set the level of path label.
+    ///
+    /// - level = 0: we will ignore the path label.
+    /// - level &gt; 0: the path label will be the path split by "/" and get the last n level,
+    ///   if n=1 and input path is "abc/def/ghi", and then we will get "abc/" as the path label.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use log::debug;
+    /// # use opendal::layers::PrometheusLayer;
+    /// # use opendal::services;
+    /// # use opendal::Operator;
+    /// # use opendal::Result;
+    /// #
+    /// # #[tokio::main]
+    /// # async fn main() -&gt; Result&lt;()&gt; {
+    /// // Pick a builder and configure it.
+    /// let builder = services::Memory::default();
+    /// let registry = prometheus::default_registry();
+    ///
+    /// let op = Operator::new(builder)?
+    ///     .layer(
+    ///         PrometheusLayer::builder()
+    ///             .path_label(1)
+    ///             .register(registry)
+    ///             .expect("register metrics successfully"),
+    ///     )
+    ///     .finish();
+    /// debug!("operator: {op:?}");
+    ///
+    /// Ok(())
+    /// # }
+    /// ```
+    </span><span class="kw">pub fn </span>path_label(<span class="kw-2">mut </span><span class="self">self</span>, level: usize) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.path_label_level = level;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Register the metrics into the given registry and return a [`PrometheusLayer`].
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use log::debug;
+    /// # use opendal::layers::PrometheusLayer;
+    /// # use opendal::services;
+    /// # use opendal::Operator;
+    /// # use opendal::Result;
+    /// #
+    /// # #[tokio::main]
+    /// # async fn main() -&gt; Result&lt;()&gt; {
+    /// // Pick a builder and configure it.
+    /// let builder = services::Memory::default();
+    /// let registry = prometheus::default_registry();
+    ///
+    /// let op = Operator::new(builder)?
+    ///     .layer(
+    ///         PrometheusLayer::builder()
+    ///             .register(registry)
+    ///             .expect("register metrics successfully"),
+    ///     )
+    ///     .finish();
+    /// debug!("operator: {op:?}");
+    ///
+    /// Ok(())
+    /// # }
+    /// ```
+    </span><span class="kw">pub fn </span>register(<span class="self">self</span>, registry: <span class="kw-2">&amp;</span>Registry) -&gt; <span class="prelude-ty">Result</span>&lt;PrometheusLayer&gt; {
+        <span class="kw">let </span>labels = OperationLabels::names(<span class="bool-val">false</span>, <span class="self">self</span>.path_label_level);
+        <span class="kw">let </span>operation_duration_seconds = HistogramVec::new(
+            <span class="macro">histogram_opts!</span>(
+                observe::METRIC_OPERATION_DURATION_SECONDS.name(),
+                observe::METRIC_OPERATION_DURATION_SECONDS.help(),
+                <span class="self">self</span>.operation_duration_seconds_buckets
+            ),
+            <span class="kw-2">&amp;</span>labels,
+        )
+        .map_err(parse_prometheus_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>operation_bytes = HistogramVec::new(
+            <span class="macro">histogram_opts!</span>(
+                observe::METRIC_OPERATION_BYTES.name(),
+                observe::METRIC_OPERATION_BYTES.help(),
+                <span class="self">self</span>.operation_bytes_buckets
+            ),
+            <span class="kw-2">&amp;</span>labels,
+        )
+        .map_err(parse_prometheus_error)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>labels = OperationLabels::names(<span class="bool-val">true</span>, <span class="self">self</span>.path_label_level);
+        <span class="kw">let </span>operation_errors_total = GenericCounterVec::new(
+            Opts::new(
+                observe::METRIC_OPERATION_ERRORS_TOTAL.name(),
+                observe::METRIC_OPERATION_ERRORS_TOTAL.help(),
+            ),
+            <span class="kw-2">&amp;</span>labels,
+        )
+        .map_err(parse_prometheus_error)<span class="question-mark">?</span>;
+
+        registry
+            .register(Box::new(operation_duration_seconds.clone()))
+            .map_err(parse_prometheus_error)<span class="question-mark">?</span>;
+        registry
+            .register(Box::new(operation_bytes.clone()))
+            .map_err(parse_prometheus_error)<span class="question-mark">?</span>;
+        registry
+            .register(Box::new(operation_errors_total.clone()))
+            .map_err(parse_prometheus_error)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(PrometheusLayer {
+            interceptor: PrometheusInterceptor {
+                operation_duration_seconds,
+                operation_bytes,
+                operation_errors_total,
+                path_label_level: <span class="self">self</span>.path_label_level,
+            },
+        })
     }
 
-    <span class="doccomment">/// generate metric label
-    </span><span class="kw">pub fn </span>generate_metric_label&lt;<span class="lifetime">'a</span>&gt;(
+    <span class="doccomment">/// Register the metrics into the default registry and return a [`PrometheusLayer`].
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use log::debug;
+    /// # use opendal::layers::PrometheusLayer;
+    /// # use opendal::services;
+    /// # use opendal::Operator;
+    /// # use opendal::Result;
+    /// #
+    /// # #[tokio::main]
+    /// # async fn main() -&gt; Result&lt;()&gt; {
+    /// // Pick a builder and configure it.
+    /// let builder = services::Memory::default();
+    ///
+    /// let op = Operator::new(builder)?
+    ///     .layer(
+    ///         PrometheusLayer::builder()
+    ///             .register_default()
+    ///             .expect("register metrics successfully"),
+    ///     )
+    ///     .finish();
+    /// debug!("operator: {op:?}");
+    ///
+    /// Ok(())
+    /// # }
+    /// ```
+    </span><span class="kw">pub fn </span>register_default(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PrometheusLayer&gt; {
+        <span class="kw">let </span>registry = prometheus::default_registry();
+        <span class="self">self</span>.register(registry)
+    }
+}
+
+<span class="doccomment">/// Convert the [`prometheus::Error`] to [`Error`].
+</span><span class="kw">fn </span>parse_prometheus_error(err: prometheus::Error) -&gt; Error {
+    Error::new(ErrorKind::Unexpected, err.to_string()).set_source(err)
+}
+
+<span class="attr">#[derive(Clone, Debug)]
+</span><span class="kw">pub struct </span>PrometheusInterceptor {
+    operation_duration_seconds: HistogramVec,
+    operation_bytes: HistogramVec,
+    operation_errors_total: GenericCounterVec&lt;AtomicU64&gt;,
+    path_label_level: usize,
+}
+
+<span class="kw">impl </span>observe::MetricsIntercept <span class="kw">for </span>PrometheusInterceptor {
+    <span class="kw">fn </span>observe_operation_duration_seconds(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        scheme: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
-        operation: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
-        path_label: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
-    ) -&gt; Vec&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; {
-        <span class="kw">match </span><span class="self">self</span>.path_label_level {
-            <span class="number">0 </span>=&gt; {
-                <span class="macro">vec!</span>[scheme, operation]
-            }
-            n <span class="kw">if </span>n &gt; <span class="number">0 </span>=&gt; {
-                <span class="kw">let </span>path_value = get_path_label(path_label, <span class="self">self</span>.path_label_level);
-                <span class="macro">vec!</span>[scheme, operation, path_value]
-            }
-            <span class="kw">_ </span>=&gt; {
-                <span class="macro">vec!</span>[scheme, operation]
-            }
-        }
-    }
-}
-
-<span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>PrometheusAccessor&lt;A: Accessor&gt; {
-    inner: A,
-    stats: Arc&lt;PrometheusMetrics&gt;,
-    scheme: Scheme,
-}
-
-<span class="kw">impl</span>&lt;A: Accessor&gt; Debug <span class="kw">for </span>PrometheusAccessor&lt;A&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        f.debug_struct(<span class="string">"PrometheusAccessor"</span>)
-            .field(<span class="string">"inner"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.inner)
-            .finish_non_exhaustive()
-    }
-}
-
-<span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-#[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-</span><span class="kw">impl</span>&lt;A: Accessor&gt; LayeredAccessor <span class="kw">for </span>PrometheusAccessor&lt;A&gt; {
-    <span class="kw">type </span>Inner = A;
-    <span class="kw">type </span>Reader = PrometheusMetricWrapper&lt;A::Reader&gt;;
-    <span class="kw">type </span>BlockingReader = PrometheusMetricWrapper&lt;A::BlockingReader&gt;;
-    <span class="kw">type </span>Writer = PrometheusMetricWrapper&lt;A::Writer&gt;;
-    <span class="kw">type </span>BlockingWriter = PrometheusMetricWrapper&lt;A::BlockingWriter&gt;;
-    <span class="kw">type </span>Lister = A::Lister;
-    <span class="kw">type </span>BlockingLister = A::BlockingLister;
-
-    <span class="kw">fn </span>inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Inner {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.inner
-    }
-
-    <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::CreateDir.into_static(),
-            path,
-        );
-
-        <span class="self">self</span>.stats.requests_total.with_label_values(<span class="kw-2">&amp;</span>labels).inc();
-
-        <span class="kw">let </span>timer = <span class="self">self
-            </span>.stats
-            .requests_duration_seconds
-            .with_label_values(<span class="kw-2">&amp;</span>labels)
-            .start_timer();
-        <span class="kw">let </span>create_res = <span class="self">self</span>.inner.create_dir(path, args).<span class="kw">await</span>;
-
-        timer.observe_duration();
-        create_res.map_err(|e| {
-            <span class="self">self</span>.stats
-                .increment_errors_total(Operation::CreateDir, e.kind());
-            e
-        })
-    }
-
-    <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::Read.into_static(),
-            path,
-        );
-        <span class="self">self</span>.stats.requests_total.with_label_values(<span class="kw-2">&amp;</span>labels).inc();
-
-        <span class="kw">let </span>timer = <span class="self">self
-            </span>.stats
-            .requests_duration_seconds
-            .with_label_values(<span class="kw-2">&amp;</span>labels)
-            .start_timer();
-
-        <span class="kw">let </span>read_res = <span class="self">self</span>.inner.read(path, args).<span class="kw">await</span>.map(|(rp, r)| {
-            (
-                rp,
-                PrometheusMetricWrapper::new(
-                    r,
-                    Operation::Read,
-                    <span class="self">self</span>.stats.clone(),
-                    <span class="self">self</span>.scheme,
-                    <span class="kw-2">&amp;</span>path.to_string(),
-                ),
-            )
-        });
-        timer.observe_duration();
-        read_res.map_err(|e| {
-            <span class="self">self</span>.stats.increment_errors_total(Operation::Read, e.kind());
-            e
-        })
-    }
-
-    <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::Write.into_static(),
-            path,
-        );
-        <span class="self">self</span>.stats.requests_total.with_label_values(<span class="kw-2">&amp;</span>labels).inc();
-
-        <span class="kw">let </span>timer = <span class="self">self
-            </span>.stats
-            .requests_duration_seconds
-            .with_label_values(<span class="kw-2">&amp;</span>labels)
-            .start_timer();
-
-        <span class="kw">let </span>write_res = <span class="self">self
-            </span>.inner
-            .write(path, args)
-            .map(|v| {
-                v.map(|(rp, r)| {
-                    (
-                        rp,
-                        PrometheusMetricWrapper::new(
-                            r,
-                            Operation::Write,
-                            <span class="self">self</span>.stats.clone(),
-                            <span class="self">self</span>.scheme,
-                            <span class="kw-2">&amp;</span>path.to_string(),
-                        ),
-                    )
-                })
-            })
-            .<span class="kw">await</span>;
-        timer.observe_duration();
-        write_res.map_err(|e| {
-            <span class="self">self</span>.stats
-                .increment_errors_total(Operation::Write, e.kind());
-            e
-        })
-    }
-
-    <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::Stat.into_static(),
-            path,
-        );
-        <span class="self">self</span>.stats.requests_total.with_label_values(<span class="kw-2">&amp;</span>labels).inc();
-        <span class="kw">let </span>timer = <span class="self">self
-            </span>.stats
-            .requests_duration_seconds
-            .with_label_values(<span class="kw-2">&amp;</span>labels)
-            .start_timer();
-
-        <span class="kw">let </span>stat_res = <span class="self">self
-            </span>.inner
-            .stat(path, args)
-            .inspect_err(|e| {
-                <span class="self">self</span>.stats.increment_errors_total(Operation::Stat, e.kind());
-            })
-            .<span class="kw">await</span>;
-        timer.observe_duration();
-        stat_res.map_err(|e| {
-            <span class="self">self</span>.stats.increment_errors_total(Operation::Stat, e.kind());
-            e
-        })
-    }
-
-    <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::Delete.into_static(),
-            path,
-        );
-        <span class="self">self</span>.stats.requests_total.with_label_values(<span class="kw-2">&amp;</span>labels).inc();
-
-        <span class="kw">let </span>timer = <span class="self">self
-            </span>.stats
-            .requests_duration_seconds
-            .with_label_values(<span class="kw-2">&amp;</span>labels)
-            .start_timer();
-
-        <span class="kw">let </span>delete_res = <span class="self">self</span>.inner.delete(path, args).<span class="kw">await</span>;
-        timer.observe_duration();
-        delete_res.map_err(|e| {
-            <span class="self">self</span>.stats
-                .increment_errors_total(Operation::Delete, e.kind());
-            e
-        })
-    }
-
-    <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Lister)&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::List.into_static(),
-            path,
-        );
-        <span class="self">self</span>.stats.requests_total.with_label_values(<span class="kw-2">&amp;</span>labels).inc();
-
-        <span class="kw">let </span>timer = <span class="self">self
-            </span>.stats
-            .requests_duration_seconds
-            .with_label_values(<span class="kw-2">&amp;</span>labels)
-            .start_timer();
-
-        <span class="kw">let </span>list_res = <span class="self">self</span>.inner.list(path, args).<span class="kw">await</span>;
-
-        timer.observe_duration();
-        list_res.map_err(|e| {
-            <span class="self">self</span>.stats.increment_errors_total(Operation::List, e.kind());
-            e
-        })
-    }
-
-    <span class="kw">async fn </span>batch(<span class="kw-2">&amp;</span><span class="self">self</span>, args: OpBatch) -&gt; <span class="prelude-ty">Result</span>&lt;RpBatch&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::Batch.into_static(),
-            <span class="string">""</span>,
-        );
-        <span class="self">self</span>.stats.requests_total.with_label_values(<span class="kw-2">&amp;</span>labels).inc();
-
-        <span class="kw">let </span>timer = <span class="self">self
-            </span>.stats
-            .requests_duration_seconds
-            .with_label_values(<span class="kw-2">&amp;</span>labels)
-            .start_timer();
-        <span class="kw">let </span>result = <span class="self">self</span>.inner.batch(args).<span class="kw">await</span>;
-
-        timer.observe_duration();
-        result.map_err(|e| {
-            <span class="self">self</span>.stats
-                .increment_errors_total(Operation::Batch, e.kind());
-            e
-        })
-    }
-
-    <span class="kw">async fn </span>presign(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpPresign) -&gt; <span class="prelude-ty">Result</span>&lt;RpPresign&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::Presign.into_static(),
-            path,
-        );
-        <span class="self">self</span>.stats.requests_total.with_label_values(<span class="kw-2">&amp;</span>labels).inc();
-
-        <span class="kw">let </span>timer = <span class="self">self
-            </span>.stats
-            .requests_duration_seconds
-            .with_label_values(<span class="kw-2">&amp;</span>labels)
-            .start_timer();
-        <span class="kw">let </span>result = <span class="self">self</span>.inner.presign(path, args).<span class="kw">await</span>;
-        timer.observe_duration();
-
-        result.map_err(|e| {
-            <span class="self">self</span>.stats
-                .increment_errors_total(Operation::Presign, e.kind());
-            e
-        })
-    }
-
-    <span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::BlockingCreateDir.into_static(),
-            path,
-        );
-        <span class="self">self</span>.stats.requests_total.with_label_values(<span class="kw-2">&amp;</span>labels).inc();
-
-        <span class="kw">let </span>timer = <span class="self">self
-            </span>.stats
-            .requests_duration_seconds
-            .with_label_values(<span class="kw-2">&amp;</span>labels)
-            .start_timer();
-        <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_create_dir(path, args);
-
-        timer.observe_duration();
-
-        result.map_err(|e| {
-            <span class="self">self</span>.stats
-                .increment_errors_total(Operation::BlockingCreateDir, e.kind());
-            e
-        })
-    }
-
-    <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::BlockingRead.into_static(),
-            path,
-        );
-        <span class="self">self</span>.stats.requests_total.with_label_values(<span class="kw-2">&amp;</span>labels).inc();
-
-        <span class="kw">let </span>timer = <span class="self">self
-            </span>.stats
-            .requests_duration_seconds
-            .with_label_values(<span class="kw-2">&amp;</span>labels)
-            .start_timer();
-        <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_read(path, args).map(|(rp, r)| {
-            (
-                rp,
-                PrometheusMetricWrapper::new(
-                    r,
-                    Operation::BlockingRead,
-                    <span class="self">self</span>.stats.clone(),
-                    <span class="self">self</span>.scheme,
-                    <span class="kw-2">&amp;</span>path.to_string(),
-                ),
-            )
-        });
-        timer.observe_duration();
-        result.map_err(|e| {
-            <span class="self">self</span>.stats
-                .increment_errors_total(Operation::BlockingRead, e.kind());
-            e
-        })
-    }
-
-    <span class="kw">fn </span>blocking_write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::BlockingWriter)&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::BlockingWrite.into_static(),
-            path,
-        );
-        <span class="self">self</span>.stats.requests_total.with_label_values(<span class="kw-2">&amp;</span>labels).inc();
-
-        <span class="kw">let </span>timer = <span class="self">self
-            </span>.stats
-            .requests_duration_seconds
-            .with_label_values(<span class="kw-2">&amp;</span>labels)
-            .start_timer();
-        <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_write(path, args).map(|(rp, r)| {
-            (
-                rp,
-                PrometheusMetricWrapper::new(
-                    r,
-                    Operation::BlockingWrite,
-                    <span class="self">self</span>.stats.clone(),
-                    <span class="self">self</span>.scheme,
-                    <span class="kw-2">&amp;</span>path.to_string(),
-                ),
-            )
-        });
-        timer.observe_duration();
-        result.map_err(|e| {
-            <span class="self">self</span>.stats
-                .increment_errors_total(Operation::BlockingWrite, e.kind());
-            e
-        })
-    }
-
-    <span class="kw">fn </span>blocking_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::BlockingStat.into_static(),
-            path,
-        );
-        <span class="self">self</span>.stats.requests_total.with_label_values(<span class="kw-2">&amp;</span>labels).inc();
-
-        <span class="kw">let </span>timer = <span class="self">self
-            </span>.stats
-            .requests_duration_seconds
-            .with_label_values(<span class="kw-2">&amp;</span>labels)
-            .start_timer();
-        <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_stat(path, args);
-        timer.observe_duration();
-        result.map_err(|e| {
-            <span class="self">self</span>.stats
-                .increment_errors_total(Operation::BlockingStat, e.kind());
-            e
-        })
-    }
-
-    <span class="kw">fn </span>blocking_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::BlockingDelete.into_static(),
-            path,
-        );
-        <span class="self">self</span>.stats.requests_total.with_label_values(<span class="kw-2">&amp;</span>labels).inc();
-
-        <span class="kw">let </span>timer = <span class="self">self
-            </span>.stats
-            .requests_duration_seconds
-            .with_label_values(<span class="kw-2">&amp;</span>labels)
-            .start_timer();
-        <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_delete(path, args);
-        timer.observe_duration();
-
-        result.map_err(|e| {
-            <span class="self">self</span>.stats
-                .increment_errors_total(Operation::BlockingDelete, e.kind());
-            e
-        })
-    }
-
-    <span class="kw">fn </span>blocking_list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::BlockingLister)&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::BlockingList.into_static(),
-            path,
-        );
-        <span class="self">self</span>.stats.requests_total.with_label_values(<span class="kw-2">&amp;</span>labels).inc();
-
-        <span class="kw">let </span>timer = <span class="self">self
-            </span>.stats
-            .requests_duration_seconds
-            .with_label_values(<span class="kw-2">&amp;</span>labels)
-            .start_timer();
-        <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_list(path, args);
-        timer.observe_duration();
-
-        result.map_err(|e| {
-            <span class="self">self</span>.stats
-                .increment_errors_total(Operation::BlockingList, e.kind());
-            e
-        })
-    }
-}
-
-<span class="kw">pub struct </span>PrometheusMetricWrapper&lt;R&gt; {
-    inner: R,
-
-    op: Operation,
-    stats: Arc&lt;PrometheusMetrics&gt;,
-    scheme: Scheme,
-    path: String,
-}
-
-<span class="kw">impl</span>&lt;R&gt; PrometheusMetricWrapper&lt;R&gt; {
-    <span class="kw">fn </span>new(
-        inner: R,
-        op: Operation,
-        stats: Arc&lt;PrometheusMetrics&gt;,
         scheme: Scheme,
-        path: <span class="kw-2">&amp;</span>String,
-    ) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            inner,
-            op,
-            stats,
+        namespace: Arc&lt;String&gt;,
+        root: Arc&lt;String&gt;,
+        path: <span class="kw-2">&amp;</span>str,
+        op: Operation,
+        duration: Duration,
+    ) {
+        <span class="kw">let </span>labels = OperationLabels {
             scheme,
-            path: path.to_string(),
+            namespace: <span class="kw-2">&amp;</span>namespace,
+            root: <span class="kw-2">&amp;</span>root,
+            operation: op,
+            error: <span class="prelude-val">None</span>,
+            path,
         }
+        .into_values(<span class="self">self</span>.path_label_level);
+
+        <span class="self">self</span>.operation_duration_seconds
+            .with_label_values(<span class="kw-2">&amp;</span>labels)
+            .observe(duration.as_secs_f64())
+    }
+
+    <span class="kw">fn </span>observe_operation_bytes(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        scheme: Scheme,
+        namespace: Arc&lt;String&gt;,
+        root: Arc&lt;String&gt;,
+        path: <span class="kw-2">&amp;</span>str,
+        op: Operation,
+        bytes: usize,
+    ) {
+        <span class="kw">let </span>labels = OperationLabels {
+            scheme,
+            namespace: <span class="kw-2">&amp;</span>namespace,
+            root: <span class="kw-2">&amp;</span>root,
+            operation: op,
+            error: <span class="prelude-val">None</span>,
+            path,
+        }
+        .into_values(<span class="self">self</span>.path_label_level);
+
+        <span class="self">self</span>.operation_bytes
+            .with_label_values(<span class="kw-2">&amp;</span>labels)
+            .observe(bytes <span class="kw">as </span>f64);
+    }
+
+    <span class="kw">fn </span>observe_operation_errors_total(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        scheme: Scheme,
+        namespace: Arc&lt;String&gt;,
+        root: Arc&lt;String&gt;,
+        path: <span class="kw-2">&amp;</span>str,
+        op: Operation,
+        error: ErrorKind,
+    ) {
+        <span class="kw">let </span>labels = OperationLabels {
+            scheme,
+            namespace: <span class="kw-2">&amp;</span>namespace,
+            root: <span class="kw-2">&amp;</span>root,
+            operation: op,
+            error: <span class="prelude-val">Some</span>(error),
+            path,
+        }
+        .into_values(<span class="self">self</span>.path_label_level);
+
+        <span class="self">self</span>.operation_errors_total.with_label_values(<span class="kw-2">&amp;</span>labels).inc();
     }
 }
 
-<span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>PrometheusMetricWrapper&lt;R&gt; {
-    <span class="kw">fn </span>poll_read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::Read.into_static(),
-            <span class="kw-2">&amp;</span><span class="self">self</span>.path,
-        );
-        <span class="self">self</span>.inner.poll_read(cx, buf).map(|res| <span class="kw">match </span>res {
-            <span class="prelude-val">Ok</span>(bytes) =&gt; {
-                <span class="self">self</span>.stats
-                    .bytes_total
-                    .with_label_values(<span class="kw-2">&amp;</span>labels)
-                    .observe(bytes <span class="kw">as </span>f64);
-                <span class="prelude-val">Ok</span>(bytes)
-            }
-            <span class="prelude-val">Err</span>(e) =&gt; {
-                <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, e.kind());
-                <span class="prelude-val">Err</span>(e)
-            }
-        })
-    }
-
-    <span class="kw">fn </span>poll_seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, pos: io::SeekFrom) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;u64&gt;&gt; {
-        <span class="self">self</span>.inner.poll_seek(cx, pos).map(|res| <span class="kw">match </span>res {
-            <span class="prelude-val">Ok</span>(n) =&gt; <span class="prelude-val">Ok</span>(n),
-            <span class="prelude-val">Err</span>(e) =&gt; {
-                <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, e.kind());
-                <span class="prelude-val">Err</span>(e)
-            }
-        })
-    }
-
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::Read.into_static(),
-            <span class="kw-2">&amp;</span><span class="self">self</span>.path,
-        );
-        <span class="self">self</span>.inner.poll_next(cx).map(|res| <span class="kw">match </span>res {
-            <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(bytes)) =&gt; {
-                <span class="self">self</span>.stats
-                    .bytes_total
-                    .with_label_values(<span class="kw-2">&amp;</span>labels)
-                    .observe(bytes.len() <span class="kw">as </span>f64);
-                <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(bytes))
-            }
-            <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(e)) =&gt; {
-                <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, e.kind());
-                <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(e))
-            }
-            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">None</span>,
-        })
-    }
+<span class="kw">struct </span>OperationLabels&lt;<span class="lifetime">'a</span>&gt; {
+    scheme: Scheme,
+    namespace: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
+    root: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
+    operation: Operation,
+    path: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
+    error: <span class="prelude-ty">Option</span>&lt;ErrorKind&gt;,
 }
 
-<span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>PrometheusMetricWrapper&lt;R&gt; {
-    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; OperationLabels&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>names(error: bool, path_label_level: usize) -&gt; Vec&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>names = Vec::with_capacity(<span class="number">6</span>);
+
+        names.extend([
+            observe::LABEL_SCHEME,
+            observe::LABEL_NAMESPACE,
+            observe::LABEL_ROOT,
+            observe::LABEL_OPERATION,
+        ]);
+
+        <span class="kw">if </span>path_label_level &gt; <span class="number">0 </span>{
+            names.push(observe::LABEL_PATH);
+        }
+
+        <span class="kw">if </span>error {
+            names.push(observe::LABEL_ERROR);
+        }
+
+        names
+    }
+
+    <span class="doccomment">/// labels:
+    ///
+    /// 1. `["scheme", "namespace", "root", "operation"]`
+    /// 2. `["scheme", "namespace", "root", "operation", "path"]`
+    /// 3. `["scheme", "namespace", "root", "operation", "error"]`
+    /// 4. `["scheme", "namespace", "root", "operation", "path", "error"]`
+    </span><span class="kw">fn </span>into_values(<span class="self">self</span>, path_label_level: usize) -&gt; Vec&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>labels = Vec::with_capacity(<span class="number">6</span>);
+
+        labels.extend([
             <span class="self">self</span>.scheme.into_static(),
-            Operation::BlockingRead.into_static(),
-            <span class="kw-2">&amp;</span><span class="self">self</span>.path,
-        );
-        <span class="self">self</span>.inner
-            .read(buf)
-            .map(|n| {
-                <span class="self">self</span>.stats
-                    .bytes_total
-                    .with_label_values(<span class="kw-2">&amp;</span>labels)
-                    .observe(n <span class="kw">as </span>f64);
-                n
-            })
-            .map_err(|e| {
-                <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, e.kind());
-                e
-            })
-    }
+            <span class="self">self</span>.namespace,
+            <span class="self">self</span>.root,
+            <span class="self">self</span>.operation.into_static(),
+        ]);
 
-    <span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        <span class="self">self</span>.inner.seek(pos).map_err(|err| {
-            <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, err.kind());
-            err
-        })
-    }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(path) = observe::path_label_value(<span class="self">self</span>.path, path_label_level) {
+            labels.push(path);
+        }
 
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::BlockingRead.into_static(),
-            <span class="kw-2">&amp;</span><span class="self">self</span>.path,
-        );
-        <span class="self">self</span>.inner.next().map(|res| <span class="kw">match </span>res {
-            <span class="prelude-val">Ok</span>(bytes) =&gt; {
-                <span class="self">self</span>.stats
-                    .bytes_total
-                    .with_label_values(<span class="kw-2">&amp;</span>labels)
-                    .observe(bytes.len() <span class="kw">as </span>f64);
-                <span class="prelude-val">Ok</span>(bytes)
-            }
-            <span class="prelude-val">Err</span>(e) =&gt; {
-                <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, e.kind());
-                <span class="prelude-val">Err</span>(e)
-            }
-        })
-    }
-}
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(error) = <span class="self">self</span>.error {
+            labels.push(error.into_static());
+        }
 
-<span class="kw">impl</span>&lt;R: oio::Write&gt; oio::Write <span class="kw">for </span>PrometheusMetricWrapper&lt;R&gt; {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::Write.into_static(),
-            <span class="kw-2">&amp;</span><span class="self">self</span>.path,
-        );
-        <span class="self">self</span>.inner
-            .poll_write(cx, bs)
-            .map_ok(|n| {
-                <span class="self">self</span>.stats
-                    .bytes_total
-                    .with_label_values(<span class="kw-2">&amp;</span>labels)
-                    .observe(n <span class="kw">as </span>f64);
-                n
-            })
-            .map_err(|err| {
-                <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, err.kind());
-                err
-            })
-    }
-
-    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="self">self</span>.inner.poll_abort(cx).map_err(|err| {
-            <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, err.kind());
-            err
-        })
-    }
-
-    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="self">self</span>.inner.poll_close(cx).map_err(|err| {
-            <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, err.kind());
-            err
-        })
-    }
-}
-
-<span class="kw">impl</span>&lt;R: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>PrometheusMetricWrapper&lt;R&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">let </span>labels = <span class="self">self</span>.stats.generate_metric_label(
-            <span class="self">self</span>.scheme.into_static(),
-            Operation::BlockingWrite.into_static(),
-            <span class="kw-2">&amp;</span><span class="self">self</span>.path,
-        );
-        <span class="self">self</span>.inner
-            .write(bs)
-            .map(|n| {
-                <span class="self">self</span>.stats
-                    .bytes_total
-                    .with_label_values(<span class="kw-2">&amp;</span>labels)
-                    .observe(n <span class="kw">as </span>f64);
-                n
-            })
-            .map_err(|err| {
-                <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, err.kind());
-                err
-            })
-    }
-
-    <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.inner.close().map_err(|err| {
-            <span class="self">self</span>.stats.increment_errors_total(<span class="self">self</span>.op, err.kind());
-            err
-        })
-    }
-}
-
-<span class="kw">fn </span>get_path_label(path: <span class="kw-2">&amp;</span>str, path_level: usize) -&gt; <span class="kw-2">&amp;</span>str {
-    <span class="kw">if </span>path_level &gt; <span class="number">0 </span>{
-        <span class="kw">return </span>path
-            .char_indices()
-            .filter(|<span class="kw-2">&amp;</span>(<span class="kw">_</span>, c)| c == <span class="string">'/'</span>)
-            .nth(path_level - <span class="number">1</span>)
-            .map_or(path, |(i, <span class="kw">_</span>)| <span class="kw-2">&amp;</span>path[..i]);
-    }
-    <span class="string">""
-</span>}
-
-<span class="attr">#[cfg(test)]
-</span><span class="kw">mod </span>tests {
-    <span class="kw">use super</span>::<span class="kw-2">*</span>;
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_get_path_label() {
-        <span class="kw">let </span>path = <span class="string">"abc/def/ghi"</span>;
-        <span class="macro">assert_eq!</span>(get_path_label(path, <span class="number">0</span>), <span class="string">""</span>);
-        <span class="macro">assert_eq!</span>(get_path_label(path, <span class="number">1</span>), <span class="string">"abc"</span>);
-        <span class="macro">assert_eq!</span>(get_path_label(path, <span class="number">2</span>), <span class="string">"abc/def"</span>);
-        <span class="macro">assert_eq!</span>(get_path_label(path, <span class="number">3</span>), <span class="string">"abc/def/ghi"</span>);
-        <span class="macro">assert_eq!</span>(get_path_label(path, usize::MAX), <span class="string">"abc/def/ghi"</span>);
-
-        <span class="macro">assert_eq!</span>(get_path_label(<span class="string">""</span>, <span class="number">0</span>), <span class="string">""</span>);
+        labels
     }
 }
 </code></pre></div></section></main></body></html>

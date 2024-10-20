@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/fs/backend.rs`."><title>backend.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/fs/backend.rs`."><title>backend.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -581,30 +579,6 @@
 <a href="#579" id="579">579</a>
 <a href="#580" id="580">580</a>
 <a href="#581" id="581">581</a>
-<a href="#582" id="582">582</a>
-<a href="#583" id="583">583</a>
-<a href="#584" id="584">584</a>
-<a href="#585" id="585">585</a>
-<a href="#586" id="586">586</a>
-<a href="#587" id="587">587</a>
-<a href="#588" id="588">588</a>
-<a href="#589" id="589">589</a>
-<a href="#590" id="590">590</a>
-<a href="#591" id="591">591</a>
-<a href="#592" id="592">592</a>
-<a href="#593" id="593">593</a>
-<a href="#594" id="594">594</a>
-<a href="#595" id="595">595</a>
-<a href="#596" id="596">596</a>
-<a href="#597" id="597">597</a>
-<a href="#598" id="598">598</a>
-<a href="#599" id="599">599</a>
-<a href="#600" id="600">600</a>
-<a href="#601" id="601">601</a>
-<a href="#602" id="602">602</a>
-<a href="#603" id="603">603</a>
-<a href="#604" id="604">604</a>
-<a href="#605" id="605">605</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -622,35 +596,44 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
+</span><span class="kw">use </span>std::io::SeekFrom;
 <span class="kw">use </span>std::path::Path;
 <span class="kw">use </span>std::path::PathBuf;
+<span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>chrono::DateTime;
 <span class="kw">use </span>log::debug;
-<span class="kw">use </span>uuid::Uuid;
 
+<span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">super</span>::lister::FsLister;
+<span class="kw">use </span><span class="kw">super</span>::reader::FsReader;
 <span class="kw">use </span><span class="kw">super</span>::writer::FsWriter;
+<span class="kw">use </span><span class="kw">super</span>::writer::FsWriters;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::services::FsConfig;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
+
+<span class="kw">impl </span>Configurator <span class="kw">for </span>FsConfig {
+    <span class="kw">type </span>Builder = FsBuilder;
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Builder {
+        FsBuilder { config: <span class="self">self </span>}
+    }
+}
 
 <span class="doccomment">/// POSIX file system support.
 </span><span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
 #[derive(Default, Debug)]
 </span><span class="kw">pub struct </span>FsBuilder {
-    root: <span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
-    atomic_write_dir: <span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
+    config: FsConfig,
 }
 
 <span class="kw">impl </span>FsBuilder {
     <span class="doccomment">/// Set root for backend.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.root = <span class="kw">if </span>root.is_empty() {
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
-            <span class="prelude-val">Some</span>(PathBuf::from(root))
+            <span class="prelude-val">Some</span>(root.to_string())
         };
 
         <span class="self">self
@@ -661,47 +644,24 @@
     /// # Notes
     ///
     /// - When append is enabled, we will not use atomic write
-    /// to avoid data loss and performance issue.
-    </span><span class="kw">pub fn </span>atomic_write_dir(<span class="kw-2">&amp;mut </span><span class="self">self</span>, dir: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.atomic_write_dir = <span class="kw">if </span>dir.is_empty() {
-            <span class="prelude-val">None
-        </span>} <span class="kw">else </span>{
-            <span class="prelude-val">Some</span>(PathBuf::from(dir))
-        };
+    ///   to avoid data loss and performance issue.
+    </span><span class="kw">pub fn </span>atomic_write_dir(<span class="kw-2">mut </span><span class="self">self</span>, dir: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="kw">if </span>!dir.is_empty() {
+            <span class="self">self</span>.config.atomic_write_dir = <span class="prelude-val">Some</span>(dir.to_string());
+        }
 
-        <span class="self">self
-    </span>}
-
-    <span class="doccomment">/// OpenDAL requires all input path are normalized to make sure the
-    /// behavior is consistent. By enable path check, we can make sure
-    /// fs will behave the same as other services.
-    ///
-    /// Enabling this feature will lead to extra metadata call in all
-    /// operations.
-    </span><span class="attr">#[deprecated(note = <span class="string">"path always checked since RFC-3243 List Prefix"</span>)]
-    </span><span class="kw">pub fn </span>enable_path_check(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="self">self
     </span>}
 }
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>FsBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Fs;
-    <span class="kw">type </span>Accessor = FsBackend;
+    <span class="kw">type </span>Config = FsConfig;
 
-    <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = FsBuilder::default();
-
-        map.get(<span class="string">"root"</span>).map(|v| builder.root(v));
-        map.get(<span class="string">"atomic_write_dir"</span>)
-            .map(|v| builder.atomic_write_dir(v));
-
-        builder
-    }
-
-    <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
+    <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
         <span class="macro">debug!</span>(<span class="string">"backend build started: {:?}"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>);
 
-        <span class="kw">let </span>root = <span class="kw">match </span><span class="self">self</span>.root.take() {
+        <span class="kw">let </span>root = <span class="kw">match </span><span class="self">self</span>.config.root.map(PathBuf::from) {
             <span class="prelude-val">Some</span>(root) =&gt; <span class="prelude-val">Ok</span>(root),
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::ConfigInvalid,
@@ -722,7 +682,7 @@
             }
         }
 
-        <span class="kw">let </span>atomic_write_dir = <span class="self">self</span>.atomic_write_dir.take();
+        <span class="kw">let </span>atomic_write_dir = <span class="self">self</span>.config.atomic_write_dir.map(PathBuf::from);
 
         <span class="comment">// If atomic write dir is not exist, we must create it.
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(d) = <span class="kw-2">&amp;</span>atomic_write_dir {
@@ -766,103 +726,38 @@
             })
             .unwrap_or(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>))<span class="question-mark">?</span>;
 
-        <span class="macro">debug!</span>(<span class="string">"backend build finished: {:?}"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>);
         <span class="prelude-val">Ok</span>(FsBackend {
-            root,
-            atomic_write_dir,
+            core: Arc::new(FsCore {
+                root,
+                atomic_write_dir,
+                buf_pool: oio::PooledBuf::new(<span class="number">16</span>).with_initial_capacity(<span class="number">256 </span>* <span class="number">1024</span>),
+            }),
         })
     }
 }
 
-<span class="doccomment">/// Backend is used to serve `Accessor` support for posix alike fs.
+<span class="doccomment">/// Backend is used to serve `Accessor` support for posix-like fs.
 </span><span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>FsBackend {
-    root: PathBuf,
-    atomic_write_dir: <span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
+    core: Arc&lt;FsCore&gt;,
 }
 
-<span class="attr">#[inline]
-</span><span class="kw">fn </span>tmp_file_of(path: <span class="kw-2">&amp;</span>str) -&gt; String {
-    <span class="kw">let </span>name = get_basename(path);
-    <span class="kw">let </span>uuid = Uuid::new_v4().to_string();
-
-    <span class="macro">format!</span>(<span class="string">"{name}.{uuid}"</span>)
-}
-
-<span class="kw">impl </span>FsBackend {
-    <span class="comment">// Synchronously build write path and ensure the parent dirs created
-    </span><span class="kw">fn </span>blocking_ensure_write_abs_path(parent: <span class="kw-2">&amp;</span>Path, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;PathBuf&gt; {
-        <span class="kw">let </span>p = parent.join(path);
-
-        <span class="comment">// Create dir before write path.
-        //
-        // TODO(xuanwo): There are many works to do here:
-        //   - Is it safe to create dir concurrently?
-        //   - Do we need to extract this logic as new util functions?
-        //   - Is it better to check the parent dir exists before call mkdir?
-        </span><span class="kw">let </span>parent = PathBuf::from(<span class="kw-2">&amp;</span>p)
-            .parent()
-            .ok_or_else(|| {
-                Error::new(
-                    ErrorKind::Unexpected,
-                    <span class="string">"path should have parent but not, it must be malformed"</span>,
-                )
-                .with_context(<span class="string">"input"</span>, p.to_string_lossy())
-            })<span class="question-mark">?
-            </span>.to_path_buf();
-
-        std::fs::create_dir_all(parent).map_err(new_std_io_error)<span class="question-mark">?</span>;
-
-        <span class="prelude-val">Ok</span>(p)
-    }
-
-    <span class="comment">// Build write path and ensure the parent dirs created
-    </span><span class="kw">async fn </span>ensure_write_abs_path(parent: <span class="kw-2">&amp;</span>Path, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;PathBuf&gt; {
-        <span class="kw">let </span>p = parent.join(path);
-
-        <span class="comment">// Create dir before write path.
-        //
-        // TODO(xuanwo): There are many works to do here:
-        //   - Is it safe to create dir concurrently?
-        //   - Do we need to extract this logic as new util functions?
-        //   - Is it better to check the parent dir exists before call mkdir?
-        </span><span class="kw">let </span>parent = PathBuf::from(<span class="kw-2">&amp;</span>p)
-            .parent()
-            .ok_or_else(|| {
-                Error::new(
-                    ErrorKind::Unexpected,
-                    <span class="string">"path should have parent but not, it must be malformed"</span>,
-                )
-                .with_context(<span class="string">"input"</span>, p.to_string_lossy())
-            })<span class="question-mark">?
-            </span>.to_path_buf();
-
-        tokio::fs::create_dir_all(<span class="kw-2">&amp;</span>parent)
-            .<span class="kw">await
-            </span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
-
-        <span class="prelude-val">Ok</span>(p)
-    }
-}
-
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>Accessor <span class="kw">for </span>FsBackend {
-    <span class="kw">type </span>Reader = oio::TokioReader&lt;tokio::fs::File&gt;;
-    <span class="kw">type </span>Writer = FsWriter&lt;tokio::fs::File&gt;;
+<span class="kw">impl </span>Access <span class="kw">for </span>FsBackend {
+    <span class="kw">type </span>Reader = FsReader&lt;tokio::fs::File&gt;;
+    <span class="kw">type </span>Writer = FsWriters;
     <span class="kw">type </span>Lister = <span class="prelude-ty">Option</span>&lt;FsLister&lt;tokio::fs::ReadDir&gt;&gt;;
-    <span class="kw">type </span>BlockingReader = oio::StdReader&lt;std::fs::File&gt;;
+    <span class="kw">type </span>BlockingReader = FsReader&lt;std::fs::File&gt;;
     <span class="kw">type </span>BlockingWriter = FsWriter&lt;std::fs::File&gt;;
     <span class="kw">type </span>BlockingLister = <span class="prelude-ty">Option</span>&lt;FsLister&lt;std::fs::ReadDir&gt;&gt;;
 
-    <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
+    <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>am = AccessorInfo::default();
         am.set_scheme(Scheme::Fs)
-            .set_root(<span class="kw-2">&amp;</span><span class="self">self</span>.root.to_string_lossy())
+            .set_root(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root.to_string_lossy())
             .set_native_capability(Capability {
                 stat: <span class="bool-val">true</span>,
 
                 read: <span class="bool-val">true</span>,
-                read_can_seek: <span class="bool-val">true</span>,
 
                 write: <span class="bool-val">true</span>,
                 write_can_empty: <span class="bool-val">true</span>,
@@ -880,11 +775,11 @@
                 ..Default::default()
             });
 
-        am
+        am.into()
     }
 
     <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
         tokio::fs::create_dir_all(<span class="kw-2">&amp;</span>p)
             .<span class="kw">await
@@ -894,7 +789,7 @@
     }
 
     <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="kw">let </span>meta = tokio::fs::metadata(<span class="kw-2">&amp;</span>p).<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
 
@@ -920,29 +815,46 @@
     ///
     /// There are three ways to get the total file length:
     ///
-    /// - call std::fs::metadata directly and than open. (400ns)
-    /// - open file first, and than use `f.metadata()` (300ns)
-    /// - open file first, and than use `seek`. (100ns)
+    /// - call std::fs::metadata directly and then open. (400ns)
+    /// - open file first, and then use `f.metadata()` (300ns)
+    /// - open file first, and then use `seek`. (100ns)
     ///
     /// Benchmark could be found [here](https://gist.github.com/Xuanwo/48f9cfbc3022ea5f865388bb62e1a70f)
-    </span><span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+    </span><span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
-        <span class="kw">let </span>f = tokio::fs::OpenOptions::new()
+        <span class="kw">let </span><span class="kw-2">mut </span>f = tokio::fs::OpenOptions::new()
             .read(<span class="bool-val">true</span>)
             .open(<span class="kw-2">&amp;</span>p)
             .<span class="kw">await
             </span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>r = oio::TokioReader::new(f);
+        <span class="kw">if </span>args.range().offset() != <span class="number">0 </span>{
+            <span class="kw">use </span>tokio::io::AsyncSeekExt;
+
+            f.seek(SeekFrom::Start(args.range().offset()))
+                .<span class="kw">await
+                </span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
+        }
+
+        <span class="kw">let </span>r = FsReader::new(
+            <span class="self">self</span>.core.clone(),
+            f,
+            args.range().size().unwrap_or(u64::MAX) <span class="kw">as _</span>,
+        );
         <span class="prelude-val">Ok</span>((RpRead::new(), r))
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, op: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
-        <span class="kw">let </span>(target_path, tmp_path) = <span class="kw">if let </span><span class="prelude-val">Some</span>(atomic_write_dir) = <span class="kw-2">&amp;</span><span class="self">self</span>.atomic_write_dir {
-            <span class="kw">let </span>target_path = <span class="self">Self</span>::ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path).<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="kw">let </span>tmp_path =
-                <span class="self">Self</span>::ensure_write_abs_path(atomic_write_dir, <span class="kw-2">&amp;</span>tmp_file_of(path)).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>(target_path, tmp_path) = <span class="kw">if let </span><span class="prelude-val">Some</span>(atomic_write_dir) = <span class="kw-2">&amp;</span><span class="self">self</span>.core.atomic_write_dir {
+            <span class="kw">let </span>target_path = <span class="self">self
+                </span>.core
+                .ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, path)
+                .<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>tmp_path = <span class="self">self
+                </span>.core
+                .ensure_write_abs_path(atomic_write_dir, <span class="kw-2">&amp;</span>tmp_file_of(path))
+                .<span class="kw">await</span><span class="question-mark">?</span>;
 
             <span class="comment">// If the target file exists, we should append to the end of it directly.
             </span><span class="kw">if </span>op.append()
@@ -955,7 +867,10 @@
                 (target_path, <span class="prelude-val">Some</span>(tmp_path))
             }
         } <span class="kw">else </span>{
-            <span class="kw">let </span>p = <span class="self">Self</span>::ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>p = <span class="self">self
+                </span>.core
+                .ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, path)
+                .<span class="kw">await</span><span class="question-mark">?</span>;
 
             (p, <span class="prelude-val">None</span>)
         };
@@ -973,11 +888,23 @@
             .<span class="kw">await
             </span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>((RpWrite::new(), FsWriter::new(target_path, tmp_path, f)))
+        <span class="kw">let </span>w = FsWriter::new(target_path, tmp_path, f);
+
+        <span class="kw">let </span>w = <span class="kw">if </span>op.append() {
+            FsWriters::One(w)
+        } <span class="kw">else </span>{
+            FsWriters::Two(oio::PositionWriter::new(
+                w,
+                op.executor().cloned(),
+                op.concurrent(),
+            ))
+        };
+
+        <span class="prelude-val">Ok</span>((RpWrite::default(), w))
     }
 
     <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="kw">let </span>meta = tokio::fs::metadata(<span class="kw-2">&amp;</span>p).<span class="kw">await</span>;
 
@@ -996,8 +923,8 @@
         }
     }
 
-    <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Lister)&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+    <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, arg: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Lister)&gt; {
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="kw">let </span>f = <span class="kw">match </span>tokio::fs::read_dir(<span class="kw-2">&amp;</span>p).<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(rd) =&gt; rd,
@@ -1010,18 +937,20 @@
             }
         };
 
-        <span class="kw">let </span>rd = FsLister::new(<span class="kw-2">&amp;</span><span class="self">self</span>.root, f);
-
+        <span class="kw">let </span>rd = FsLister::new(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, path, f, arg);
         <span class="prelude-val">Ok</span>((RpList::default(), <span class="prelude-val">Some</span>(rd)))
     }
 
     <span class="kw">async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, _args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
-        <span class="kw">let </span>from = <span class="self">self</span>.root.join(from.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>from = <span class="self">self</span>.core.root.join(from.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="comment">// try to get the metadata of the source file to ensure it exists
         </span>tokio::fs::metadata(<span class="kw-2">&amp;</span>from).<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>to = <span class="self">Self</span>::ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to.trim_end_matches(<span class="string">'/'</span>)).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>to = <span class="self">self
+            </span>.core
+            .ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, to.trim_end_matches(<span class="string">'/'</span>))
+            .<span class="kw">await</span><span class="question-mark">?</span>;
 
         tokio::fs::copy(from, to).<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
 
@@ -1029,12 +958,15 @@
     }
 
     <span class="kw">async fn </span>rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, _args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
-        <span class="kw">let </span>from = <span class="self">self</span>.root.join(from.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>from = <span class="self">self</span>.core.root.join(from.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="comment">// try to get the metadata of the source file to ensure it exists
         </span>tokio::fs::metadata(<span class="kw-2">&amp;</span>from).<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>to = <span class="self">Self</span>::ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to.trim_end_matches(<span class="string">'/'</span>)).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>to = <span class="self">self
+            </span>.core
+            .ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, to.trim_end_matches(<span class="string">'/'</span>))
+            .<span class="kw">await</span><span class="question-mark">?</span>;
 
         tokio::fs::rename(from, to)
             .<span class="kw">await
@@ -1044,7 +976,7 @@
     }
 
     <span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
         std::fs::create_dir_all(p).map_err(new_std_io_error)<span class="question-mark">?</span>;
 
@@ -1052,7 +984,7 @@
     }
 
     <span class="kw">fn </span>blocking_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="kw">let </span>meta = std::fs::metadata(p).map_err(new_std_io_error)<span class="question-mark">?</span>;
 
@@ -1074,24 +1006,37 @@
         <span class="prelude-val">Ok</span>(RpStat::new(m))
     }
 
-    <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+    <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
-        <span class="kw">let </span>f = std::fs::OpenOptions::new()
+        <span class="kw">let </span><span class="kw-2">mut </span>f = std::fs::OpenOptions::new()
             .read(<span class="bool-val">true</span>)
             .open(p)
             .map_err(new_std_io_error)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>r = oio::StdReader::new(f);
+        <span class="kw">if </span>args.range().offset() != <span class="number">0 </span>{
+            <span class="kw">use </span>std::io::Seek;
 
+            f.seek(SeekFrom::Start(args.range().offset()))
+                .map_err(new_std_io_error)<span class="question-mark">?</span>;
+        }
+
+        <span class="kw">let </span>r = FsReader::new(
+            <span class="self">self</span>.core.clone(),
+            f,
+            args.range().size().unwrap_or(u64::MAX) <span class="kw">as _</span>,
+        );
         <span class="prelude-val">Ok</span>((RpRead::new(), r))
     }
 
     <span class="kw">fn </span>blocking_write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, op: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::BlockingWriter)&gt; {
-        <span class="kw">let </span>(target_path, tmp_path) = <span class="kw">if let </span><span class="prelude-val">Some</span>(atomic_write_dir) = <span class="kw-2">&amp;</span><span class="self">self</span>.atomic_write_dir {
-            <span class="kw">let </span>target_path = <span class="self">Self</span>::blocking_ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path)<span class="question-mark">?</span>;
-            <span class="kw">let </span>tmp_path =
-                <span class="self">Self</span>::blocking_ensure_write_abs_path(atomic_write_dir, <span class="kw-2">&amp;</span>tmp_file_of(path))<span class="question-mark">?</span>;
+        <span class="kw">let </span>(target_path, tmp_path) = <span class="kw">if let </span><span class="prelude-val">Some</span>(atomic_write_dir) = <span class="kw-2">&amp;</span><span class="self">self</span>.core.atomic_write_dir {
+            <span class="kw">let </span>target_path = <span class="self">self
+                </span>.core
+                .blocking_ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, path)<span class="question-mark">?</span>;
+            <span class="kw">let </span>tmp_path = <span class="self">self
+                </span>.core
+                .blocking_ensure_write_abs_path(atomic_write_dir, <span class="kw-2">&amp;</span>tmp_file_of(path))<span class="question-mark">?</span>;
 
             <span class="comment">// If the target file exists, we should append to the end of it directly.
             </span><span class="kw">if </span>op.append()
@@ -1104,7 +1049,9 @@
                 (target_path, <span class="prelude-val">Some</span>(tmp_path))
             }
         } <span class="kw">else </span>{
-            <span class="kw">let </span>p = <span class="self">Self</span>::blocking_ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path)<span class="question-mark">?</span>;
+            <span class="kw">let </span>p = <span class="self">self
+                </span>.core
+                .blocking_ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, path)<span class="question-mark">?</span>;
 
             (p, <span class="prelude-val">None</span>)
         };
@@ -1126,7 +1073,7 @@
     }
 
     <span class="kw">fn </span>blocking_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="kw">let </span>meta = std::fs::metadata(<span class="kw-2">&amp;</span>p);
 
@@ -1145,8 +1092,8 @@
         }
     }
 
-    <span class="kw">fn </span>blocking_list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::BlockingLister)&gt; {
-        <span class="kw">let </span>p = <span class="self">self</span>.root.join(path.trim_end_matches(<span class="string">'/'</span>));
+    <span class="kw">fn </span>blocking_list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, arg: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::BlockingLister)&gt; {
+        <span class="kw">let </span>p = <span class="self">self</span>.core.root.join(path.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="kw">let </span>f = <span class="kw">match </span>std::fs::read_dir(p) {
             <span class="prelude-val">Ok</span>(rd) =&gt; rd,
@@ -1159,18 +1106,19 @@
             }
         };
 
-        <span class="kw">let </span>rd = FsLister::new(<span class="kw-2">&amp;</span><span class="self">self</span>.root, f);
-
+        <span class="kw">let </span>rd = FsLister::new(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, path, f, arg);
         <span class="prelude-val">Ok</span>((RpList::default(), <span class="prelude-val">Some</span>(rd)))
     }
 
     <span class="kw">fn </span>blocking_copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, _args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
-        <span class="kw">let </span>from = <span class="self">self</span>.root.join(from.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>from = <span class="self">self</span>.core.root.join(from.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="comment">// try to get the metadata of the source file to ensure it exists
         </span>std::fs::metadata(<span class="kw-2">&amp;</span>from).map_err(new_std_io_error)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>to = <span class="self">Self</span>::blocking_ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to.trim_end_matches(<span class="string">'/'</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>to = <span class="self">self
+            </span>.core
+            .blocking_ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, to.trim_end_matches(<span class="string">'/'</span>))<span class="question-mark">?</span>;
 
         std::fs::copy(from, to).map_err(new_std_io_error)<span class="question-mark">?</span>;
 
@@ -1178,12 +1126,14 @@
     }
 
     <span class="kw">fn </span>blocking_rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, _args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
-        <span class="kw">let </span>from = <span class="self">self</span>.root.join(from.trim_end_matches(<span class="string">'/'</span>));
+        <span class="kw">let </span>from = <span class="self">self</span>.core.root.join(from.trim_end_matches(<span class="string">'/'</span>));
 
         <span class="comment">// try to get the metadata of the source file to ensure it exists
         </span>std::fs::metadata(<span class="kw-2">&amp;</span>from).map_err(new_std_io_error)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>to = <span class="self">Self</span>::blocking_ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to.trim_end_matches(<span class="string">'/'</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>to = <span class="self">self
+            </span>.core
+            .blocking_ensure_write_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root, to.trim_end_matches(<span class="string">'/'</span>))<span class="question-mark">?</span>;
 
         std::fs::rename(from, to).map_err(new_std_io_error)<span class="question-mark">?</span>;
 

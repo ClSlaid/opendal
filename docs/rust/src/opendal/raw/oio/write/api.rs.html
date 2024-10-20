@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/raw/oio/write/api.rs`."><title>api.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/raw/oio/write/api.rs`."><title>api.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -146,99 +144,6 @@
 <a href="#144" id="144">144</a>
 <a href="#145" id="145">145</a>
 <a href="#146" id="146">146</a>
-<a href="#147" id="147">147</a>
-<a href="#148" id="148">148</a>
-<a href="#149" id="149">149</a>
-<a href="#150" id="150">150</a>
-<a href="#151" id="151">151</a>
-<a href="#152" id="152">152</a>
-<a href="#153" id="153">153</a>
-<a href="#154" id="154">154</a>
-<a href="#155" id="155">155</a>
-<a href="#156" id="156">156</a>
-<a href="#157" id="157">157</a>
-<a href="#158" id="158">158</a>
-<a href="#159" id="159">159</a>
-<a href="#160" id="160">160</a>
-<a href="#161" id="161">161</a>
-<a href="#162" id="162">162</a>
-<a href="#163" id="163">163</a>
-<a href="#164" id="164">164</a>
-<a href="#165" id="165">165</a>
-<a href="#166" id="166">166</a>
-<a href="#167" id="167">167</a>
-<a href="#168" id="168">168</a>
-<a href="#169" id="169">169</a>
-<a href="#170" id="170">170</a>
-<a href="#171" id="171">171</a>
-<a href="#172" id="172">172</a>
-<a href="#173" id="173">173</a>
-<a href="#174" id="174">174</a>
-<a href="#175" id="175">175</a>
-<a href="#176" id="176">176</a>
-<a href="#177" id="177">177</a>
-<a href="#178" id="178">178</a>
-<a href="#179" id="179">179</a>
-<a href="#180" id="180">180</a>
-<a href="#181" id="181">181</a>
-<a href="#182" id="182">182</a>
-<a href="#183" id="183">183</a>
-<a href="#184" id="184">184</a>
-<a href="#185" id="185">185</a>
-<a href="#186" id="186">186</a>
-<a href="#187" id="187">187</a>
-<a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
-<a href="#194" id="194">194</a>
-<a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a>
-<a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
-<a href="#200" id="200">200</a>
-<a href="#201" id="201">201</a>
-<a href="#202" id="202">202</a>
-<a href="#203" id="203">203</a>
-<a href="#204" id="204">204</a>
-<a href="#205" id="205">205</a>
-<a href="#206" id="206">206</a>
-<a href="#207" id="207">207</a>
-<a href="#208" id="208">208</a>
-<a href="#209" id="209">209</a>
-<a href="#210" id="210">210</a>
-<a href="#211" id="211">211</a>
-<a href="#212" id="212">212</a>
-<a href="#213" id="213">213</a>
-<a href="#214" id="214">214</a>
-<a href="#215" id="215">215</a>
-<a href="#216" id="216">216</a>
-<a href="#217" id="217">217</a>
-<a href="#218" id="218">218</a>
-<a href="#219" id="219">219</a>
-<a href="#220" id="220">220</a>
-<a href="#221" id="221">221</a>
-<a href="#222" id="222">222</a>
-<a href="#223" id="223">223</a>
-<a href="#224" id="224">224</a>
-<a href="#225" id="225">225</a>
-<a href="#226" id="226">226</a>
-<a href="#227" id="227">227</a>
-<a href="#228" id="228">228</a>
-<a href="#229" id="229">229</a>
-<a href="#230" id="230">230</a>
-<a href="#231" id="231">231</a>
-<a href="#232" id="232">232</a>
-<a href="#233" id="233">233</a>
-<a href="#234" id="234">234</a>
-<a href="#235" id="235">235</a>
-<a href="#236" id="236">236</a>
-<a href="#237" id="237">237</a>
-<a href="#238" id="238">238</a>
-<a href="#239" id="239">239</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -256,63 +161,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::fmt::Display;
-<span class="kw">use </span>std::fmt::Formatter;
-<span class="kw">use </span>std::future::Future;
-<span class="kw">use </span>std::pin::Pin;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
+</span><span class="kw">use </span>std::future::Future;
+<span class="kw">use </span>std::ops::DerefMut;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// WriteOperation is the name for APIs of Writer.
-</span><span class="attr">#[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
-#[non_exhaustive]
-</span><span class="kw">pub enum </span>WriteOperation {
-    <span class="doccomment">/// Operation for [`Write::write`]
-    </span>Write,
-    <span class="doccomment">/// Operation for [`Write::close`]
-    </span>Close,
-    <span class="doccomment">/// Operation for [`Write::abort`]
-    </span>Abort,
-
-    <span class="doccomment">/// Operation for [`BlockingWrite::write`]
-    </span>BlockingWrite,
-    <span class="doccomment">/// Operation for [`BlockingWrite::close`]
-    </span>BlockingClose,
-}
-
-<span class="kw">impl </span>WriteOperation {
-    <span class="doccomment">/// Convert self into static str.
-    </span><span class="kw">pub fn </span>into_static(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str {
-        <span class="self">self</span>.into()
-    }
-}
-
-<span class="kw">impl </span>Display <span class="kw">for </span>WriteOperation {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">"{}"</span>, <span class="self">self</span>.into_static())
-    }
-}
-
-<span class="kw">impl </span>From&lt;WriteOperation&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'static </span>str {
-    <span class="kw">fn </span>from(v: WriteOperation) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str {
-        <span class="kw">use </span>WriteOperation::<span class="kw-2">*</span>;
-
-        <span class="kw">match </span>v {
-            Write =&gt; <span class="string">"Writer::write"</span>,
-            Close =&gt; <span class="string">"Writer::close"</span>,
-            Abort =&gt; <span class="string">"Writer::abort"</span>,
-
-            BlockingWrite =&gt; <span class="string">"BlockingWriter::write"</span>,
-            BlockingClose =&gt; <span class="string">"BlockingWriter::close"</span>,
-        }
-    }
-}
-
 <span class="doccomment">/// Writer is a type erased [`Write`]
-</span><span class="kw">pub type </span>Writer = Box&lt;<span class="kw">dyn </span>Write&gt;;
+</span><span class="kw">pub type </span>Writer = Box&lt;<span class="kw">dyn </span>WriteDyn&gt;;
 
 <span class="doccomment">/// Write is the trait that OpenDAL returns to callers.
 </span><span class="kw">pub trait </span>Write: Unpin + Send + Sync {
@@ -320,123 +176,71 @@
     ///
     /// # Behavior
     ///
-    /// - `Ok(n)` means `n` bytes has been written successfully.
+    /// - `Ok(())` means all bytes has been written successfully.
     /// - `Err(err)` means error happens and no bytes has been written.
-    ///
-    /// It's possible that `n &lt; bs.len()`, caller should pass the remaining bytes
-    /// repeatedly until all bytes has been written.
-    </span><span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt;;
+    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend;
 
     <span class="doccomment">/// Close the writer and make sure all data has been flushed.
-    </span><span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt;;
+    </span><span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend;
 
     <span class="doccomment">/// Abort the pending writer.
-    </span><span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt;;
+    </span><span class="kw">fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend;
 }
 
 <span class="kw">impl </span>Write <span class="kw">for </span>() {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="macro">unimplemented!</span>(<span class="string">"write is required to be implemented for oio::Write"</span>)
     }
 
-    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        Poll::Ready(<span class="prelude-val">Err</span>(Error::new(
+    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="prelude-val">Err</span>(Error::new(
             ErrorKind::Unsupported,
             <span class="string">"output writer doesn't support close"</span>,
-        )))
+        ))
     }
 
-    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        Poll::Ready(<span class="prelude-val">Err</span>(Error::new(
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="prelude-val">Err</span>(Error::new(
             ErrorKind::Unsupported,
             <span class="string">"output writer doesn't support abort"</span>,
-        )))
+        ))
     }
 }
 
-<span class="doccomment">/// `Box&lt;dyn Write&gt;` won't implement `Write` automatically.
-///
-/// To make Writer work as expected, we must add this impl.
-</span><span class="kw">impl</span>&lt;T: Write + <span class="question-mark">?</span>Sized&gt; Write <span class="kw">for </span>Box&lt;T&gt; {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        (<span class="kw-2">**</span><span class="self">self</span>).poll_write(cx, bs)
+<span class="kw">pub trait </span>WriteDyn: Unpin + Send + Sync {
+    <span class="kw">fn </span>write_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt;;
+
+    <span class="kw">fn </span>close_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt;;
+
+    <span class="kw">fn </span>abort_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt;;
+}
+
+<span class="kw">impl</span>&lt;T: Write + <span class="question-mark">?</span>Sized&gt; WriteDyn <span class="kw">for </span>T {
+    <span class="kw">fn </span>write_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
+        Box::pin(<span class="self">self</span>.write(bs))
     }
 
-    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        (<span class="kw-2">**</span><span class="self">self</span>).poll_close(cx)
+    <span class="kw">fn </span>close_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
+        Box::pin(<span class="self">self</span>.close())
     }
 
-    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        (<span class="kw-2">**</span><span class="self">self</span>).poll_abort(cx)
+    <span class="kw">fn </span>abort_dyn(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
+        Box::pin(<span class="self">self</span>.abort())
     }
 }
 
-<span class="doccomment">/// Impl WriteExt for all T: Write
-</span><span class="kw">impl</span>&lt;T: Write&gt; WriteExt <span class="kw">for </span>T {}
+<span class="kw">impl</span>&lt;T: WriteDyn + <span class="question-mark">?</span>Sized&gt; Write <span class="kw">for </span>Box&lt;T&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.deref_mut().write_dyn(bs).<span class="kw">await
+    </span>}
 
-<span class="doccomment">/// Extension of [`Read`] to make it easier for use.
-</span><span class="kw">pub trait </span>WriteExt: Write {
-    <span class="doccomment">/// Build a future for `poll_write`.
-    </span><span class="kw">fn </span>write&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw">dyn </span>oio::WriteBuf) -&gt; WriteFuture&lt;<span class="lifetime">'a</span>, <span class="self">Self</span>&gt; {
-        WriteFuture { writer: <span class="self">self</span>, buf }
-    }
+    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.deref_mut().close_dyn().<span class="kw">await
+    </span>}
 
-    <span class="doccomment">/// Build a future for `poll_close`.
-    </span><span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; CloseFuture&lt;<span class="self">Self</span>&gt; {
-        CloseFuture { writer: <span class="self">self </span>}
-    }
-
-    <span class="doccomment">/// Build a future for `poll_abort`.
-    </span><span class="kw">fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; AbortFuture&lt;<span class="self">Self</span>&gt; {
-        AbortFuture { writer: <span class="self">self </span>}
-    }
-}
-
-<span class="kw">pub struct </span>WriteFuture&lt;<span class="lifetime">'a</span>, W: Write + Unpin + <span class="question-mark">?</span>Sized&gt; {
-    writer: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>W,
-    buf: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw">dyn </span>oio::WriteBuf,
-}
-
-<span class="kw">impl</span>&lt;W&gt; Future <span class="kw">for </span>WriteFuture&lt;<span class="lifetime">'_</span>, W&gt;
-<span class="kw">where
-    </span>W: Write + Unpin + <span class="question-mark">?</span>Sized,
-{
-    <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;usize&gt;;
-
-    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="kw">let </span>this = <span class="self">self</span>.get_mut();
-        this.writer.poll_write(cx, this.buf)
-    }
-}
-
-<span class="kw">pub struct </span>AbortFuture&lt;<span class="lifetime">'a</span>, W: Write + Unpin + <span class="question-mark">?</span>Sized&gt; {
-    writer: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>W,
-}
-
-<span class="kw">impl</span>&lt;W&gt; Future <span class="kw">for </span>AbortFuture&lt;<span class="lifetime">'_</span>, W&gt;
-<span class="kw">where
-    </span>W: Write + Unpin + <span class="question-mark">?</span>Sized,
-{
-    <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;()&gt;;
-
-    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="self">self</span>.writer.poll_abort(cx)
-    }
-}
-
-<span class="kw">pub struct </span>CloseFuture&lt;<span class="lifetime">'a</span>, W: Write + Unpin + <span class="question-mark">?</span>Sized&gt; {
-    writer: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>W,
-}
-
-<span class="kw">impl</span>&lt;W&gt; Future <span class="kw">for </span>CloseFuture&lt;<span class="lifetime">'_</span>, W&gt;
-<span class="kw">where
-    </span>W: Write + Unpin + <span class="question-mark">?</span>Sized,
-{
-    <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;()&gt;;
-
-    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="self">self</span>.writer.poll_close(cx)
-    }
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.deref_mut().abort_dyn().<span class="kw">await
+    </span>}
 }
 
 <span class="doccomment">/// BlockingWriter is a type erased [`BlockingWrite`]
@@ -445,14 +249,22 @@
 <span class="doccomment">/// BlockingWrite is the trait that OpenDAL returns to callers.
 </span><span class="kw">pub trait </span>BlockingWrite: Send + Sync + <span class="lifetime">'static </span>{
     <span class="doccomment">/// Write whole content at once.
-    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt;;
+    ///
+    /// # Behavior
+    ///
+    /// - `Ok(n)` means `n` bytes has been written successfully.
+    /// - `Err(err)` means error happens and no bytes has been written.
+    ///
+    /// It's possible that `n &lt; bs.len()`, caller should pass the remaining bytes
+    /// repeatedly until all bytes has been written.
+    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 
     <span class="doccomment">/// Close the writer and make sure all data has been flushed.
     </span><span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 }
 
 <span class="kw">impl </span>BlockingWrite <span class="kw">for </span>() {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let _ </span>= bs;
 
         <span class="macro">unimplemented!</span>(<span class="string">"write is required to be implemented for oio::BlockingWrite"</span>)
@@ -470,7 +282,7 @@
 ///
 /// To make BlockingWriter work as expected, we must add this impl.
 </span><span class="kw">impl</span>&lt;T: BlockingWrite + <span class="question-mark">?</span>Sized&gt; BlockingWrite <span class="kw">for </span>Box&lt;T&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         (<span class="kw-2">**</span><span class="self">self</span>).write(bs)
     }
 

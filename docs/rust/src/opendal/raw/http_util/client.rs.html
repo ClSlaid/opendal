@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/raw/http_util/client.rs`."><title>client.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/raw/http_util/client.rs`."><title>client.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -210,6 +208,19 @@
 <a href="#208" id="208">208</a>
 <a href="#209" id="209">209</a>
 <a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -229,29 +240,38 @@
 
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
+<span class="kw">use </span>std::future;
 <span class="kw">use </span>std::mem;
+<span class="kw">use </span>std::ops::Deref;
 <span class="kw">use </span>std::str::FromStr;
-<span class="kw">use </span>std::time::Duration;
+<span class="kw">use </span>std::sync::Arc;
 
+<span class="kw">use </span>futures::Future;
 <span class="kw">use </span>futures::TryStreamExt;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::Response;
+<span class="kw">use </span>once_cell::sync::Lazy;
+<span class="kw">use </span>raw::oio::Read;
 
-<span class="kw">use </span><span class="kw">super</span>::body::IncomingAsyncBody;
 <span class="kw">use </span><span class="kw">super</span>::parse_content_encoding;
 <span class="kw">use </span><span class="kw">super</span>::parse_content_length;
-<span class="kw">use </span><span class="kw">super</span>::AsyncBody;
+<span class="kw">use </span><span class="kw">super</span>::HttpBody;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::Error;
-<span class="kw">use </span><span class="kw">crate</span>::ErrorKind;
-<span class="kw">use </span><span class="kw">crate</span>::Result;
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="kw">const </span>DEFAULT_CONNECT_TIMEOUT: Duration = Duration::from_secs(<span class="number">60</span>);
+<span class="doccomment">/// Http client used across opendal for loading credentials.
+/// This is merely a temporary solution because reqsign requires a reqwest client to be passed.
+/// We will remove it after the next major version of reqsign, which will enable users to provide their own client.
+</span><span class="attr">#[allow(dead_code)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">static </span>GLOBAL_REQWEST_CLIENT: Lazy&lt;reqwest::Client&gt; = Lazy::new(reqwest::Client::new);
+
+<span class="doccomment">/// HttpFetcher is a type erased [`HttpFetch`].
+</span><span class="kw">pub type </span>HttpFetcher = Arc&lt;<span class="kw">dyn </span>HttpFetchDyn&gt;;
 
 <span class="doccomment">/// HttpClient that used across opendal.
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>HttpClient {
-    client: reqwest::Client,
+    fetcher: HttpFetcher,
 }
 
 <span class="doccomment">/// We don't want users to know details about our clients.
@@ -264,48 +284,73 @@
 <span class="kw">impl </span>HttpClient {
     <span class="doccomment">/// Create a new http client in async context.
     </span><span class="kw">pub fn </span>new() -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="self">Self</span>::build(reqwest::ClientBuilder::new())
+        <span class="kw">let </span>fetcher = Arc::new(reqwest::Client::new());
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ fetcher })
+    }
+
+    <span class="doccomment">/// Construct `Self` with given [`reqwest::Client`]
+    </span><span class="kw">pub fn </span>with(client: <span class="kw">impl </span>HttpFetch) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>fetcher = Arc::new(client);
+        <span class="self">Self </span>{ fetcher }
     }
 
     <span class="doccomment">/// Build a new http client in async context.
-    </span><span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
-    </span><span class="kw">pub fn </span>build(<span class="kw-2">mut </span>builder: reqwest::ClientBuilder) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="comment">// Make sure we don't enable auto gzip decompress.
-        </span>builder = builder.no_gzip();
-        <span class="comment">// Make sure we don't enable auto brotli decompress.
-        </span>builder = builder.no_brotli();
-        <span class="comment">// Make sure we don't enable auto deflate decompress.
-        </span>builder = builder.no_deflate();
-        <span class="comment">// Make sure we don't wait a connection establishment forever.
-        </span>builder = builder.connect_timeout(DEFAULT_CONNECT_TIMEOUT);
-
-        <span class="attr">#[cfg(feature = <span class="string">"trust-dns"</span>)]
-        </span><span class="kw">let </span>builder = builder.trust_dns(<span class="bool-val">true</span>);
-
-        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
-            client: builder.build().map_err(|err| {
-                Error::new(ErrorKind::Unexpected, <span class="string">"async client build failed"</span>).set_source(err)
-            })<span class="question-mark">?</span>,
-        })
-    }
-
-    <span class="doccomment">/// Build a new http client in async context.
-    </span><span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
-    </span><span class="kw">pub fn </span>build(<span class="kw-2">mut </span>builder: reqwest::ClientBuilder) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
-            client: builder.build().map_err(|err| {
-                Error::new(ErrorKind::Unexpected, <span class="string">"async client build failed"</span>).set_source(err)
-            })<span class="question-mark">?</span>,
-        })
-    }
-
-    <span class="doccomment">/// Get the async client from http client.
-    </span><span class="kw">pub fn </span>client(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; reqwest::Client {
-        <span class="self">self</span>.client.clone()
+    </span><span class="attr">#[deprecated]
+    </span><span class="kw">pub fn </span>build(builder: reqwest::ClientBuilder) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span>client = builder.build().map_err(|err| {
+            Error::new(ErrorKind::Unexpected, <span class="string">"http client build failed"</span>).set_source(err)
+        })<span class="question-mark">?</span>;
+        <span class="kw">let </span>fetcher = Arc::new(client);
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ fetcher })
     }
 
     <span class="doccomment">/// Send a request in async way.
-    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
+        <span class="kw">let </span>(parts, <span class="kw-2">mut </span>body) = <span class="self">self</span>.fetch(req).<span class="kw">await</span><span class="question-mark">?</span>.into_parts();
+        <span class="kw">let </span>buffer = body.read_all().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(Response::from_parts(parts, buffer))
+    }
+
+    <span class="doccomment">/// Fetch a request in async way.
+    </span><span class="kw">pub async fn </span>fetch(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;HttpBody&gt;&gt; {
+        <span class="self">self</span>.fetcher.fetch(req).<span class="kw">await
+    </span>}
+}
+
+<span class="doccomment">/// HttpFetch is the trait to fetch a request in async way.
+/// User should implement this trait to provide their own http client.
+</span><span class="kw">pub trait </span>HttpFetch: Send + Sync + Unpin + <span class="lifetime">'static </span>{
+    <span class="doccomment">/// Fetch a request in async way.
+    </span><span class="kw">fn </span>fetch(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        req: Request&lt;Buffer&gt;,
+    ) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;Response&lt;HttpBody&gt;&gt;&gt; + MaybeSend;
+}
+
+<span class="doccomment">/// HttpFetchDyn is the dyn version of [`HttpFetch`]
+/// which make it possible to use as `Arc&lt;dyn HttpFetchDyn&gt;`.
+/// User should never implement this trait, but use `HttpFetch` instead.
+</span><span class="kw">pub trait </span>HttpFetchDyn: Send + Sync + Unpin + <span class="lifetime">'static </span>{
+    <span class="doccomment">/// The dyn version of [`HttpFetch::fetch`].
+    ///
+    /// This function returns a boxed future to make it object safe.
+    </span><span class="kw">fn </span>fetch_dyn(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;Buffer&gt;) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;Response&lt;HttpBody&gt;&gt;&gt;;
+}
+
+<span class="kw">impl</span>&lt;T: HttpFetch + <span class="question-mark">?</span>Sized&gt; HttpFetchDyn <span class="kw">for </span>T {
+    <span class="kw">fn </span>fetch_dyn(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;Buffer&gt;) -&gt; BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;Response&lt;HttpBody&gt;&gt;&gt; {
+        Box::pin(<span class="self">self</span>.fetch(req))
+    }
+}
+
+<span class="kw">impl</span>&lt;T: HttpFetchDyn + <span class="question-mark">?</span>Sized&gt; HttpFetch <span class="kw">for </span>Arc&lt;T&gt; {
+    <span class="kw">async fn </span>fetch(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;HttpBody&gt;&gt; {
+        <span class="self">self</span>.deref().fetch_dyn(req).<span class="kw">await
+    </span>}
+}
+
+<span class="kw">impl </span>HttpFetch <span class="kw">for </span>reqwest::Client {
+    <span class="kw">async fn </span>fetch(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;HttpBody&gt;&gt; {
         <span class="comment">// Uri stores all string alike data in `Bytes` which means
         // the clone here is cheap.
         </span><span class="kw">let </span>uri = req.uri().clone();
@@ -314,8 +359,7 @@
         <span class="kw">let </span>(parts, body) = req.into_parts();
 
         <span class="kw">let </span><span class="kw-2">mut </span>req_builder = <span class="self">self
-            </span>.client
-            .request(
+            </span>.request(
                 parts.method,
                 reqwest::Url::from_str(<span class="kw-2">&amp;</span>uri.to_string()).expect(<span class="string">"input request url must be valid"</span>),
             )
@@ -327,62 +371,30 @@
             req_builder = req_builder.version(parts.version);
         }
 
-        req_builder = <span class="kw">match </span>body {
-            AsyncBody::Empty =&gt; req_builder.body(reqwest::Body::from(<span class="string">""</span>)),
-            AsyncBody::Bytes(bs) =&gt; req_builder.body(reqwest::Body::from(bs)),
-            AsyncBody::ChunkedBytes(bs) =&gt; {
-                <span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
-                </span>{
-                    req_builder.body(reqwest::Body::wrap_stream(bs))
-                }
-                <span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
-                </span>{
-                    <span class="kw">let </span>bs = oio::WriteBuf::bytes(<span class="kw-2">&amp;</span>bs, bs.len());
-                    req_builder.body(reqwest::Body::from(bs))
-                }
+        <span class="comment">// Don't set body if body is empty.
+        </span><span class="kw">if </span>!body.is_empty() {
+            <span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
+            </span>{
+                req_builder = req_builder.body(reqwest::Body::wrap_stream(body))
             }
-            AsyncBody::Stream(s) =&gt; {
-                <span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
-                </span>{
-                    req_builder.body(reqwest::Body::wrap_stream(s))
-                }
-                <span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
-                </span>{
-                    <span class="kw">let </span>bs = oio::StreamExt::collect(s).<span class="kw">await</span><span class="question-mark">?</span>;
-                    req_builder.body(reqwest::Body::from(bs))
-                }
+            <span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
+            </span>{
+                req_builder = req_builder.body(reqwest::Body::from(body.to_bytes()))
             }
-        };
+        }
 
         <span class="kw">let </span><span class="kw-2">mut </span>resp = req_builder.send().<span class="kw">await</span>.map_err(|err| {
-            <span class="kw">let </span>is_temporary = !(
-                <span class="comment">// Builder related error should not be retried.
-                </span>err.is_builder() ||
-                <span class="comment">// Error returned by RedirectPolicy.
-                //
-                // Don't retry error if we redirect too many.
-                </span>err.is_redirect() ||
-                <span class="comment">// We never use `Response::error_for_status`, just don't allow retry.
-                //
-                // Status should be checked by our services.
-                </span>err.is_status()
-            );
-
-            <span class="kw">let </span><span class="kw-2">mut </span>oerr = Error::new(ErrorKind::Unexpected, <span class="string">"send http request"</span>)
+            Error::new(ErrorKind::Unexpected, <span class="string">"send http request"</span>)
                 .with_operation(<span class="string">"http_util::Client::send"</span>)
                 .with_context(<span class="string">"url"</span>, uri.to_string())
-                .set_source(err);
-            <span class="kw">if </span>is_temporary {
-                oerr = oerr.set_temporary();
-            }
-
-            oerr
+                .with_temporary(is_temporary_error(<span class="kw-2">&amp;</span>err))
+                .set_source(err)
         })<span class="question-mark">?</span>;
 
         <span class="comment">// Get content length from header so that we can check it.
         //
         // - If the request method is HEAD, we will ignore content length.
-        // - If response contains content_encoding, we should omit it's content length.
+        // - If response contains content_encoding, we should omit its content length.
         </span><span class="kw">let </span>content_length = <span class="kw">if </span>is_head || parse_content_encoding(resp.headers())<span class="question-mark">?</span>.is_some() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -404,20 +416,32 @@
         <span class="comment">// Swap headers directly instead of copy the entire map.
         </span>mem::swap(hr.headers_mut().unwrap(), resp.headers_mut());
 
-        <span class="kw">let </span>stream = resp.bytes_stream().map_err(<span class="kw">move </span>|err| {
-            <span class="comment">// If stream returns a body related error, we can convert
-            // it to interrupt so we can retry it.
-            </span>Error::new(ErrorKind::Unexpected, <span class="string">"read data from http stream"</span>)
-                .map(|v| <span class="kw">if </span>err.is_body() { v.set_temporary() } <span class="kw">else </span>{ v })
-                .with_context(<span class="string">"url"</span>, uri.to_string())
-                .set_source(err)
-        });
+        <span class="kw">let </span>bs = HttpBody::new(
+            resp.bytes_stream()
+                .try_filter(|v| future::ready(!v.is_empty()))
+                .map_ok(Buffer::from)
+                .map_err(<span class="kw">move </span>|err| {
+                    Error::new(ErrorKind::Unexpected, <span class="string">"read data from http response"</span>)
+                        .with_operation(<span class="string">"http_util::Client::send"</span>)
+                        .with_context(<span class="string">"url"</span>, uri.to_string())
+                        .with_temporary(is_temporary_error(<span class="kw-2">&amp;</span>err))
+                        .set_source(err)
+                }),
+            content_length,
+        );
 
-        <span class="kw">let </span>body = IncomingAsyncBody::new(Box::new(oio::into_stream(stream)), content_length);
-
-        <span class="kw">let </span>resp = hr.body(body).expect(<span class="string">"response must build succeed"</span>);
-
+        <span class="kw">let </span>resp = hr.body(bs).expect(<span class="string">"response must build succeed"</span>);
         <span class="prelude-val">Ok</span>(resp)
     }
+}
+
+<span class="attr">#[inline]
+</span><span class="kw">fn </span>is_temporary_error(err: <span class="kw-2">&amp;</span>reqwest::Error) -&gt; bool {
+    <span class="comment">// error sending request
+    </span>err.is_request()||
+    <span class="comment">// request or response body error
+    </span>err.is_body() ||
+    <span class="comment">// error decoding response body, for example, connection reset.
+    </span>err.is_decode()
 }
 </code></pre></div></section></main></body></html>

@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/types/metadata.rs`."><title>metadata.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/types/metadata.rs`."><title>metadata.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -555,6 +553,24 @@
 <a href="#553" id="553">553</a>
 <a href="#554" id="554">554</a>
 <a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -572,7 +588,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>chrono::prelude::<span class="kw-2">*</span>;
+</span><span class="kw">use </span>std::collections::HashMap;
+
+<span class="kw">use </span>chrono::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>flagset::flags;
 <span class="kw">use </span>flagset::FlagSet;
 
@@ -602,6 +620,7 @@
     etag: <span class="prelude-ty">Option</span>&lt;String&gt;,
     last_modified: <span class="prelude-ty">Option</span>&lt;DateTime&lt;Utc&gt;&gt;,
     version: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    user_metadata: <span class="prelude-ty">Option</span>&lt;HashMap&lt;String, String&gt;&gt;,
 }
 
 <span class="kw">impl </span>Metadata {
@@ -628,6 +647,7 @@
             etag: <span class="prelude-val">None</span>,
             content_disposition: <span class="prelude-val">None</span>,
             version: <span class="prelude-val">None</span>,
+            user_metadata: <span class="prelude-val">None</span>,
         }
     }
 
@@ -644,7 +664,7 @@
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Check if there metadata already contains given metakey.
+    <span class="doccomment">/// Check if the metadata already contains given metakey.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>contains_metakey(<span class="kw-2">&amp;</span><span class="self">self</span>, metakey: <span class="kw">impl </span>Into&lt;FlagSet&lt;Metakey&gt;&gt;) -&gt; bool {
         <span class="kw">let </span>input_metakey = metakey.into();
 
@@ -693,8 +713,12 @@
     <span class="doccomment">/// Cache control of this entry.
     /// Cache-Control is defined by [RFC 7234](https://httpwg.org/specs/rfc7234.html#header.cache-control)
     /// Refer to [MDN Cache-Control](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control) for more information.
+    ///
+    /// This value is only available when calling on result of `stat` or `list` with
+    /// [`Metakey::CacheControl`], otherwise this method returns `None`.
     </span><span class="kw">pub fn </span>cache_control(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
-        <span class="macro">debug_assert!</span>(
+        <span class="attr">#[cfg(feature = <span class="string">"tests"</span>)]
+        </span><span class="macro">debug_assert!</span>(
             <span class="self">self</span>.metakey.contains(Metakey::CacheControl)
                 || <span class="self">self</span>.metakey.contains(Metakey::Complete),
             <span class="string">"visiting not set metadata: cache_control, maybe a bug"
@@ -763,12 +787,11 @@
     ///
     /// OpenDAL will try its best to set this value, but not guarantee this value is the md5 of content.
     ///
-    /// # Panics
-    ///
     /// This value is only available when calling on result of `stat` or `list` with
-    /// [`Metakey::ContentMd5`], otherwise it will panic.
+    /// [`Metakey::ContentMd5`], otherwise this method returns `None`.
     </span><span class="kw">pub fn </span>content_md5(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
-        <span class="macro">debug_assert!</span>(
+        <span class="attr">#[cfg(feature = <span class="string">"tests"</span>)]
+        </span><span class="macro">debug_assert!</span>(
             <span class="self">self</span>.metakey.contains(Metakey::ContentMd5) || <span class="self">self</span>.metakey.contains(Metakey::Complete),
             <span class="string">"visiting not set metadata: content_md5, maybe a bug"
         </span>);
@@ -800,12 +823,11 @@
     ///
     /// Content Type is defined by [RFC 9110](https://httpwg.org/specs/rfc9110.html#field.content-type).
     ///
-    /// # Panics
-    ///
     /// This value is only available when calling on result of `stat` or `list` with
-    /// [`Metakey::ContentType`], otherwise it will panic.
+    /// [`Metakey::ContentType`], otherwise this method returns `None`.
     </span><span class="kw">pub fn </span>content_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
-        <span class="macro">debug_assert!</span>(
+        <span class="attr">#[cfg(feature = <span class="string">"tests"</span>)]
+        </span><span class="macro">debug_assert!</span>(
             <span class="self">self</span>.metakey.contains(Metakey::ContentType) || <span class="self">self</span>.metakey.contains(Metakey::Complete),
             <span class="string">"visiting not set metadata: content_type, maybe a bug"
         </span>);
@@ -835,12 +857,11 @@
     ///
     /// Content Range is defined by [RFC 9110](https://httpwg.org/specs/rfc9110.html#field.content-range).
     ///
-    /// # Panics
-    ///
     /// This value is only available when calling on result of `stat` or `list` with
-    /// [`Metakey::ContentRange`], otherwise it will panic.
+    /// [`Metakey::ContentRange`], otherwise this method returns `None`.
     </span><span class="kw">pub fn </span>content_range(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;BytesContentRange&gt; {
-        <span class="macro">debug_assert!</span>(
+        <span class="attr">#[cfg(feature = <span class="string">"tests"</span>)]
+        </span><span class="macro">debug_assert!</span>(
             <span class="self">self</span>.metakey.contains(Metakey::ContentRange)
                 || <span class="self">self</span>.metakey.contains(Metakey::Complete),
             <span class="string">"visiting not set metadata: content_range, maybe a bug"
@@ -874,12 +895,11 @@
     ///
     /// OpenDAL parse the raw value into [`DateTime`] for convenient.
     ///
-    /// # Panics
-    ///
     /// This value is only available when calling on result of `stat` or `list` with
-    /// [`Metakey::LastModified`], otherwise it will panic.
+    /// [`Metakey::LastModified`], otherwise this method returns `None`.
     </span><span class="kw">pub fn </span>last_modified(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;DateTime&lt;Utc&gt;&gt; {
-        <span class="macro">debug_assert!</span>(
+        <span class="attr">#[cfg(feature = <span class="string">"tests"</span>)]
+        </span><span class="macro">debug_assert!</span>(
             <span class="self">self</span>.metakey.contains(Metakey::LastModified)
                 || <span class="self">self</span>.metakey.contains(Metakey::Complete),
             <span class="string">"visiting not set metadata: last_modified, maybe a bug"
@@ -920,12 +940,11 @@
     ///
     /// `"` is part of etag.
     ///
-    /// # Panics
-    ///
     /// This value is only available when calling on result of `stat` or `list` with
-    /// [`Metakey::Etag`], otherwise it will panic.
+    /// [`Metakey::Etag`], otherwise this method returns `None`.
     </span><span class="kw">pub fn </span>etag(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
-        <span class="macro">debug_assert!</span>(
+        <span class="attr">#[cfg(feature = <span class="string">"tests"</span>)]
+        </span><span class="macro">debug_assert!</span>(
             <span class="self">self</span>.metakey.contains(Metakey::Etag) || <span class="self">self</span>.metakey.contains(Metakey::Complete),
             <span class="string">"visiting not set metadata: etag, maybe a bug"
         </span>);
@@ -979,12 +998,11 @@
     /// - "attachment"
     /// - "attachment; filename=\"filename.jpg\""
     ///
-    /// # Panics
-    ///
     /// This value is only available when calling on result of `stat` or `list` with
-    /// [`Metakey::ContentDisposition`], otherwise it will panic.
+    /// [`Metakey::ContentDisposition`], otherwise this method returns `None`.
     </span><span class="kw">pub fn </span>content_disposition(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
-        <span class="macro">debug_assert!</span>(
+        <span class="attr">#[cfg(feature = <span class="string">"tests"</span>)]
+        </span><span class="macro">debug_assert!</span>(
             <span class="self">self</span>.metakey.contains(Metakey::ContentDisposition)
                 || <span class="self">self</span>.metakey.contains(Metakey::Complete),
             <span class="string">"visiting not set metadata: content_disposition, maybe a bug"
@@ -1033,12 +1051,11 @@
     ///
     /// This field may come out from the version control system, like object versioning in AWS S3.
     ///
-    /// # Panics
-    ///
     /// This value is only available when calling on result of `stat` or `list` with
-    /// [`Metakey::Version`], otherwise it will panic.
+    /// [`Metakey::Version`], otherwise this method returns `None`.
     </span><span class="kw">pub fn </span>version(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
-        <span class="macro">debug_assert!</span>(
+        <span class="attr">#[cfg(feature = <span class="string">"tests"</span>)]
+        </span><span class="macro">debug_assert!</span>(
             <span class="self">self</span>.metakey.contains(Metakey::Version) || <span class="self">self</span>.metakey.contains(Metakey::Complete),
             <span class="string">"visiting not set metadata: version, maybe a bug"
         </span>);
@@ -1067,9 +1084,24 @@
         <span class="self">self</span>.metakey |= Metakey::Version;
         <span class="self">self
     </span>}
+
+    <span class="doccomment">/// User defined metadata of this entry
+    ///
+    /// The prefix of the user defined metadata key(for example: in oss, it's x-oss-meta-)
+    /// is remove from the key
+    </span><span class="kw">pub fn </span>user_metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>HashMap&lt;String, String&gt;&gt; {
+        <span class="self">self</span>.user_metadata.as_ref()
+    }
+
+    <span class="doccomment">/// Set user defined metadata of this entry
+    </span><span class="kw">pub fn </span>with_user_metadata(<span class="kw-2">&amp;mut </span><span class="self">self</span>, data: HashMap&lt;String, String&gt;) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+        <span class="self">self</span>.user_metadata = <span class="prelude-val">Some</span>(data);
+        <span class="self">self</span>.metakey |= Metakey::UserMetaData;
+        <span class="self">self
+    </span>}
 }
 
-<span class="macro">flags! </span>{
+<span class="macro">flags!</span> {
     <span class="doccomment">/// Metakey describes the metadata keys that can be stored
     /// or queried.
     ///
@@ -1104,10 +1136,12 @@
         </span>ContentType,
         <span class="doccomment">/// Key for etag.
         </span>Etag,
-        <span class="doccomment">/// Key for last last modified.
+        <span class="doccomment">/// Key for last modified.
         </span>LastModified,
         <span class="doccomment">/// Key for version.
         </span>Version,
+        <span class="doccomment">/// Key for user metadata
+        </span>UserMetaData,
     }
 }
 </code></pre></div></section></main></body></html>

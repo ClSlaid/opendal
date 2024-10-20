@@ -1,4 +1,1 @@
-var searchData=
-[
-  ['blockinglister_1',['BlockingLister',['../opendal_8h.html#a03ea17a7d09e319825d05a1d9f5d933c',1,'opendal.h']]]
-];
+var searchData=[["apache_20opendal\u2122_20c_20binding_20_28wip_29_1",["Apache OpenDAL\u2122 C Binding (WIP)",["../index.html",1,""]]]];

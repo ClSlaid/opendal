@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/types/capability.rs`."><title>capability.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/types/capability.rs`."><title>capability.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -202,6 +200,12 @@
 <a href="#200" id="200">200</a>
 <a href="#201" id="201">201</a>
 <a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -265,21 +269,17 @@
     </span><span class="kw">pub </span>stat_with_if_match: bool,
     <span class="doccomment">/// If operator supports stat with if none match.
     </span><span class="kw">pub </span>stat_with_if_none_match: bool,
-    <span class="doccomment">/// if operator supports read with override cache control.
+    <span class="doccomment">/// if operator supports stat with override cache control.
     </span><span class="kw">pub </span>stat_with_override_cache_control: bool,
-    <span class="doccomment">/// if operator supports read with override content disposition.
+    <span class="doccomment">/// if operator supports stat with override content disposition.
     </span><span class="kw">pub </span>stat_with_override_content_disposition: bool,
-    <span class="doccomment">/// if operator supports read with override content type.
+    <span class="doccomment">/// if operator supports stat with override content type.
     </span><span class="kw">pub </span>stat_with_override_content_type: bool,
+    <span class="doccomment">/// if operator supports stat with version.
+    </span><span class="kw">pub </span>stat_with_version: bool,
 
     <span class="doccomment">/// If operator supports read.
     </span><span class="kw">pub </span>read: bool,
-    <span class="doccomment">/// If operator supports seek on returning reader.
-    </span><span class="kw">pub </span>read_can_seek: bool,
-    <span class="doccomment">/// If operator supports next on returning reader.
-    </span><span class="kw">pub </span>read_can_next: bool,
-    <span class="doccomment">/// If operator supports read with range.
-    </span><span class="kw">pub </span>read_with_range: bool,
     <span class="doccomment">/// If operator supports read with if match.
     </span><span class="kw">pub </span>read_with_if_match: bool,
     <span class="doccomment">/// If operator supports read with if none match.
@@ -290,6 +290,8 @@
     </span><span class="kw">pub </span>read_with_override_content_disposition: bool,
     <span class="doccomment">/// if operator supports read with override content type.
     </span><span class="kw">pub </span>read_with_override_content_type: bool,
+    <span class="doccomment">/// if operator supports read with version.
+    </span><span class="kw">pub </span>read_with_version: bool,
 
     <span class="doccomment">/// If operator supports write.
     </span><span class="kw">pub </span>write: bool,
@@ -305,6 +307,10 @@
     </span><span class="kw">pub </span>write_with_content_disposition: bool,
     <span class="doccomment">/// If operator supports write with cache control.
     </span><span class="kw">pub </span>write_with_cache_control: bool,
+    <span class="doccomment">/// If operator supports write with if none match.
+    </span><span class="kw">pub </span>write_with_if_none_match: bool,
+    <span class="doccomment">/// If operator supports write with user defined metadata
+    </span><span class="kw">pub </span>write_with_user_metadata: bool,
     <span class="doccomment">/// write_multi_max_size is the max size that services support in write_multi.
     ///
     /// For example, AWS S3 supports 5GiB as max in write_multi.
@@ -327,6 +333,8 @@
 
     <span class="doccomment">/// If operator supports delete.
     </span><span class="kw">pub </span>delete: bool,
+    <span class="doccomment">/// if operator supports delete with version.
+    </span><span class="kw">pub </span>delete_with_version: bool,
 
     <span class="doccomment">/// If operator supports copy.
     </span><span class="kw">pub </span>copy: bool,
@@ -342,6 +350,8 @@
     </span><span class="kw">pub </span>list_with_start_after: bool,
     <span class="doccomment">/// If backend supports list with recursive.
     </span><span class="kw">pub </span>list_with_recursive: bool,
+    <span class="doccomment">/// if operator supports list with version.
+    </span><span class="kw">pub </span>list_with_version: bool,
 
     <span class="doccomment">/// If operator supports presign.
     </span><span class="kw">pub </span>presign: bool,

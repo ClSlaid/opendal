@@ -1,3 +1,1 @@
-(function() {var implementors = {
-"opendal":[["impl AsyncSeek for dyn <a class=\"trait\" href=\"opendal/raw/oio/trait.Read.html\" title=\"trait opendal::raw::oio::Read\">Read</a>"],["impl AsyncSeek for <a class=\"struct\" href=\"opendal/struct.Reader.html\" title=\"struct opendal::Reader\">Reader</a>"]]
-};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
+!function(){var e={opendal:[['impl AsyncSeek for <a class="struct" href="opendal/struct.FuturesAsyncReader.html" title="struct opendal::FuturesAsyncReader">FuturesAsyncReader</a>']]};window.register_implementors?window.register_implementors(e):window.pending_implementors=e}();

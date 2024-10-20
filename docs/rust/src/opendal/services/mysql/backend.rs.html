@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/mysql/backend.rs`."><title>backend.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/mysql/backend.rs`."><title>backend.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -254,67 +252,6 @@
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
 <a href="#254" id="254">254</a>
-<a href="#255" id="255">255</a>
-<a href="#256" id="256">256</a>
-<a href="#257" id="257">257</a>
-<a href="#258" id="258">258</a>
-<a href="#259" id="259">259</a>
-<a href="#260" id="260">260</a>
-<a href="#261" id="261">261</a>
-<a href="#262" id="262">262</a>
-<a href="#263" id="263">263</a>
-<a href="#264" id="264">264</a>
-<a href="#265" id="265">265</a>
-<a href="#266" id="266">266</a>
-<a href="#267" id="267">267</a>
-<a href="#268" id="268">268</a>
-<a href="#269" id="269">269</a>
-<a href="#270" id="270">270</a>
-<a href="#271" id="271">271</a>
-<a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
-<a href="#276" id="276">276</a>
-<a href="#277" id="277">277</a>
-<a href="#278" id="278">278</a>
-<a href="#279" id="279">279</a>
-<a href="#280" id="280">280</a>
-<a href="#281" id="281">281</a>
-<a href="#282" id="282">282</a>
-<a href="#283" id="283">283</a>
-<a href="#284" id="284">284</a>
-<a href="#285" id="285">285</a>
-<a href="#286" id="286">286</a>
-<a href="#287" id="287">287</a>
-<a href="#288" id="288">288</a>
-<a href="#289" id="289">289</a>
-<a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
-<a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a>
-<a href="#294" id="294">294</a>
-<a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
-<a href="#297" id="297">297</a>
-<a href="#298" id="298">298</a>
-<a href="#299" id="299">299</a>
-<a href="#300" id="300">300</a>
-<a href="#301" id="301">301</a>
-<a href="#302" id="302">302</a>
-<a href="#303" id="303">303</a>
-<a href="#304" id="304">304</a>
-<a href="#305" id="305">305</a>
-<a href="#306" id="306">306</a>
-<a href="#307" id="307">307</a>
-<a href="#308" id="308">308</a>
-<a href="#309" id="309">309</a>
-<a href="#310" id="310">310</a>
-<a href="#311" id="311">311</a>
-<a href="#312" id="312">312</a>
-<a href="#313" id="313">313</a>
-<a href="#314" id="314">314</a>
-<a href="#315" id="315">315</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -332,45 +269,22 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::fmt::Debug;
+<span class="kw">use </span>std::str::FromStr;
 
-<span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>mysql_async::prelude::<span class="kw-2">*</span>;
-<span class="kw">use </span>mysql_async::Opts;
-<span class="kw">use </span>mysql_async::Pool;
-<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>sqlx::mysql::MySqlConnectOptions;
+<span class="kw">use </span>sqlx::MySqlPool;
+<span class="kw">use </span>tokio::sync::OnceCell;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::services::MysqlConfig;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Config for Mysql services support.
-</span><span class="attr">#[derive(Default, Deserialize)]
-#[serde(default)]
-#[non_exhaustive]
-</span><span class="kw">pub struct </span>MysqlConfig {
-    connection_string: <span class="prelude-ty">Option</span>&lt;String&gt;,
-
-    table: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    key_field: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    value_field: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-}
-
-<span class="kw">impl </span>Debug <span class="kw">for </span>MysqlConfig {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>d = f.debug_struct(<span class="string">"MysqlConfig"</span>);
-
-        <span class="kw">if </span><span class="self">self</span>.connection_string.is_some() {
-            d.field(<span class="string">"connection_string"</span>, <span class="kw-2">&amp;</span><span class="string">"&lt;redacted&gt;"</span>);
-        }
-
-        d.field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root)
-            .field(<span class="string">"table"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.table)
-            .field(<span class="string">"key_field"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.key_field)
-            .field(<span class="string">"value_field"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.value_field)
-            .finish()
+<span class="kw">impl </span>Configurator <span class="kw">for </span>MysqlConfig {
+    <span class="kw">type </span>Builder = MysqlBuilder;
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Builder {
+        MysqlBuilder { config: <span class="self">self </span>}
     }
 }
 
@@ -395,15 +309,15 @@
     ///
     /// ## Url
     ///
-    /// This format resembles the url format of the mysql client. The format is: [scheme://][user[:[password]]@]host[:port][/schema][?attribute1=value1&amp;attribute2=value2...
+    /// This format resembles the url format of the mysql client. The format is: `[scheme://][user[:[password]]@]host[:port][/schema][?attribute1=value1&amp;attribute2=value2...`
     ///
     /// - `mysql://user@localhost`
     /// - `mysql://user:password@localhost`
     /// - `mysql://user:password@localhost:3306`
     /// - `mysql://user:password@localhost:3306/db`
     ///
-    /// For more information, please refer to [mysql client](https://dev.mysql.com/doc/refman/8.0/en/connecting-using-uri-or-key-value-pairs.html)
-    </span><span class="kw">pub fn </span>connection_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    /// For more information, please refer to &lt;https://docs.rs/sqlx/latest/sqlx/mysql/struct.MySqlConnectOptions.html&gt;.
+    </span><span class="kw">pub fn </span>connection_string(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.connection_string = <span class="prelude-val">Some</span>(v.to_string());
         }
@@ -413,15 +327,18 @@
     <span class="doccomment">/// set the working directory, all operations will be performed under it.
     ///
     /// default: "/"
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="kw">if </span>!root.is_empty() {
-            <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_string());
-        }
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(root.to_string())
+        };
+
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set the table name of the mysql service to read/write.
-    </span><span class="kw">pub fn </span>table(<span class="kw-2">&amp;mut </span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>table(<span class="kw-2">mut </span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!table.is_empty() {
             <span class="self">self</span>.config.table = <span class="prelude-val">Some</span>(table.to_string());
         }
@@ -431,7 +348,7 @@
     <span class="doccomment">/// Set the key field name of the mysql service to read/write.
     ///
     /// Default to `key` if not specified.
-    </span><span class="kw">pub fn </span>key_field(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>key_field(<span class="kw-2">mut </span><span class="self">self</span>, key_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!key_field.is_empty() {
             <span class="self">self</span>.config.key_field = <span class="prelude-val">Some</span>(key_field.to_string());
         }
@@ -441,7 +358,7 @@
     <span class="doccomment">/// Set the value field name of the mysql service to read/write.
     ///
     /// Default to `value` if not specified.
-    </span><span class="kw">pub fn </span>value_field(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>value_field(<span class="kw-2">mut </span><span class="self">self</span>, value_field: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!value_field.is_empty() {
             <span class="self">self</span>.config.value_field = <span class="prelude-val">Some</span>(value_field.to_string());
         }
@@ -451,17 +368,10 @@
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>MysqlBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Mysql;
-    <span class="kw">type </span>Accessor = MySqlBackend;
+    <span class="kw">type </span>Config = MysqlConfig;
 
-    <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>config = MysqlConfig::deserialize(ConfigDeserializer::new(map))
-            .expect(<span class="string">"config deserialize must succeed"</span>);
-
-        MysqlBuilder { config }
-    }
-
-    <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
-        <span class="kw">let </span>conn = <span class="kw">match </span><span class="self">self</span>.config.connection_string.clone() {
+    <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
+        <span class="kw">let </span>conn = <span class="kw">match </span><span class="self">self</span>.config.connection_string {
             <span class="prelude-val">Some</span>(v) =&gt; v,
             <span class="prelude-val">None </span>=&gt; {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(
@@ -471,74 +381,67 @@
             }
         };
 
-        <span class="kw">let </span>config = Opts::from_url(<span class="kw-2">&amp;</span>conn).map_err(|err| {
+        <span class="kw">let </span>config = MySqlConnectOptions::from_str(<span class="kw-2">&amp;</span>conn).map_err(|err| {
             Error::new(ErrorKind::ConfigInvalid, <span class="string">"connection_string is invalid"</span>)
                 .with_context(<span class="string">"service"</span>, Scheme::Mysql)
                 .set_source(err)
         })<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>table = <span class="kw">match </span><span class="self">self</span>.config.table.clone() {
+        <span class="kw">let </span>table = <span class="kw">match </span><span class="self">self</span>.config.table {
             <span class="prelude-val">Some</span>(v) =&gt; v,
             <span class="prelude-val">None </span>=&gt; {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::ConfigInvalid, <span class="string">"table is empty"</span>)
                     .with_context(<span class="string">"service"</span>, Scheme::Mysql))
             }
         };
-        <span class="kw">let </span>key_field = <span class="kw">match </span><span class="self">self</span>.config.key_field.clone() {
-            <span class="prelude-val">Some</span>(v) =&gt; v,
-            <span class="prelude-val">None </span>=&gt; <span class="string">"key"</span>.to_string(),
-        };
-        <span class="kw">let </span>value_field = <span class="kw">match </span><span class="self">self</span>.config.value_field.clone() {
-            <span class="prelude-val">Some</span>(v) =&gt; v,
-            <span class="prelude-val">None </span>=&gt; <span class="string">"value"</span>.to_string(),
-        };
-        <span class="kw">let </span>root = normalize_root(
-            <span class="self">self</span>.config
-                .root
-                .clone()
-                .unwrap_or_else(|| <span class="string">"/"</span>.to_string())
-                .as_str(),
-        );
-        <span class="kw">let </span>pool = Pool::new(config.clone());
+
+        <span class="kw">let </span>key_field = <span class="self">self</span>.config.key_field.unwrap_or_else(|| <span class="string">"key"</span>.to_string());
+
+        <span class="kw">let </span>value_field = <span class="self">self
+            </span>.config
+            .value_field
+            .unwrap_or_else(|| <span class="string">"value"</span>.to_string());
+
+        <span class="kw">let </span>root = normalize_root(<span class="self">self</span>.config.root.unwrap_or_else(|| <span class="string">"/"</span>.to_string()).as_str());
 
         <span class="prelude-val">Ok</span>(MySqlBackend::new(Adapter {
-            connection_pool: pool,
+            pool: OnceCell::new(),
             config,
             table,
             key_field,
             value_field,
         })
-        .with_root(<span class="kw-2">&amp;</span>root))
+        .with_normalized_root(root))
     }
 }
 
 <span class="doccomment">/// Backend for mysql service
 </span><span class="kw">pub type </span>MySqlBackend = kv::Backend&lt;Adapter&gt;;
 
-<span class="attr">#[derive(Clone)]
+<span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>Adapter {
-    connection_pool: Pool,
-    config: Opts,
+    pool: OnceCell&lt;MySqlPool&gt;,
+    config: MySqlConnectOptions,
 
     table: String,
     key_field: String,
     value_field: String,
 }
 
-<span class="kw">impl </span>Debug <span class="kw">for </span>Adapter {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        f.debug_struct(<span class="string">"Adapter"</span>)
-            .field(<span class="string">"connection_pool"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.connection_pool)
-            .field(<span class="string">"config"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.config)
-            .field(<span class="string">"table"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.table)
-            .field(<span class="string">"key_field"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.key_field)
-            .field(<span class="string">"value_field"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.value_field)
-            .finish()
-    }
+<span class="kw">impl </span>Adapter {
+    <span class="kw">async fn </span>get_client(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>MySqlPool&gt; {
+        <span class="self">self</span>.pool
+            .get_or_try_init(|| <span class="kw">async </span>{
+                <span class="kw">let </span>pool = MySqlPool::connect_with(<span class="self">self</span>.config.clone())
+                    .<span class="kw">await
+                    </span>.map_err(parse_mysql_error)<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(pool)
+            })
+            .<span class="kw">await
+    </span>}
 }
 
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>kv::Adapter <span class="kw">for </span>Adapter {
+<span class="kw">impl </span>kv::Adapter <span class="kw">for </span>Adapter {
     <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; kv::Metadata {
         kv::Metadata::new(
             Scheme::Mysql,
@@ -546,88 +449,61 @@
             Capability {
                 read: <span class="bool-val">true</span>,
                 write: <span class="bool-val">true</span>,
+                delete: <span class="bool-val">true</span>,
                 ..Default::default()
             },
         )
     }
 
-    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
-        <span class="kw">let </span>query = <span class="macro">format!</span>(
-            <span class="string">"SELECT `{}` FROM `{}` WHERE `{}` = :path LIMIT 1"</span>,
+    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt; {
+        <span class="kw">let </span>pool = <span class="self">self</span>.get_client().<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span>value: <span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt; = sqlx::query_scalar(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+            <span class="string">"SELECT `{}` FROM `{}` WHERE `{}` = ? LIMIT 1"</span>,
             <span class="self">self</span>.value_field, <span class="self">self</span>.table, <span class="self">self</span>.key_field
-        );
-        <span class="kw">let </span><span class="kw-2">mut </span>conn = <span class="self">self
-            </span>.connection_pool
-            .get_conn()
-            .<span class="kw">await
-            </span>.map_err(parse_mysql_error)<span class="question-mark">?</span>;
-        <span class="kw">let </span>statement = conn.prep(query).<span class="kw">await</span>.map_err(parse_mysql_error)<span class="question-mark">?</span>;
-        <span class="kw">let </span>result: <span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt; = conn
-            .exec_first(
-                statement,
-                <span class="macro">params! </span>{
-                    <span class="string">"path" </span>=&gt; path,
-                },
-            )
-            .<span class="kw">await
-            </span>.map_err(parse_mysql_error)<span class="question-mark">?</span>;
-        <span class="kw">match </span>result {
-            <span class="prelude-val">Some</span>(v) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(v)),
-            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-        }
-    }
-
-    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>query = <span class="macro">format!</span>(
-            <span class="string">"INSERT INTO `{}` (`{}`, `{}`)
-            VALUES (:path, :value)
-            ON DUPLICATE KEY UPDATE `{}` = VALUES({})"</span>,
-            <span class="self">self</span>.table, <span class="self">self</span>.key_field, <span class="self">self</span>.value_field, <span class="self">self</span>.value_field, <span class="self">self</span>.value_field
-        );
-        <span class="kw">let </span><span class="kw-2">mut </span>conn = <span class="self">self
-            </span>.connection_pool
-            .get_conn()
-            .<span class="kw">await
-            </span>.map_err(parse_mysql_error)<span class="question-mark">?</span>;
-        <span class="kw">let </span>statement = conn.prep(query).<span class="kw">await</span>.map_err(parse_mysql_error)<span class="question-mark">?</span>;
-
-        conn.exec_drop(
-            statement,
-            <span class="macro">params! </span>{
-                <span class="string">"path" </span>=&gt; path,
-                <span class="string">"value" </span>=&gt; value,
-            },
-        )
+        ))
+        .bind(path)
+        .fetch_optional(pool)
         .<span class="kw">await
         </span>.map_err(parse_mysql_error)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(value.map(Buffer::from))
+    }
+
+    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>pool = <span class="self">self</span>.get_client().<span class="kw">await</span><span class="question-mark">?</span>;
+
+        sqlx::query(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+            <span class="string">r#"INSERT INTO `{}` (`{}`, `{}`) VALUES (?, ?)
+            ON DUPLICATE KEY UPDATE `{}` = VALUES({})"#</span>,
+            <span class="self">self</span>.table, <span class="self">self</span>.key_field, <span class="self">self</span>.value_field, <span class="self">self</span>.value_field, <span class="self">self</span>.value_field
+        ))
+        .bind(path)
+        .bind(value.to_vec())
+        .execute(pool)
+        .<span class="kw">await
+        </span>.map_err(parse_mysql_error)<span class="question-mark">?</span>;
+
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>query = <span class="macro">format!</span>(
-            <span class="string">"DELETE FROM `{}` WHERE `{}` = :path"</span>,
-            <span class="self">self</span>.table, <span class="self">self</span>.key_field
-        );
-        <span class="kw">let </span><span class="kw-2">mut </span>conn = <span class="self">self
-            </span>.connection_pool
-            .get_conn()
-            .<span class="kw">await
-            </span>.map_err(parse_mysql_error)<span class="question-mark">?</span>;
-        <span class="kw">let </span>statement = conn.prep(query).<span class="kw">await</span>.map_err(parse_mysql_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>pool = <span class="self">self</span>.get_client().<span class="kw">await</span><span class="question-mark">?</span>;
 
-        conn.exec_drop(
-            statement,
-            <span class="macro">params! </span>{
-                <span class="string">"path" </span>=&gt; path,
-            },
-        )
+        sqlx::query(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+            <span class="string">"DELETE FROM `{}` WHERE `{}` = ?"</span>,
+            <span class="self">self</span>.table, <span class="self">self</span>.key_field
+        ))
+        .bind(path)
+        .execute(pool)
         .<span class="kw">await
         </span>.map_err(parse_mysql_error)<span class="question-mark">?</span>;
+
         <span class="prelude-val">Ok</span>(())
     }
 }
 
-<span class="kw">fn </span>parse_mysql_error(err: mysql_async::Error) -&gt; Error {
+<span class="kw">fn </span>parse_mysql_error(err: sqlx::Error) -&gt; Error {
     Error::new(ErrorKind::Unexpected, <span class="string">"unhandled error from mysql"</span>).set_source(err)
 }
 </code></pre></div></section></main></body></html>

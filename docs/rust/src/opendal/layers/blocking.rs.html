@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/layers/blocking.rs`."><title>blocking.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/layers/blocking.rs`."><title>blocking.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -339,28 +337,6 @@
 <a href="#337" id="337">337</a>
 <a href="#338" id="338">338</a>
 <a href="#339" id="339">339</a>
-<a href="#340" id="340">340</a>
-<a href="#341" id="341">341</a>
-<a href="#342" id="342">342</a>
-<a href="#343" id="343">343</a>
-<a href="#344" id="344">344</a>
-<a href="#345" id="345">345</a>
-<a href="#346" id="346">346</a>
-<a href="#347" id="347">347</a>
-<a href="#348" id="348">348</a>
-<a href="#349" id="349">349</a>
-<a href="#350" id="350">350</a>
-<a href="#351" id="351">351</a>
-<a href="#352" id="352">352</a>
-<a href="#353" id="353">353</a>
-<a href="#354" id="354">354</a>
-<a href="#355" id="355">355</a>
-<a href="#356" id="356">356</a>
-<a href="#357" id="357">357</a>
-<a href="#358" id="358">358</a>
-<a href="#359" id="359">359</a>
-<a href="#360" id="360">360</a>
-<a href="#361" id="361">361</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -378,13 +354,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>bytes;
-<span class="kw">use </span>bytes::Bytes;
-<span class="kw">use </span>futures::future::poll_fn;
+</span><span class="kw">use </span>std::sync::Arc;
+
 <span class="kw">use </span>tokio::runtime::Handle;
 
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::ReadExt;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -400,19 +373,17 @@
 ///
 /// BlockingLayer will use current async context's runtime to handle the async calls.
 ///
-/// ```rust
-/// # use anyhow::Result;
-/// use opendal::layers::BlockingLayer;
-/// use opendal::services::S3;
-/// use opendal::BlockingOperator;
-/// use opendal::Operator;
+/// ```rust,no_run
+/// # use opendal::layers::BlockingLayer;
+/// # use opendal::services;
+/// # use opendal::BlockingOperator;
+/// # use opendal::Operator;
+/// # use opendal::Result;
 ///
 /// #[tokio::main]
 /// async fn main() -&gt; Result&lt;()&gt; {
 ///     // Create fs backend builder.
-///     let mut builder = S3::default();
-///     builder.bucket("test");
-///     builder.region("us-east-1");
+///     let mut builder = services::S3::default().bucket("test").region("us-east-1");
 ///
 ///     // Build an `BlockingOperator` with blocking layer to start operating the storage.
 ///     let _: BlockingOperator = Operator::new(builder)?
@@ -430,12 +401,12 @@
 /// first. You can use [`Handle::try_current`] first to get the handle and than call [`Handle::enter`].
 /// This often happens in the case that async function calls blocking function.
 ///
-/// ```rust
-/// use opendal::layers::BlockingLayer;
-/// use opendal::services::S3;
-/// use opendal::BlockingOperator;
-/// use opendal::Operator;
-/// use opendal::Result;
+/// ```rust,no_run
+/// # use opendal::layers::BlockingLayer;
+/// # use opendal::services;
+/// # use opendal::BlockingOperator;
+/// # use opendal::Operator;
+/// # use opendal::Result;
 ///
 /// #[tokio::main]
 /// async fn main() -&gt; Result&lt;()&gt; {
@@ -445,9 +416,7 @@
 ///
 /// fn blocking_fn() -&gt; Result&lt;BlockingOperator&gt; {
 ///     // Create fs backend builder.
-///     let mut builder = S3::default();
-///     builder.bucket("test");
-///     builder.region("us-east-1");
+///     let mut builder = services::S3::default().bucket("test").region("us-east-1");
 ///
 ///     let handle = tokio::runtime::Handle::try_current().unwrap();
 ///     let _guard = handle.enter();
@@ -465,15 +434,15 @@
 /// In a pure blocking context, we can create a runtime and use it to create the `BlockingLayer`.
 ///
 /// &gt; The following code uses a global statically created runtime as an example, please manage the
-/// runtime on demand.
+/// &gt; runtime on demand.
 ///
-/// ```rust
-/// use once_cell::sync::Lazy;
-/// use opendal::layers::BlockingLayer;
-/// use opendal::services::S3;
-/// use opendal::BlockingOperator;
-/// use opendal::Operator;
-/// use opendal::Result;
+/// ```rust,no_run
+/// # use once_cell::sync::Lazy;
+/// # use opendal::layers::BlockingLayer;
+/// # use opendal::services;
+/// # use opendal::BlockingOperator;
+/// # use opendal::Operator;
+/// # use opendal::Result;
 ///
 /// static RUNTIME: Lazy&lt;tokio::runtime::Runtime&gt; = Lazy::new(|| {
 ///     tokio::runtime::Builder::new_multi_thread()
@@ -481,13 +450,10 @@
 ///         .build()
 ///         .unwrap()
 /// });
-/// ///
 ///
 /// fn main() -&gt; Result&lt;()&gt; {
 ///     // Create fs backend builder.
-///     let mut builder = S3::default();
-///     builder.bucket("test");
-///     builder.region("us-east-1");
+///     let mut builder = services::S3::default().bucket("test").region("us-east-1");
 ///
 ///     // Fetch the `EnterGuard` from global runtime.
 ///     let _guard = RUNTIME.enter();
@@ -515,10 +481,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Layer&lt;A&gt; <span class="kw">for </span>BlockingLayer {
-    <span class="kw">type </span>LayeredAccessor = BlockingAccessor&lt;A&gt;;
+<span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>BlockingLayer {
+    <span class="kw">type </span>LayeredAccess = BlockingAccessor&lt;A&gt;;
 
-    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccessor {
+    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess {
         BlockingAccessor {
             inner,
             handle: <span class="self">self</span>.handle.clone(),
@@ -527,15 +493,13 @@
 }
 
 <span class="attr">#[derive(Clone, Debug)]
-</span><span class="kw">pub struct </span>BlockingAccessor&lt;A: Accessor&gt; {
+</span><span class="kw">pub struct </span>BlockingAccessor&lt;A: Access&gt; {
     inner: A,
 
     handle: Handle,
 }
 
-<span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-#[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-</span><span class="kw">impl</span>&lt;A: Accessor&gt; LayeredAccessor <span class="kw">for </span>BlockingAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; LayeredAccess <span class="kw">for </span>BlockingAccessor&lt;A&gt; {
     <span class="kw">type </span>Inner = A;
     <span class="kw">type </span>Reader = A::Reader;
     <span class="kw">type </span>BlockingReader = BlockingWrapper&lt;A::Reader&gt;;
@@ -548,10 +512,10 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.inner
     }
 
-    <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
-        <span class="kw">let </span><span class="kw-2">mut </span>meta = <span class="self">self</span>.inner.info();
+    <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>meta = <span class="self">self</span>.inner.info().as_ref().clone();
         meta.full_capability_mut().blocking = <span class="bool-val">true</span>;
-        meta
+        meta.into()
     }
 
     <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
@@ -652,34 +616,24 @@
 }
 
 <span class="kw">impl</span>&lt;I: oio::Read + <span class="lifetime">'static</span>&gt; oio::BlockingRead <span class="kw">for </span>BlockingWrapper&lt;I&gt; {
-    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="self">self</span>.handle.block_on(<span class="self">self</span>.inner.read(buf))
-    }
-
-    <span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: std::io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        <span class="self">self</span>.handle.block_on(<span class="self">self</span>.inner.seek(pos))
-    }
-
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt; {
-        <span class="self">self</span>.handle.block_on(<span class="self">self</span>.inner.next())
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="self">self</span>.handle.block_on(<span class="self">self</span>.inner.read())
     }
 }
 
 <span class="kw">impl</span>&lt;I: oio::Write + <span class="lifetime">'static</span>&gt; oio::BlockingWrite <span class="kw">for </span>BlockingWrapper&lt;I&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="self">self</span>.handle
-            .block_on(poll_fn(|cx| <span class="self">self</span>.inner.poll_write(cx, bs)))
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.handle.block_on(<span class="self">self</span>.inner.write(bs))
     }
 
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.handle
-            .block_on(poll_fn(|cx| <span class="self">self</span>.inner.poll_close(cx)))
+        <span class="self">self</span>.handle.block_on(<span class="self">self</span>.inner.close())
     }
 }
 
 <span class="kw">impl</span>&lt;I: oio::List&gt; oio::BlockingList <span class="kw">for </span>BlockingWrapper&lt;I&gt; {
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
-        <span class="self">self</span>.handle.block_on(poll_fn(|cx| <span class="self">self</span>.inner.poll_next(cx)))
+        <span class="self">self</span>.handle.block_on(<span class="self">self</span>.inner.next())
     }
 }
 

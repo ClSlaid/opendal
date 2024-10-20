@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/pcloud/core.rs`."><title>core.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/pcloud/core.rs`."><title>core.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -434,33 +432,6 @@
 <a href="#432" id="432">432</a>
 <a href="#433" id="433">433</a>
 <a href="#434" id="434">434</a>
-<a href="#435" id="435">435</a>
-<a href="#436" id="436">436</a>
-<a href="#437" id="437">437</a>
-<a href="#438" id="438">438</a>
-<a href="#439" id="439">439</a>
-<a href="#440" id="440">440</a>
-<a href="#441" id="441">441</a>
-<a href="#442" id="442">442</a>
-<a href="#443" id="443">443</a>
-<a href="#444" id="444">444</a>
-<a href="#445" id="445">445</a>
-<a href="#446" id="446">446</a>
-<a href="#447" id="447">447</a>
-<a href="#448" id="448">448</a>
-<a href="#449" id="449">449</a>
-<a href="#450" id="450">450</a>
-<a href="#451" id="451">451</a>
-<a href="#452" id="452">452</a>
-<a href="#453" id="453">453</a>
-<a href="#454" id="454">454</a>
-<a href="#455" id="455">455</a>
-<a href="#456" id="456">456</a>
-<a href="#457" id="457">457</a>
-<a href="#458" id="458">458</a>
-<a href="#459" id="459">459</a>
-<a href="#460" id="460">460</a>
-<a href="#461" id="461">461</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -481,7 +452,8 @@
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 
-<span class="kw">use </span>bytes::Bytes;
+<span class="kw">use </span>bytes::Buf;
+<span class="kw">use </span>http::header;
 <span class="kw">use </span>http::Request;
 <span class="kw">use </span>http::Response;
 <span class="kw">use </span>http::StatusCode;
@@ -518,7 +490,7 @@
 
 <span class="kw">impl </span>PcloudCore {
     <span class="attr">#[inline]
-    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 }
@@ -538,24 +510,22 @@
         <span class="kw">let </span>req = Request::get(url);
 
         <span class="comment">// set body
-        </span><span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>bs = resp.into_body();
                 <span class="kw">let </span>resp: GetFileLinkResponse =
-                    serde_json::from_slice(<span class="kw-2">&amp;</span>bs).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                    serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                 <span class="kw">let </span>result = resp.result;
                 <span class="kw">if </span>result == <span class="number">2010 </span>|| result == <span class="number">2055 </span>|| result == <span class="number">2002 </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::NotFound, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::NotFound, <span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
                 }
                 <span class="kw">if </span>result != <span class="number">0 </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
                 }
 
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(hosts) = resp.hosts {
@@ -567,19 +537,20 @@
                 }
                 <span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="string">"hosts is empty"</span>))
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
-    <span class="kw">pub async fn </span>download(<span class="kw-2">&amp;</span><span class="self">self</span>, url: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>download(<span class="kw-2">&amp;</span><span class="self">self</span>, url: <span class="kw-2">&amp;</span>str, range: BytesRange) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;HttpBody&gt;&gt; {
         <span class="kw">let </span>req = Request::get(url);
 
         <span class="comment">// set body
         </span><span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
+            .header(header::RANGE, range.to_header())
+            .body(Buffer::new())
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.send(req).<span class="kw">await
+        <span class="self">self</span>.client.fetch(req).<span class="kw">await
     </span>}
 
     <span class="kw">pub async fn </span>ensure_dir_exists(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
@@ -595,31 +566,28 @@
 
             <span class="kw">match </span>status {
                 StatusCode::OK =&gt; {
-                    <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                    <span class="kw">let </span>bs = resp.into_body();
                     <span class="kw">let </span>resp: PcloudError =
-                        serde_json::from_slice(<span class="kw-2">&amp;</span>bs).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                        serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                     <span class="kw">let </span>result = resp.result;
                     <span class="kw">if </span>result == <span class="number">2010 </span>|| result == <span class="number">2055 </span>|| result == <span class="number">2002 </span>{
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::NotFound, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::NotFound, <span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
                     }
                     <span class="kw">if </span>result != <span class="number">0 </span>{
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
                     }
 
                     <span class="kw">if </span>result != <span class="number">0 </span>{
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="macro">format!</span>(<span class="string">"{resp:?}"</span>)));
                     }
                 }
-                <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+                <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp)),
             }
         }
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">pub async fn </span>create_folder_if_not_exists(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span>str,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>create_folder_if_not_exists(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>url = <span class="macro">format!</span>(
             <span class="string">"{}/createfolderifnotexists?path=/{}&amp;username={}&amp;password={}"</span>,
             <span class="self">self</span>.endpoint,
@@ -631,14 +599,12 @@
         <span class="kw">let </span>req = Request::post(url);
 
         <span class="comment">// set body
-        </span><span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>rename_file(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>rename_file(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>from = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, from);
         <span class="kw">let </span>to = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to);
 
@@ -654,14 +620,12 @@
         <span class="kw">let </span>req = Request::post(url);
 
         <span class="comment">// set body
-        </span><span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>rename_folder(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>rename_folder(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>from = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, from);
         <span class="kw">let </span>to = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to);
         <span class="kw">let </span>url = <span class="macro">format!</span>(
@@ -676,14 +640,12 @@
         <span class="kw">let </span>req = Request::post(url);
 
         <span class="comment">// set body
-        </span><span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>delete_folder(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>delete_folder(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>url = <span class="macro">format!</span>(
@@ -697,14 +659,12 @@
         <span class="kw">let </span>req = Request::post(url);
 
         <span class="comment">// set body
-        </span><span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>delete_file(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>delete_file(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>url = <span class="macro">format!</span>(
@@ -718,14 +678,12 @@
         <span class="kw">let </span>req = Request::post(url);
 
         <span class="comment">// set body
-        </span><span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>copy_file(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>copy_file(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>from = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, from);
         <span class="kw">let </span>to = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to);
 
@@ -741,14 +699,12 @@
         <span class="kw">let </span>req = Request::post(url);
 
         <span class="comment">// set body
-        </span><span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>copy_folder(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>copy_folder(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>from = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, from);
         <span class="kw">let </span>to = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to);
 
@@ -764,14 +720,12 @@
         <span class="kw">let </span>req = Request::post(url);
 
         <span class="comment">// set body
-        </span><span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>path = path.trim_end_matches(<span class="string">'/'</span>);
@@ -787,14 +741,12 @@
         <span class="kw">let </span>req = Request::post(url);
 
         <span class="comment">// set body
-        </span><span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>upload_file(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>upload_file(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>(name, path) = (get_basename(<span class="kw-2">&amp;</span>path), get_parent(<span class="kw-2">&amp;</span>path).trim_end_matches(<span class="string">'/'</span>));
@@ -811,14 +763,12 @@
         <span class="kw">let </span>req = Request::put(url);
 
         <span class="comment">// set body
-        </span><span class="kw">let </span>req = req
-            .body(AsyncBody::Bytes(bs))
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>req = req.body(bs).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>list_folder(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>list_folder(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>path = normalize_root(<span class="kw-2">&amp;</span>path);
@@ -836,9 +786,7 @@
         <span class="kw">let </span>req = Request::get(url);
 
         <span class="comment">// set body
-        </span><span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
@@ -899,11 +847,9 @@
 
 <span class="attr">#[derive(Debug, Deserialize)]
 </span><span class="kw">pub struct </span>StatMetadata {
-    <span class="kw">pub </span>name: String,
     <span class="kw">pub </span>modified: String,
     <span class="kw">pub </span>isfolder: bool,
     <span class="kw">pub </span>size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
-    <span class="kw">pub </span>contenttype: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="attr">#[derive(Debug, Deserialize)]
@@ -914,12 +860,10 @@
 
 <span class="attr">#[derive(Debug, Deserialize)]
 </span><span class="kw">pub struct </span>ListMetadata {
-    <span class="kw">pub </span>name: String,
     <span class="kw">pub </span>path: String,
     <span class="kw">pub </span>modified: String,
     <span class="kw">pub </span>isfolder: bool,
     <span class="kw">pub </span>size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
-    <span class="kw">pub </span>contenttype: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="kw">pub </span>contents: <span class="prelude-ty">Option</span>&lt;Vec&lt;ListMetadata&gt;&gt;,
 }
 </code></pre></div></section></main></body></html>

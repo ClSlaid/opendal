@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/raw/ops.rs`."><title>ops.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/raw/ops.rs`."><title>ops.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -638,6 +636,148 @@
 <a href="#636" id="636">636</a>
 <a href="#637" id="637">637</a>
 <a href="#638" id="638">638</a>
+<a href="#639" id="639">639</a>
+<a href="#640" id="640">640</a>
+<a href="#641" id="641">641</a>
+<a href="#642" id="642">642</a>
+<a href="#643" id="643">643</a>
+<a href="#644" id="644">644</a>
+<a href="#645" id="645">645</a>
+<a href="#646" id="646">646</a>
+<a href="#647" id="647">647</a>
+<a href="#648" id="648">648</a>
+<a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
+<a href="#656" id="656">656</a>
+<a href="#657" id="657">657</a>
+<a href="#658" id="658">658</a>
+<a href="#659" id="659">659</a>
+<a href="#660" id="660">660</a>
+<a href="#661" id="661">661</a>
+<a href="#662" id="662">662</a>
+<a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
+<a href="#665" id="665">665</a>
+<a href="#666" id="666">666</a>
+<a href="#667" id="667">667</a>
+<a href="#668" id="668">668</a>
+<a href="#669" id="669">669</a>
+<a href="#670" id="670">670</a>
+<a href="#671" id="671">671</a>
+<a href="#672" id="672">672</a>
+<a href="#673" id="673">673</a>
+<a href="#674" id="674">674</a>
+<a href="#675" id="675">675</a>
+<a href="#676" id="676">676</a>
+<a href="#677" id="677">677</a>
+<a href="#678" id="678">678</a>
+<a href="#679" id="679">679</a>
+<a href="#680" id="680">680</a>
+<a href="#681" id="681">681</a>
+<a href="#682" id="682">682</a>
+<a href="#683" id="683">683</a>
+<a href="#684" id="684">684</a>
+<a href="#685" id="685">685</a>
+<a href="#686" id="686">686</a>
+<a href="#687" id="687">687</a>
+<a href="#688" id="688">688</a>
+<a href="#689" id="689">689</a>
+<a href="#690" id="690">690</a>
+<a href="#691" id="691">691</a>
+<a href="#692" id="692">692</a>
+<a href="#693" id="693">693</a>
+<a href="#694" id="694">694</a>
+<a href="#695" id="695">695</a>
+<a href="#696" id="696">696</a>
+<a href="#697" id="697">697</a>
+<a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
+<a href="#713" id="713">713</a>
+<a href="#714" id="714">714</a>
+<a href="#715" id="715">715</a>
+<a href="#716" id="716">716</a>
+<a href="#717" id="717">717</a>
+<a href="#718" id="718">718</a>
+<a href="#719" id="719">719</a>
+<a href="#720" id="720">720</a>
+<a href="#721" id="721">721</a>
+<a href="#722" id="722">722</a>
+<a href="#723" id="723">723</a>
+<a href="#724" id="724">724</a>
+<a href="#725" id="725">725</a>
+<a href="#726" id="726">726</a>
+<a href="#727" id="727">727</a>
+<a href="#728" id="728">728</a>
+<a href="#729" id="729">729</a>
+<a href="#730" id="730">730</a>
+<a href="#731" id="731">731</a>
+<a href="#732" id="732">732</a>
+<a href="#733" id="733">733</a>
+<a href="#734" id="734">734</a>
+<a href="#735" id="735">735</a>
+<a href="#736" id="736">736</a>
+<a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -659,12 +799,12 @@
 //!
 //! By using ops, users can add more context for operation.
 
-</span><span class="kw">use </span>std::time::Duration;
-
-<span class="kw">use </span>flagset::FlagSet;
+</span><span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::Metakey;
+<span class="kw">use crate</span>::<span class="kw-2">*</span>;
+<span class="kw">use </span>flagset::FlagSet;
 
 <span class="doccomment">/// Args for `create` operation.
 ///
@@ -739,6 +879,14 @@
     /// - If this is set to &gt; 1, the list operation will be concurrent,
     ///   and the maximum number of concurrent operations will be determined by this value.
     </span>concurrent: usize,
+    <span class="doccomment">/// The version is used to control whether the object versions should be returned.
+    ///
+    /// - If `false`, list operation will not return with object versions
+    /// - If `true`, list operation will return with object versions if object versioning is supported
+    ///   by the underlying service
+    ///
+    /// Default to `false`
+    </span>version: bool,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>OpList {
@@ -750,6 +898,7 @@
             <span class="comment">// By default, we want to know what's the mode of this entry.
             </span>metakey: Metakey::Mode.into(),
             concurrent: <span class="number">1</span>,
+            version: <span class="bool-val">false</span>,
         }
     }
 }
@@ -822,6 +971,17 @@
     <span class="doccomment">/// Get the concurrent of list operation.
     </span><span class="kw">pub fn </span>concurrent(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.concurrent
+    }
+
+    <span class="doccomment">/// Change the version of this list operation
+    </span><span class="kw">pub fn </span>with_version(<span class="kw-2">mut </span><span class="self">self</span>, version: bool) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.version = version;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Get the version of this list operation
+    </span><span class="kw">pub fn </span>version(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.version
     }
 }
 
@@ -940,16 +1100,14 @@
 <span class="doccomment">/// Args for `read` operation.
 </span><span class="attr">#[derive(Debug, Clone, Default)]
 </span><span class="kw">pub struct </span>OpRead {
-    br: BytesRange,
+    range: BytesRange,
     if_match: <span class="prelude-ty">Option</span>&lt;String&gt;,
     if_none_match: <span class="prelude-ty">Option</span>&lt;String&gt;,
     override_content_type: <span class="prelude-ty">Option</span>&lt;String&gt;,
     override_cache_control: <span class="prelude-ty">Option</span>&lt;String&gt;,
     override_content_disposition: <span class="prelude-ty">Option</span>&lt;String&gt;,
     version: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// The maximum buffer capability.
-    /// `None` stand for disable buffer.
-    </span>buffer: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+    executor: <span class="prelude-ty">Option</span>&lt;Executor&gt;,
 }
 
 <span class="kw">impl </span>OpRead {
@@ -958,64 +1116,52 @@
         <span class="self">Self</span>::default()
     }
 
-    <span class="doccomment">/// The into_deterministic function transforms the OpRead into a deterministic version.
-    ///
-    /// This API is utilized because it allows for internal optimizations such as dividing read
-    /// ranges or retrying the read request from where it failed. In these scenarios, the expected
-    /// `ETag` value differs from what users specify in `If-Match` or `If-None-Match`.Therefore,
-    /// we need to eliminate these conditional headers to ensure that the read operation is
-    /// deterministic.
-    ///
-    /// This API is not intended to be used by users and should never be exposed.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>into_deterministic(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            if_match: <span class="prelude-val">None</span>,
-            if_none_match: <span class="prelude-val">None</span>,
-            ..<span class="self">self
-        </span>}
-    }
-
-    <span class="doccomment">/// Create a new OpRead with range.
+    <span class="doccomment">/// Set the range of the option
     </span><span class="kw">pub fn </span>with_range(<span class="kw-2">mut </span><span class="self">self</span>, range: BytesRange) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.br = range;
+        <span class="self">self</span>.range = range;
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Get range from OpRead.
+    <span class="doccomment">/// Get range from option
     </span><span class="kw">pub fn </span>range(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BytesRange {
-        <span class="self">self</span>.br
+        <span class="self">self</span>.range
     }
 
-    <span class="doccomment">/// Sets the content-disposition header that should be send back by the remote read operation.
+    <span class="doccomment">/// Returns a mutable range to allow updating.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>range_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>BytesRange {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.range
+    }
+
+    <span class="doccomment">/// Sets the content-disposition header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>with_override_content_disposition(<span class="kw-2">mut </span><span class="self">self</span>, content_disposition: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.override_content_disposition = <span class="prelude-val">Some</span>(content_disposition.into());
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Returns the content-disposition header that should be send back by the remote read
+    <span class="doccomment">/// Returns the content-disposition header that should be sent back by the remote read
     /// operation.
     </span><span class="kw">pub fn </span>override_content_disposition(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
         <span class="self">self</span>.override_content_disposition.as_deref()
     }
 
-    <span class="doccomment">/// Sets the cache-control header that should be send back by the remote read operation.
+    <span class="doccomment">/// Sets the cache-control header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>with_override_cache_control(<span class="kw-2">mut </span><span class="self">self</span>, cache_control: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.override_cache_control = <span class="prelude-val">Some</span>(cache_control.into());
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Returns the cache-control header that should be send back by the remote read operation.
+    <span class="doccomment">/// Returns the cache-control header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>override_cache_control(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
         <span class="self">self</span>.override_cache_control.as_deref()
     }
 
-    <span class="doccomment">/// Sets the content-type header that should be send back by the remote read operation.
+    <span class="doccomment">/// Sets the content-type header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>with_override_content_type(<span class="kw-2">mut </span><span class="self">self</span>, content_type: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.override_content_type = <span class="prelude-val">Some</span>(content_type.into());
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Returns the content-type header that should be send back by the remote read operation.
+    <span class="doccomment">/// Returns the content-type header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>override_content_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
         <span class="self">self</span>.override_content_type.as_deref()
     }
@@ -1053,16 +1199,90 @@
         <span class="self">self</span>.version.as_deref()
     }
 
-    <span class="doccomment">/// Set the buffer capability.
-    </span><span class="kw">pub fn </span>with_buffer(<span class="kw-2">mut </span><span class="self">self</span>, buffer: usize) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.buffer = <span class="prelude-val">Some</span>(buffer);
-
+    <span class="doccomment">/// Set the executor of the option
+    </span><span class="kw">pub fn </span>with_executor(<span class="kw-2">mut </span><span class="self">self</span>, executor: Executor) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.executor = <span class="prelude-val">Some</span>(executor);
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Get buffer from option.
-    </span><span class="kw">pub fn </span>buffer(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
-        <span class="self">self</span>.buffer
+    <span class="doccomment">/// Merge given executor into option.
+    ///
+    /// If executor has already been set, this will do nothing.
+    /// Otherwise, this will set the given executor.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>merge_executor(<span class="self">self</span>, executor: <span class="prelude-ty">Option</span>&lt;Executor&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">if </span><span class="self">self</span>.executor.is_some() {
+            <span class="kw">return </span><span class="self">self</span>;
+        }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(exec) = executor {
+            <span class="kw">return </span><span class="self">self</span>.with_executor(exec);
+        }
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Get executor from option
+    </span><span class="kw">pub fn </span>executor(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Executor&gt; {
+        <span class="self">self</span>.executor.as_ref()
+    }
+}
+
+<span class="doccomment">/// Args for reader operation.
+</span><span class="attr">#[derive(Debug, Clone)]
+</span><span class="kw">pub struct </span>OpReader {
+    <span class="doccomment">/// The concurrent requests that reader can send.
+    </span>concurrent: usize,
+    <span class="doccomment">/// The chunk size of each request.
+    </span>chunk: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+    <span class="doccomment">/// The gap size of each request.
+    </span>gap: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+}
+
+<span class="kw">impl </span>Default <span class="kw">for </span>OpReader {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            concurrent: <span class="number">1</span>,
+            chunk: <span class="prelude-val">None</span>,
+            gap: <span class="prelude-val">None</span>,
+        }
+    }
+}
+
+<span class="kw">impl </span>OpReader {
+    <span class="doccomment">/// Create a new `OpReader`.
+    </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::default()
+    }
+
+    <span class="doccomment">/// Set the concurrent of the option
+    </span><span class="kw">pub fn </span>with_concurrent(<span class="kw-2">mut </span><span class="self">self</span>, concurrent: usize) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.concurrent = concurrent.max(<span class="number">1</span>);
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Get concurrent from option
+    </span><span class="kw">pub fn </span>concurrent(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.concurrent
+    }
+
+    <span class="doccomment">/// Set the chunk of the option
+    </span><span class="kw">pub fn </span>with_chunk(<span class="kw-2">mut </span><span class="self">self</span>, chunk: usize) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.chunk = <span class="prelude-val">Some</span>(chunk.max(<span class="number">1</span>));
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Get chunk from option
+    </span><span class="kw">pub fn </span>chunk(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
+        <span class="self">self</span>.chunk
+    }
+
+    <span class="doccomment">/// Set the gap of the option
+    </span><span class="kw">pub fn </span>with_gap(<span class="kw-2">mut </span><span class="self">self</span>, gap: usize) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.gap = <span class="prelude-val">Some</span>(gap.max(<span class="number">1</span>));
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Get gap from option
+    </span><span class="kw">pub fn </span>gap(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
+        <span class="self">self</span>.gap
     }
 }
 
@@ -1105,36 +1325,36 @@
         <span class="self">self</span>.if_none_match.as_deref()
     }
 
-    <span class="doccomment">/// Sets the content-disposition header that should be send back by the remote read operation.
+    <span class="doccomment">/// Sets the content-disposition header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>with_override_content_disposition(<span class="kw-2">mut </span><span class="self">self</span>, content_disposition: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.override_content_disposition = <span class="prelude-val">Some</span>(content_disposition.into());
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Returns the content-disposition header that should be send back by the remote read
+    <span class="doccomment">/// Returns the content-disposition header that should be sent back by the remote read
     /// operation.
     </span><span class="kw">pub fn </span>override_content_disposition(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
         <span class="self">self</span>.override_content_disposition.as_deref()
     }
 
-    <span class="doccomment">/// Sets the cache-control header that should be send back by the remote read operation.
+    <span class="doccomment">/// Sets the cache-control header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>with_override_cache_control(<span class="kw-2">mut </span><span class="self">self</span>, cache_control: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.override_cache_control = <span class="prelude-val">Some</span>(cache_control.into());
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Returns the cache-control header that should be send back by the remote read operation.
+    <span class="doccomment">/// Returns the cache-control header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>override_cache_control(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
         <span class="self">self</span>.override_cache_control.as_deref()
     }
 
-    <span class="doccomment">/// Sets the content-type header that should be send back by the remote read operation.
+    <span class="doccomment">/// Sets the content-type header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>with_override_content_type(<span class="kw-2">mut </span><span class="self">self</span>, content_type: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.override_content_type = <span class="prelude-val">Some</span>(content_type.into());
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Returns the content-type header that should be send back by the remote read operation.
+    <span class="doccomment">/// Returns the content-type header that should be sent back by the remote read operation.
     </span><span class="kw">pub fn </span>override_content_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
         <span class="self">self</span>.override_content_type.as_deref()
     }
@@ -1155,12 +1375,13 @@
 </span><span class="attr">#[derive(Debug, Clone, Default)]
 </span><span class="kw">pub struct </span>OpWrite {
     append: bool,
-    buffer: <span class="prelude-ty">Option</span>&lt;usize&gt;,
     concurrent: usize,
-
     content_type: <span class="prelude-ty">Option</span>&lt;String&gt;,
     content_disposition: <span class="prelude-ty">Option</span>&lt;String&gt;,
     cache_control: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    executor: <span class="prelude-ty">Option</span>&lt;Executor&gt;,
+    if_none_match: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    user_metadata: <span class="prelude-ty">Option</span>&lt;HashMap&lt;String, String&gt;&gt;,
 }
 
 <span class="kw">impl </span>OpWrite {
@@ -1187,26 +1408,6 @@
     /// Service could return `Unsupported` if the underlying storage does not support append.
     </span><span class="kw">pub fn </span>with_append(<span class="kw-2">mut </span><span class="self">self</span>, append: bool) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.append = append;
-        <span class="self">self
-    </span>}
-
-    <span class="doccomment">/// Get the buffer from op.
-    ///
-    /// The buffer is used by service to decide the buffer size of the underlying writer.
-    </span><span class="kw">pub fn </span>buffer(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
-        <span class="self">self</span>.buffer
-    }
-
-    <span class="doccomment">/// Set the buffer of op.
-    ///
-    /// If buffer is set, the data will be buffered by the underlying writer.
-    ///
-    /// ## NOTE
-    ///
-    /// Service could have their own minimum buffer size while perform write operations like
-    /// multipart uploads. So the buffer size may be larger than the given buffer size.
-    </span><span class="kw">pub fn </span>with_buffer(<span class="kw-2">mut </span><span class="self">self</span>, buffer: usize) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.buffer = <span class="prelude-val">Some</span>(buffer);
         <span class="self">self
     </span>}
 
@@ -1251,6 +1452,87 @@
     <span class="doccomment">/// Set the maximum concurrent write task amount.
     </span><span class="kw">pub fn </span>with_concurrent(<span class="kw-2">mut </span><span class="self">self</span>, concurrent: usize) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.concurrent = concurrent;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Get the executor from option
+    </span><span class="kw">pub fn </span>executor(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Executor&gt; {
+        <span class="self">self</span>.executor.as_ref()
+    }
+
+    <span class="doccomment">/// Set the executor of the option
+    </span><span class="kw">pub fn </span>with_executor(<span class="kw-2">mut </span><span class="self">self</span>, executor: Executor) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.executor = <span class="prelude-val">Some</span>(executor);
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Set the If-None-Match of the option
+    </span><span class="kw">pub fn </span>with_if_none_match(<span class="kw-2">mut </span><span class="self">self</span>, s: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.if_none_match = <span class="prelude-val">Some</span>(s.to_string());
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Get If-None-Match from option
+    </span><span class="kw">pub fn </span>if_none_match(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
+        <span class="self">self</span>.if_none_match.as_deref()
+    }
+
+    <span class="doccomment">/// Merge given executor into option.
+    ///
+    /// If executor has already been set, this will do nothing.
+    /// Otherwise, this will set the given executor.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>merge_executor(<span class="self">self</span>, executor: <span class="prelude-ty">Option</span>&lt;Executor&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">if </span><span class="self">self</span>.executor.is_some() {
+            <span class="kw">return </span><span class="self">self</span>;
+        }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(exec) = executor {
+            <span class="kw">return </span><span class="self">self</span>.with_executor(exec);
+        }
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Set the user defined metadata of the op
+    </span><span class="kw">pub fn </span>with_user_metadata(<span class="kw-2">mut </span><span class="self">self</span>, metadata: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.user_metadata = <span class="prelude-val">Some</span>(metadata);
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Get the user defined metadata from the op
+    </span><span class="kw">pub fn </span>user_metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>HashMap&lt;String, String&gt;&gt; {
+        <span class="self">self</span>.user_metadata.as_ref()
+    }
+}
+
+<span class="doccomment">/// Args for `writer` operation.
+</span><span class="attr">#[derive(Debug, Clone, Default)]
+</span><span class="kw">pub struct </span>OpWriter {
+    chunk: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+}
+
+<span class="kw">impl </span>OpWriter {
+    <span class="doccomment">/// Create a new `OpWriter`.
+    </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::default()
+    }
+
+    <span class="doccomment">/// Get the chunk from op.
+    ///
+    /// The chunk is used by service to decide the chunk size of the underlying writer.
+    </span><span class="kw">pub fn </span>chunk(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
+        <span class="self">self</span>.chunk
+    }
+
+    <span class="doccomment">/// Set the chunk of op.
+    ///
+    /// If chunk is set, the data will be chunked by the underlying writer.
+    ///
+    /// ## NOTE
+    ///
+    /// Service could have their own minimum chunk size while perform write
+    /// operations like multipart uploads. So the chunk size may be larger than
+    /// the given buffer size.
+    </span><span class="kw">pub fn </span>with_chunk(<span class="kw-2">mut </span><span class="self">self</span>, chunk: usize) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.chunk = <span class="prelude-val">Some</span>(chunk);
         <span class="self">self
     </span>}
 }

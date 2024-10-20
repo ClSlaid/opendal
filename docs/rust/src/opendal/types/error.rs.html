@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/types/error.rs`."><title>error.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/types/error.rs`."><title>error.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -464,18 +462,6 @@
 <a href="#462" id="462">462</a>
 <a href="#463" id="463">463</a>
 <a href="#464" id="464">464</a>
-<a href="#465" id="465">465</a>
-<a href="#466" id="466">466</a>
-<a href="#467" id="467">467</a>
-<a href="#468" id="468">468</a>
-<a href="#469" id="469">469</a>
-<a href="#470" id="470">470</a>
-<a href="#471" id="471">471</a>
-<a href="#472" id="472">472</a>
-<a href="#473" id="473">473</a>
-<a href="#474" id="474">474</a>
-<a href="#475" id="475">475</a>
-<a href="#476" id="476">476</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -502,7 +488,6 @@
 //! # use opendal::EntryMode;
 //! # use opendal::Operator;
 //! use opendal::ErrorKind;
-//! # #[tokio::main]
 //! # async fn test(op: Operator) -&gt; Result&lt;()&gt; {
 //! if let Err(e) = op.stat("test_file").await {
 //!     if e.kind() == ErrorKind::NotFound {
@@ -522,7 +507,7 @@
 <span class="kw">use </span>std::io;
 
 <span class="doccomment">/// Result that is a wrapper of `Result&lt;T, opendal::Error&gt;`
-</span><span class="kw">pub type </span><span class="prelude-ty">Result</span>&lt;T&gt; = std::result::Result&lt;T, Error&gt;;
+</span><span class="kw">pub type </span><span class="prelude-ty">Result</span>&lt;T, E = Error&gt; = std::result::Result&lt;T, E&gt;;
 
 <span class="doccomment">/// ErrorKind is all kinds of Error of opendal.
 </span><span class="attr">#[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -561,28 +546,10 @@
     /// As OpenDAL cannot handle the `condition not match` error, it will always return this error to users.
     /// So users could to handle this error by themselves.
     </span>ConditionNotMatch,
-    <span class="doccomment">/// The content is truncated.
+    <span class="doccomment">/// The range of the content is not satisfied.
     ///
-    /// This error kind means there are more content to come but been truncated.
-    ///
-    /// For examples:
-    ///
-    /// - Users expected to read 1024 bytes, but service returned more bytes.
-    /// - Service expected to write 1024 bytes, but users write more bytes.
-    </span>ContentTruncated,
-    <span class="doccomment">/// The content is incomplete.
-    ///
-    /// This error kind means expect content length is not reached.
-    ///
-    /// For examples:
-    ///
-    /// - Users expected to read 1024 bytes, but service returned less bytes.
-    /// - Service expected to write 1024 bytes, but users write less bytes.
-    </span>ContentIncomplete,
-    <span class="doccomment">/// The input is invalid.
-    ///
-    /// For example, user try to seek to a negative position
-    </span>InvalidInput,
+    /// OpenDAL returns this error to indicate that the range of the read request is not satisfied.
+    </span>RangeNotSatisfied,
 }
 
 <span class="kw">impl </span>ErrorKind {
@@ -612,9 +579,7 @@
             ErrorKind::RateLimited =&gt; <span class="string">"RateLimited"</span>,
             ErrorKind::IsSameFile =&gt; <span class="string">"IsSameFile"</span>,
             ErrorKind::ConditionNotMatch =&gt; <span class="string">"ConditionNotMatch"</span>,
-            ErrorKind::ContentTruncated =&gt; <span class="string">"ContentTruncated"</span>,
-            ErrorKind::ContentIncomplete =&gt; <span class="string">"ContentIncomplete"</span>,
-            ErrorKind::InvalidInput =&gt; <span class="string">"InvalidInput"</span>,
+            ErrorKind::RangeNotSatisfied =&gt; <span class="string">"RangeNotSatisfied"</span>,
         }
     }
 }
@@ -802,10 +767,10 @@
 
 <span class="kw">impl </span>Error {
     <span class="doccomment">/// Create a new Error with error kind and message.
-    </span><span class="kw">pub fn </span>new(kind: ErrorKind, message: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(kind: ErrorKind, message: <span class="kw">impl </span>Into&lt;String&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             kind,
-            message: message.to_string(),
+            message: message.into(),
 
             status: ErrorStatus::Permanent,
             operation: <span class="string">""</span>,
@@ -833,8 +798,8 @@
     </span>}
 
     <span class="doccomment">/// Add more context in error.
-    </span><span class="kw">pub fn </span>with_context(<span class="kw-2">mut </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, value: <span class="kw">impl </span>Into&lt;String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.context.push((key, value.into()));
+    </span><span class="kw">pub fn </span>with_context(<span class="kw-2">mut </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, value: <span class="kw">impl </span>ToString) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.context.push((key, value.to_string()));
         <span class="self">self
     </span>}
 
@@ -872,6 +837,16 @@
         <span class="self">self
     </span>}
 
+    <span class="doccomment">/// Set temporary status for error by given temporary.
+    ///
+    /// By set temporary, we indicate this error is retryable.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>with_temporary(<span class="kw-2">mut </span><span class="self">self</span>, temporary: bool) -&gt; <span class="self">Self </span>{
+        <span class="kw">if </span>temporary {
+            <span class="self">self</span>.status = ErrorStatus::Temporary;
+        }
+        <span class="self">self
+    </span>}
+
     <span class="doccomment">/// Set persistent status for error.
     ///
     /// By setting persistent, we indicate the retry should be stopped.
@@ -896,7 +871,6 @@
         <span class="kw">let </span>kind = <span class="kw">match </span>err.kind() {
             ErrorKind::NotFound =&gt; io::ErrorKind::NotFound,
             ErrorKind::PermissionDenied =&gt; io::ErrorKind::PermissionDenied,
-            ErrorKind::InvalidInput =&gt; io::ErrorKind::InvalidInput,
             <span class="kw">_ </span>=&gt; io::ErrorKind::Other,
         };
 

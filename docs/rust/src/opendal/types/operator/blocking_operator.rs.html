@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/types/operator/blocking_operator.rs`."><title>blocking_operator.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/types/operator/blocking_operator.rs`."><title>blocking_operator.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1196,6 +1194,11 @@
 <a href="#1194" id="1194">1194</a>
 <a href="#1195" id="1195">1195</a>
 <a href="#1196" id="1196">1196</a>
+<a href="#1197" id="1197">1197</a>
+<a href="#1198" id="1198">1198</a>
+<a href="#1199" id="1199">1199</a>
+<a href="#1200" id="1200">1200</a>
+<a href="#1201" id="1201">1201</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1213,11 +1216,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>bytes::Bytes;
-
-<span class="kw">use </span><span class="kw">super</span>::operator_functions::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::BlockingRead;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteBuf;
+</span><span class="kw">use </span><span class="kw">super</span>::operator_functions::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -1231,7 +1230,7 @@
 ///
 /// Read more backend init examples in [`services`]
 ///
-/// ```rust
+/// ```rust,no_run
 /// # use anyhow::Result;
 /// use opendal::services::Fs;
 /// use opendal::BlockingOperator;
@@ -1239,11 +1238,7 @@
 ///
 /// fn main() -&gt; Result&lt;()&gt; {
 ///     // Create fs backend builder.
-///     let mut builder = Fs::default();
-///     // Set the root for fs, all operations will happen under this root.
-///     //
-///     // NOTE: the root must be absolute path.
-///     builder.root("/tmp");
+///     let builder = Fs::default().root("/tmp");
 ///
 ///     // Build an `BlockingOperator` to start operating the storage.
 ///     let _: BlockingOperator = Operator::new(builder)?.finish().blocking();
@@ -1264,12 +1259,9 @@
 /// use opendal::BlockingOperator;
 /// use opendal::Operator;
 ///
-/// #[tokio::main]
-/// async fn main() -&gt; Result&lt;()&gt; {
+/// async fn test() -&gt; Result&lt;()&gt; {
 ///     // Create fs backend builder.
-///     let mut builder = S3::default();
-///     builder.bucket("test");
-///     builder.region("us-east-1");
+///     let mut builder = S3::default().bucket("test").region("us-east-1");
 ///
 ///     // Build an `BlockingOperator` with blocking layer to start operating the storage.
 ///     let _: BlockingOperator = Operator::new(builder)?
@@ -1282,13 +1274,13 @@
 /// ```
 </span><span class="attr">#[derive(Clone, Debug)]
 </span><span class="kw">pub struct </span>BlockingOperator {
-    accessor: FusedAccessor,
+    accessor: Accessor,
 
     limit: usize,
 }
 
 <span class="kw">impl </span>BlockingOperator {
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>FusedAccessor {
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Accessor {
         <span class="kw-2">&amp;</span><span class="self">self</span>.accessor
     }
 
@@ -1296,7 +1288,7 @@
     ///
     /// # Note
     /// default batch limit is 1000.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_inner(accessor: FusedAccessor) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_inner(accessor: Accessor) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>limit = accessor
             .info()
             .full_capability()
@@ -1344,9 +1336,9 @@
     ///
     /// # Notes
     ///
-    /// For fetch metadata of entries returned by [`Lister`], it's better to use [`list_with`] and
-    /// [`lister_with`] with `metakey` query like `Metakey::ContentLength | Metakey::LastModified`
-    /// so that we can avoid extra requests.
+    /// For fetch metadata of entries returned by [`BlockingLister`], it's better to
+    /// use [`BlockingOperator::list_with`] and [`BlockingOperator::lister_with`] with `metakey`
+    /// query like `Metakey::ContentLength | Metakey::LastModified` so that we can avoid extra requests.
     ///
     /// # Behavior
     ///
@@ -1401,8 +1393,9 @@
     ///
     /// # Notes
     ///
-    /// For fetch metadata of entries returned by [`Lister`], it's better to use [`list_with`] and
-    /// [`lister_with`] with `metakey` query like `Metakey::ContentLength | Metakey::LastModified`
+    /// For fetch metadata of entries returned by [`Lister`], it's better to use
+    /// [`Operator::list_with`] and [`Operator::lister_with`] with `metakey` query like
+    /// `Metakey::ContentLength | Metakey::LastModified`
     /// so that we can avoid extra requests.
     ///
     /// # Behavior
@@ -1483,11 +1476,36 @@
     /// use anyhow::Result;
     /// use opendal::BlockingOperator;
     /// fn test(op: BlockingOperator) -&gt; Result&lt;()&gt; {
+    ///     let _ = op.exists("test")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    </span><span class="kw">pub fn </span>exists(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;bool&gt; {
+        <span class="kw">let </span>r = <span class="self">self</span>.stat(path);
+        <span class="kw">match </span>r {
+            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>),
+            <span class="prelude-val">Err</span>(err) =&gt; <span class="kw">match </span>err.kind() {
+                ErrorKind::NotFound =&gt; <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>),
+                <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(err),
+            },
+        }
+    }
+
+    <span class="doccomment">/// Check if this path exists or not.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use anyhow::Result;
+    /// use opendal::BlockingOperator;
+    /// fn test(op: BlockingOperator) -&gt; Result&lt;()&gt; {
     ///     let _ = op.is_exist("test")?;
     ///
     ///     Ok(())
     /// }
     /// ```
+    </span><span class="attr">#[deprecated(note = <span class="string">"rename to `exists` for consistence with `std::fs::exists`"</span>)]
     </span><span class="kw">pub fn </span>is_exist(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;bool&gt; {
         <span class="kw">let </span>r = <span class="self">self</span>.stat(path);
         <span class="kw">match </span>r {
@@ -1515,7 +1533,7 @@
     /// # Examples
     ///
     /// ```no_run
-    /// # use std::io::Result;
+    /// # use opendal::Result;
     /// # use opendal::BlockingOperator;
     /// # use futures::TryStreamExt;
     /// # fn test(op: BlockingOperator) -&gt; Result&lt;()&gt; {
@@ -1550,7 +1568,7 @@
     /// # Examples
     ///
     /// ```no_run
-    /// # use std::io::Result;
+    /// # use opendal::Result;
     /// # use opendal::BlockingOperator;
     /// #
     /// # fn test(op: BlockingOperator) -&gt; Result&lt;()&gt; {
@@ -1558,7 +1576,7 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;&gt; {
+    </span><span class="kw">pub fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
         <span class="self">self</span>.read_with(path).call()
     }
 
@@ -1585,8 +1603,8 @@
         FunctionRead(OperatorFunction::new(
             <span class="self">self</span>.inner().clone(),
             path,
-            OpRead::default(),
-            |inner, path, args| {
+            (OpRead::default(), BytesRange::default()),
+            |inner, path, (args, range)| {
                 <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(
                         Error::new(ErrorKind::IsADirectory, <span class="string">"read path is a directory"</span>)
@@ -1596,22 +1614,9 @@
                     );
                 }
 
-                <span class="kw">let </span>range = args.range();
-                <span class="kw">let </span>(size_hint, range) = <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = range.size() {
-                    (size, range)
-                } <span class="kw">else </span>{
-                    <span class="kw">let </span>size = inner
-                        .blocking_stat(<span class="kw-2">&amp;</span>path, OpStat::default())<span class="question-mark">?
-                        </span>.into_metadata()
-                        .content_length();
-                    <span class="kw">let </span>range = range.complete(size);
-                    (range.size().unwrap(), range)
-                };
-
-                <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw-2">mut </span>s) = inner.blocking_read(<span class="kw-2">&amp;</span>path, args.with_range(range))<span class="question-mark">?</span>;
-                <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::with_capacity(size_hint <span class="kw">as </span>usize);
-                s.read_to_end(<span class="kw-2">&amp;mut </span>buf)<span class="question-mark">?</span>;
-
+                <span class="kw">let </span>context = ReadContext::new(inner, path, args, OpReader::default());
+                <span class="kw">let </span>r = BlockingReader::new(context);
+                <span class="kw">let </span>buf = r.read(range.to_range())<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(buf)
             },
         ))
@@ -1622,7 +1627,7 @@
     /// # Examples
     ///
     /// ```no_run
-    /// # use std::io::Result;
+    /// # use opendal::Result;
     /// # use opendal::BlockingOperator;
     /// # use futures::TryStreamExt;
     /// # fn test(op: BlockingOperator) -&gt; Result&lt;()&gt; {
@@ -1644,7 +1649,10 @@
     /// use opendal::EntryMode;
     /// use opendal::Metakey;
     /// # fn test(op: BlockingOperator) -&gt; Result&lt;()&gt; {
-    /// let r = op.reader_with("path/to/file").range(0..10).call()?;
+    /// let r = op
+    ///     .reader_with("path/to/file")
+    ///     .version("version_id")
+    ///     .call()?;
     /// # Ok(())
     /// # }
     /// ```
@@ -1665,7 +1673,8 @@
                     );
                 }
 
-                BlockingReader::create(inner.clone(), <span class="kw-2">&amp;</span>path, args)
+                <span class="kw">let </span>context = ReadContext::new(inner, path, args, OpReader::default());
+                <span class="prelude-val">Ok</span>(BlockingReader::new(context))
             },
         ))
     }
@@ -1679,7 +1688,7 @@
     /// # Examples
     ///
     /// ```no_run
-    /// # use std::io::Result;
+    /// # use opendal::Result;
     /// # use opendal::BlockingOperator;
     /// # use futures::StreamExt;
     /// # use futures::SinkExt;
@@ -1690,7 +1699,7 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, bs: <span class="kw">impl </span>Into&lt;Bytes&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    </span><span class="kw">pub fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, bs: <span class="kw">impl </span>Into&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.write_with(path, bs).call()
     }
 
@@ -1706,7 +1715,7 @@
     /// # Examples
     ///
     /// ```
-    /// # use std::io::Result;
+    /// # use opendal::Result;
     /// # use opendal::BlockingOperator;
     ///
     /// # fn test(op: BlockingOperator) -&gt; Result&lt;()&gt; {
@@ -1763,7 +1772,7 @@
     /// # Examples
     ///
     /// ```
-    /// # use std::io::Result;
+    /// # use opendal::Result;
     /// # use opendal::BlockingOperator;
     ///
     /// # fn test(op: BlockingOperator) -&gt; Result&lt;()&gt; {
@@ -1831,7 +1840,7 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>write_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, bs: <span class="kw">impl </span>Into&lt;Bytes&gt;) -&gt; FunctionWrite {
+    </span><span class="kw">pub fn </span>write_with(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, bs: <span class="kw">impl </span>Into&lt;Buffer&gt;) -&gt; FunctionWrite {
         <span class="kw">let </span>path = normalize_path(path);
 
         <span class="kw">let </span>bs = bs.into();
@@ -1839,8 +1848,8 @@
         FunctionWrite(OperatorFunction::new(
             <span class="self">self</span>.inner().clone(),
             path,
-            (OpWrite::default(), bs),
-            |inner, path, (args, <span class="kw-2">mut </span>bs)| {
+            (OpWrite::default(), OpWriter::default(), bs),
+            |inner, path, (args, options, bs)| {
                 <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(
                         Error::new(ErrorKind::IsADirectory, <span class="string">"write path is a directory"</span>)
@@ -1850,13 +1859,10 @@
                     );
                 }
 
-                <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw-2">mut </span>w) = inner.blocking_write(<span class="kw-2">&amp;</span>path, args)<span class="question-mark">?</span>;
-                <span class="kw">while </span>bs.remaining() &gt; <span class="number">0 </span>{
-                    <span class="kw">let </span>n = w.write(<span class="kw-2">&amp;</span>bs)<span class="question-mark">?</span>;
-                    bs.advance(n);
-                }
+                <span class="kw">let </span>context = WriteContext::new(inner, path, args, options);
+                <span class="kw">let </span><span class="kw-2">mut </span>w = BlockingWriter::new(context)<span class="question-mark">?</span>;
+                w.write(bs)<span class="question-mark">?</span>;
                 w.close()<span class="question-mark">?</span>;
-
                 <span class="prelude-val">Ok</span>(())
             },
         ))
@@ -1871,7 +1877,7 @@
     /// # Examples
     ///
     /// ```no_run
-    /// # use std::io::Result;
+    /// # use opendal::Result;
     /// # use opendal::BlockingOperator;
     /// # use futures::StreamExt;
     /// # use futures::SinkExt;
@@ -1912,8 +1918,8 @@
         FunctionWriter(OperatorFunction::new(
             <span class="self">self</span>.inner().clone(),
             path,
-            OpWrite::default(),
-            |inner, path, args| {
+            (OpWrite::default(), OpWriter::default()),
+            |inner, path, (args, options)| {
                 <span class="kw">let </span>path = normalize_path(<span class="kw-2">&amp;</span>path);
 
                 <span class="kw">if </span>!validate_path(<span class="kw-2">&amp;</span>path, EntryMode::FILE) {
@@ -1925,7 +1931,9 @@
                     );
                 }
 
-                BlockingWriter::create(inner.clone(), <span class="kw-2">&amp;</span>path, args)
+                <span class="kw">let </span>context = WriteContext::new(inner, path, args, options);
+                <span class="kw">let </span>w = BlockingWriter::new(context)<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(w)
             },
         ))
     }
@@ -2054,17 +2062,20 @@
     /// # }
     /// ```
     </span><span class="kw">pub fn </span>remove_all(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>meta = <span class="kw">match </span><span class="self">self</span>.stat(path) {
-            <span class="prelude-val">Ok</span>(metadata) =&gt; metadata,
+        <span class="kw">match </span><span class="self">self</span>.stat(path) {
+            <span class="prelude-val">Ok</span>(metadata) =&gt; {
+                <span class="kw">if </span>metadata.mode() != EntryMode::DIR {
+                    <span class="self">self</span>.delete(path)<span class="question-mark">?</span>;
+                    <span class="comment">// There may still be objects prefixed with the path in some backend, so we can't return here.
+                </span>}
+            }
 
-            <span class="prelude-val">Err</span>(e) <span class="kw">if </span>e.kind() == ErrorKind::NotFound =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(()),
+            <span class="comment">// If dir not found, it may be a prefix in object store like S3,
+            // and we still need to delete objects under the prefix.
+            </span><span class="prelude-val">Err</span>(e) <span class="kw">if </span>e.kind() == ErrorKind::NotFound =&gt; {}
 
             <span class="prelude-val">Err</span>(e) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(e),
         };
-
-        <span class="kw">if </span>meta.mode() != EntryMode::DIR {
-            <span class="kw">return </span><span class="self">self</span>.delete(path);
-        }
 
         <span class="kw">let </span>obs = <span class="self">self</span>.lister_with(path).recursive(<span class="bool-val">true</span>).call()<span class="question-mark">?</span>;
 
@@ -2077,9 +2088,6 @@
                 <span class="prelude-val">Err</span>(e) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(e),
             }
         }
-
-        <span class="comment">// Remove the directory itself.
-        </span><span class="self">self</span>.delete(path)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(())
     }

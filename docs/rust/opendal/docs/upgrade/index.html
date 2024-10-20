@@ -1,18 +1,193 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Upgrade and migrate procedures while OpenDAL meets breaking changes."><title>opendal::docs::upgrade - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt="logo"></a><h2><a href="../../../opendal/index.html">opendal</a><span class="version">0.45.0</span></h2></div><h2 class="location"><a href="#">Module upgrade</a></h2><div class="sidebar-elems"><h2><a href="../index.html">In opendal::docs</a></h2></div></nav><div class="sidebar-resizer"></div>
-    <main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Module <a href="../../index.html">opendal</a>::<wbr><a href="../index.html">docs</a>::<wbr><a class="mod" href="#">upgrade</a><button id="copy-path" title="Copy item path to clipboard"><img src="../../../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="src" href="../../../src/opendal/docs/mod.rs.html#38">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><span class="item-info"><div class="stab portability">Available on <strong><code>docs</code></strong> only.</div></span><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Upgrade and migrate procedures while OpenDAL meets breaking changes.</p>
-<h2 id="upgrade-to-v045"><a class="doc-anchor" href="#upgrade-to-v045">§</a>Upgrade to v0.45</h2><h3 id="public-api"><a class="doc-anchor" href="#public-api">§</a>Public API</h3><h4 id="blockinglayer-is-not-enabled-by-default"><a class="doc-anchor" href="#blockinglayer-is-not-enabled-by-default">§</a>BlockingLayer is not enabled by default</h4>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Upgrade and migrate procedures while OpenDAL meets breaking changes."><title>opendal::docs::upgrade - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../../opendal/index.html"><img src="https://raw.githubusercontent.com/apache/opendal/main/website/static/img/logo.svg" alt="logo"></a><h2><a href="../../../opendal/index.html">opendal</a><span class="version">0.50.1</span></h2></div><h2 class="location"><a href="#">Module upgrade</a></h2><div class="sidebar-elems"><h2><a href="../index.html">In opendal::docs</a></h2></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1>Module <a href="../../index.html">opendal</a>::<wbr><a href="../index.html">docs</a>::<wbr><a class="mod" href="#">upgrade</a><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><span class="out-of-band"><a class="src" href="../../../src/opendal/docs/mod.rs.html#41">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><span class="item-info"><div class="stab portability">Available on <strong><code>docsrs</code></strong> only.</div></span><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Upgrade and migrate procedures while OpenDAL meets breaking changes.</p>
+<h2 id="upgrade-to-v050"><a class="doc-anchor" href="#upgrade-to-v050">§</a>Upgrade to v0.50</h2><h3 id="public-api"><a class="doc-anchor" href="#public-api">§</a>Public API</h3><h4 id="services-postgresqls-connect-string-now-supports-only-url-format"><a class="doc-anchor" href="#services-postgresqls-connect-string-now-supports-only-url-format">§</a><code>services-postgresql</code>’s connect string now supports only URL format</h4>
+<p>Previously, it supports both URL format and key-value format. After switching the implementation from <code>tokio-postgres</code> to <code>sqlx</code>, the service now supports only the URL format.</p>
+<h4 id="list-now-returns-path-itself"><a class="doc-anchor" href="#list-now-returns-path-itself">§</a><code>list</code> now returns path itself</h4>
+<p>Previously, <code>list(&quot;a/b&quot;)</code> would not return <code>a/b</code> even if it does exist. Since v0.50.0, this behavior has been changed. OpenDAL will now return the path itself if it exists. This change applies to all cases, whether the path is a directory or a file.</p>
+<h4 id="refactoring-of-the-metrics-related-layer"><a class="doc-anchor" href="#refactoring-of-the-metrics-related-layer">§</a>Refactoring of the metrics-related layer</h4>
+<p>In OpenDAL v0.50.0, we did a refactor on all metrics-related layers. They are now sharing the same underlying implemenationts. <code>PrometheusLayer</code>, <code>PrometheusClientLayer</code> and <code>MetricsLayer</code> are now have similar public APIs and exactly the same metrics value.</p>
+<h2 id="upgrade-to-v049"><a class="doc-anchor" href="#upgrade-to-v049">§</a>Upgrade to v0.49</h2><h3 id="public-api-1"><a class="doc-anchor" href="#public-api-1">§</a>Public API</h3><h4 id="configurator-now-returns-associated-builder-instead"><a class="doc-anchor" href="#configurator-now-returns-associated-builder-instead">§</a><code>Configurator</code> now returns associated builder instead</h4>
+<p><code>Configurator</code> used to return <code>impl Builder</code>, but now it returns associated builder type directly. This will allow users to use the builder in a more flexible way.</p>
+<div class="example-wrap"><pre class="language-diff"><code>impl Configurator for MemoryConfig {
+-    fn into_builder(self) -&gt; impl Builder {
++    type Builder = MemoryBuilder;
++    fn into_builder(self) -&gt; Self::Builder {
+        MemoryBuilder { config: self }
+    }
+}
+</code></pre></div><h4 id="logginglayer-now-accepts-logginginterceptor"><a class="doc-anchor" href="#logginglayer-now-accepts-logginginterceptor">§</a><code>LoggingLayer</code> now accepts <code>LoggingInterceptor</code></h4>
+<p><code>LoggingLayer</code> now accepts <code>LoggingInterceptor</code> trait instead of configuration. This change will allow users to customize the logging behavior more flexibly.</p>
+<div class="example-wrap"><pre class="language-diff"><code>pub trait LoggingInterceptor: Debug + Clone + Send + Sync + Unpin + &#39;static {
+    fn log(
+        &amp;self,
+        info: &amp;AccessorInfo,
+        operation: Operation,
+        context: &amp;[(&amp;str, &amp;str)],
+        message: &amp;str,
+        err: Option&lt;&amp;Error&gt;,
+    );
+}
+</code></pre></div>
+<p>Users can now implement the log in the way they want.</p>
+<h2 id="upgrade-to-v048"><a class="doc-anchor" href="#upgrade-to-v048">§</a>Upgrade to v0.48</h2><h3 id="public-api-2"><a class="doc-anchor" href="#public-api-2">§</a>Public API</h3><h4 id="typo-in-customized_credential_load"><a class="doc-anchor" href="#typo-in-customized_credential_load">§</a>Typo in <code>customized_credential_load</code></h4>
+<p>Since v0.48, the <code>customed_credential_load</code> function has been renamed to <code>customized_credential_load</code> to fix the typo of <code>customized</code>.</p>
+<div class="example-wrap"><pre class="language-diff"><code>- builder.customed_credential_load(v);
++ builder.customized_credential_load(v);
+</code></pre></div><h4 id="s3-service-rename-security_token-to-session_token"><a class="doc-anchor" href="#s3-service-rename-security_token-to-session_token">§</a>S3 service rename <code>security_token</code> to <code>session_token</code></h4>
+<p><a href="https://aws.amazon.com/blogs/security/a-new-and-standardized-way-to-manage-credentials-in-the-aws-sdks/">In 2014 Amazon switched</a> from <code>AWS_SECURITY_TOKEN</code> to <code>AWS_SESSION_TOKEN</code>. To be consistent with the naming of AWS STS, we have renamed the <code>security_token</code> field to <code>session_token</code> in the S3 service.</p>
+<div class="example-wrap"><pre class="language-diff"><code>- builder.security_token(v);
++ builder.session_token(v);
+</code></pre></div><h4 id="operator-from_iter-and-via_iter-replaces-from_map-and-via_map"><a class="doc-anchor" href="#operator-from_iter-and-via_iter-replaces-from_map-and-via_map">§</a>Operator <code>from_iter</code> and <code>via_iter</code> replaces <code>from_map</code> and <code>via_map</code></h4>
+<p>Since v0.48, Operator’s new APIs <code>from_iter</code> and <code>via_iter</code> methods have deprecated the <code>from_map</code> and <code>via_map</code> methods.</p>
+<div class="example-wrap"><pre class="language-diff"><code>- Operator::from_map::&lt;Fs&gt;(map)?.finish();
++ Operator::from_iter::&lt;Fs&gt;(map)?.finish();
+</code></pre></div>
+<p>New API <code>from_iter</code> and <code>via_iter</code> should cover all use cases of <code>from_map</code> and <code>via_map</code>.</p>
+<h4 id="service-builder-now-takes-ownership"><a class="doc-anchor" href="#service-builder-now-takes-ownership">§</a>Service builder now takes ownership</h4>
+<p>Since v0.48, all service builder now takes ownership <code>self</code> instead of <code>&amp;mut self</code>. This change will allow users to configure the service in a more flexible way.</p>
+<div class="example-wrap"><pre class="language-diff"><code>- let mut builder = S3::default();
+- builder.bucket(&quot;test&quot;);
+- builder.root(&quot;/path/to/root&quot;);
++ let builder = S3::default().bucket(&quot;test&quot;).root(&quot;/path/to/root&quot;);
+  let op = Operator::new(builder)?.finish();
+</code></pre></div><h3 id="raw-api"><a class="doc-anchor" href="#raw-api">§</a>Raw API</h3><h4 id="oiowritewrite-will-write-the-whole-buffer"><a class="doc-anchor" href="#oiowritewrite-will-write-the-whole-buffer">§</a><code>oio::Write::write</code> will write the whole buffer</h4>
+<p>Starting from version 0.48, <code>oio::Write::write</code> now writes the entire buffer. This update aligns the API more closely with <code>oio::Read::read</code> and simplifies the implementation of concurrent writing.</p>
+<div class="example-wrap"><pre class="language-diff"><code>  trait Write {
+-     fn write(&amp;mut self, bs: Buffer) -&gt; impl Future&lt;Output = Result&lt;usize&gt;&gt;;
++     fn write(&amp;mut self, bs: Buffer) -&gt; impl Future&lt;Output = Result&lt;()&gt;&gt;;
+  }
+</code></pre></div>
+<p><code>write</code> will now return <code>Result&lt;()&gt;</code> instead of <code>Result&lt;usize&gt;</code>. The number of bytes written can be obtained from the buffer’s length.</p>
+<h4 id="accessmetadata-will-return-arcaccessinfo"><a class="doc-anchor" href="#accessmetadata-will-return-arcaccessinfo">§</a><code>Access::metadata()</code> will return <code>Arc&lt;AccessInfo&gt;</code></h4>
+<p>Starting from version 0.48, <code>Access::metadata()</code> will return <code>Arc&lt;AccessInfo&gt;</code> instead of <code>AccessInfo</code>. This change is intended to improve performance and reduce memory usage.</p>
+<div class="example-wrap"><pre class="language-diff"><code>  trait Access {
+-     fn metadata(&amp;self) -&gt; AccessInfo;
++     fn metadata(&amp;self) -&gt; Arc&lt;AccessInfo&gt;;
+  }
+</code></pre></div><h4 id="minitracelayer-renamed-to-fastracelayer"><a class="doc-anchor" href="#minitracelayer-renamed-to-fastracelayer">§</a><code>MinitraceLayer</code> renamed to <code>FastraceLayer</code></h4>
+<p>The <code>MinitraceLayer</code> has been renamed to <code>FastraceLayer</code> to respond to the <a href="https://github.com/tikv/minitrace-rust/issues/229">transition from <code>minitrace</code> to <code>fastrace</code></a>.</p>
+<div class="example-wrap"><pre class="language-diff"><code>- use opendal::layers::MinitraceLayer;
++ use opendal::layers::FastraceLayer;
+</code></pre></div><h4 id="use-configurator-to-replace-builderfrom_config"><a class="doc-anchor" href="#use-configurator-to-replace-builderfrom_config">§</a>Use <code>Configurator</code> to replace <code>Builder::from_config</code></h4>
+<p>Since v0.48, the <code>Builder::from_config</code> and <code>Builder::from_map</code> method has been replaced by the <code>Configurator</code> trait. The <code>Configurator</code> trait provides a more flexible and extensible way to configure OpenDAL.</p>
+<p>Service implementers should update their code to use the <code>Configurator</code> trait instead:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">impl </span>Configurator <span class="kw">for </span>MemoryConfig {
+    <span class="kw">type </span>Builder = MemoryBuilder;
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Builder {
+        MemoryBuilder { config: <span class="self">self </span>}
+    }
+}
+
+<span class="kw">impl </span>Builder <span class="kw">for </span>MemoryBuilder {
+    <span class="kw">const </span>SCHEME: Scheme = Scheme::Memory;
+    <span class="kw">type </span>Config = MemoryConfig;
+
+    <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
+        ...
+    }
+}</code></pre></div>
+<h2 id="upgrade-to-v047"><a class="doc-anchor" href="#upgrade-to-v047">§</a>Upgrade to v0.47</h2><h3 id="public-api-3"><a class="doc-anchor" href="#public-api-3">§</a>Public API</h3><h4 id="reader-into_xxx-apis"><a class="doc-anchor" href="#reader-into_xxx-apis">§</a>Reader <code>into_xxx</code> APIs</h4>
+<p>Since v0.47, <code>Reader</code>’s <code>into_xxx</code> APIs requires <code>async</code> and returns <code>Result</code> instead.</p>
+<div class="example-wrap"><pre class="language-diff"><code>- let r = op.reader(&quot;test.txt&quot;).await?.into_futures_async_read(1024..2048);
++ let r = op.reader(&quot;test.txt&quot;).await?.into_futures_async_read(1024..2048).await?;
+</code></pre></div>
+<p>Affected API includes:</p>
+<ul>
+<li><code>Reader::into_futures_async_read</code></li>
+<li><code>Reader::into_bytes_stream</code></li>
+<li><code>BlockingReader::into_std_read</code></li>
+<li><code>BlockingReader::into_bytes_iterator</code></li>
+</ul>
+<h3 id="raw-api-1"><a class="doc-anchor" href="#raw-api-1">§</a>Raw API</h3><h4 id="bring-streaming-read-back"><a class="doc-anchor" href="#bring-streaming-read-back">§</a>Bring Streaming Read Back</h4>
+<p>As explained in <a href="https://github.com/apache/opendal/issues/4672">core: Bring Streaming Read Back</a>, we do need read streaming back for better performance and low memory usage.</p>
+<p>So our <code>oio::Read</code> changed back to streaming read instead:</p>
+<div class="example-wrap"><pre class="language-diff"><code>trait Read {
+-  async fn read(&amp;self, offset: u64, size: usize) -&gt; Result&lt;Buffer&gt;;
++  async fn read(&amp;mut self) -&gt; Result&lt;Buffer&gt;;
+}
+</code></pre></div>
+<p>All services and layers should be updated to meet this change.</p>
+<h2 id="upgrade-to-v046"><a class="doc-anchor" href="#upgrade-to-v046">§</a>Upgrade to v0.46</h2><h3 id="public-api-4"><a class="doc-anchor" href="#public-api-4">§</a>Public API</h3><h4 id="msrv-changed-to-175"><a class="doc-anchor" href="#msrv-changed-to-175">§</a>MSRV Changed to 1.75</h4>
+<p>Since 0.46, OpenDAL requires Rust 1.75.0 or later to use features like <a href="https://rust-lang.github.io/rfcs/3425-return-position-impl-trait-in-traits.html"><code>RPITIT</code></a> and <a href="https://rust-lang.github.io/rfcs/3185-static-async-fn-in-trait.html"><code>AFIT</code></a>.</p>
+<h4 id="services-feature-flag"><a class="doc-anchor" href="#services-feature-flag">§</a>Services Feature Flag</h4>
+<p>Starting with version 0.46, OpenDAL only includes the memory service by default to prevent compiling unnecessary service code. To use other services, please activate their respective feature flags.</p>
+<p>Additionally, we have removed all <code>reqwest</code>-related feature flags:</p>
+<ul>
+<li>Users must now directly use <code>reqwest</code>’s feature flags for options like <code>rustls</code>, <code>native-tls</code>, etc.</li>
+<li>The <code>rustls</code> feature is no longer enabled by default; it must be activated manually.</li>
+<li>OpenDAL no longer offers the <code>trust-dns</code> option; users should configure the client builder directly.</li>
+</ul>
+<h4 id="range-based-read"><a class="doc-anchor" href="#range-based-read">§</a>Range Based Read</h4>
+<p>Since v0.46, OpenDAL transformed it’s Read IO trait to range based instead of stateful poll based IO. This change will make the IO more efficient, easier for concurrency and ready for completion based IO.</p>
+<p><code>opendal::Reader</code> now have APIs like:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>r = op.reader(<span class="string">"test.txt"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+<span class="kw">let </span>buf = r.read(<span class="number">1024</span>..<span class="number">2048</span>).<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
+<h4 id="buffer-based-io"><a class="doc-anchor" href="#buffer-based-io">§</a>Buffer Based IO</h4>
+<p>Since version 0.46, OpenDAL features a native <code>Buffer</code> struct that supports both contiguous and non-contiguous buffers. This update enhances IO efficiency by minimizing unnecessary byte copying and enabling vectored IO.</p>
+<p>OpenDAL’s <code>Reader</code> will return <code>Buffer</code> and <code>Writer</code> will accept <code>Buffer</code> as input. Users who have implemented their own IO traits should update their code to use the new <code>Buffer</code> struct.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>r = op.reader(<span class="string">"test.txt"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+<span class="comment">// read returns `Buffer`
+</span><span class="kw">let </span>buf: Buffer = r.read(<span class="number">1024</span>..<span class="number">2048</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+
+<span class="kw">let </span>w = op.writer(<span class="string">"test.txt"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+
+<span class="comment">// Buffer can be created from continues bytes.
+</span>w.write(<span class="string">"hello, world"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+<span class="comment">// Buffer can also be created from non-continues bytes.
+</span>w.write(<span class="macro">vec!</span>[Bytes::from(<span class="string">"hello,"</span>), Bytes::from(<span class="string">"world!"</span>)]).<span class="kw">await</span><span class="question-mark">?</span>;
+
+<span class="comment">// Make sure file has been written completely.
+</span>w.close().<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
+<p>To enhance usability, we’ve integrated bridges into <code>bytes::Buf</code> and <code>bytes::BufMut</code>, allowing users to directly interact with the bytes API.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>r = op.reader(<span class="string">"test.txt"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+<span class="kw">let </span><span class="kw-2">mut </span>bs = <span class="macro">vec!</span>[];
+<span class="comment">// read_into accepts bytes::BufMut
+</span><span class="kw">let </span>buf: Buffer = r.read_into(<span class="kw-2">&amp;mut </span>bs, <span class="number">1024</span>..<span class="number">2048</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+
+<span class="kw">let </span>w = op.writer(<span class="string">"test.txt"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+
+<span class="comment">// write_from accepts bytes::Buf
+</span>w.write_from(<span class="string">"hello, world"</span>.as_bytes()).<span class="kw">await</span><span class="question-mark">?</span>;
+
+<span class="comment">// Make sure file has been written completely.
+</span>w.close().<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
+<h4 id="bridge-api"><a class="doc-anchor" href="#bridge-api">§</a>Bridge API</h4>
+<p>OpenDAL’s <code>Reader</code> and <code>Writer</code> previously implemented APIs such as <code>AsyncRead</code> and <code>AsyncWrite</code> directly. This design was not user-friendly, as it could lead to unexpected costs that users were unaware of in advance.</p>
+<p>Since v0.46, OpenDAL provides bridge APIs for <code>Reader</code> and <code>Writer</code> instead.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>r = op.reader(<span class="string">"test.txt"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+
+<span class="comment">// Convert into futures AsyncRead + AsyncSeek.
+</span><span class="kw">let </span>reader = r.into_futures_async_read(<span class="number">1024</span>..<span class="number">2048</span>);
+<span class="comment">// Convert into futures bytes stream.
+</span><span class="kw">let </span>stream = r.into_bytes_stream(<span class="number">1024</span>..<span class="number">2048</span>);
+
+<span class="kw">let </span>w = op.writer(<span class="string">"test.txt"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+
+<span class="comment">// Convert into futures AsyncWrite
+</span><span class="kw">let </span>writer = w.into_futures_async_write();
+<span class="comment">// Convert into futures bytes sink;
+</span><span class="kw">let </span>sink = w.into_bytes_sink();</code></pre></div>
+<h3 id="raw-api-2"><a class="doc-anchor" href="#raw-api-2">§</a>Raw API</h3><h4 id="async-in-io-trait"><a class="doc-anchor" href="#async-in-io-trait">§</a>Async in IO trait</h4>
+<p>Since version 0.46, OpenDAL has adopted Rust’s native <a href="https://blog.rust-lang.org/2023/12/21/async-fn-rpit-in-traits.html"><code>async_in_trait</code></a> for our core IO traits, including <code>oio::Read</code>, <code>oio::Write</code>, and <code>oio::List</code>.</p>
+<p>This update eliminates the need for manually written, poll-based state machines and simplifies the codebase. Consequently, OpenDAL now requires Rust version 1.75.0 or later.</p>
+<p>Users who have implemented their own IO traits should update their code to use the new async trait syntax.</p>
+<h2 id="upgrade-to-v045"><a class="doc-anchor" href="#upgrade-to-v045">§</a>Upgrade to v0.45</h2><h3 id="public-api-5"><a class="doc-anchor" href="#public-api-5">§</a>Public API</h3><h4 id="blockinglayer-is-not-enabled-by-default"><a class="doc-anchor" href="#blockinglayer-is-not-enabled-by-default">§</a>BlockingLayer is not enabled by default</h4>
 <p>To further enhance the optionality of <code>tokio</code>, we have introduced a new feature called <code>layers-blocking</code>. The default usage of the blocking layer has been disabled. To utilize the <code>BlockingLayer</code>, please enable the <code>layers-blocking</code> feature.</p>
 <h4 id="timeoutlayer-deprecated-with_speed"><a class="doc-anchor" href="#timeoutlayer-deprecated-with_speed">§</a>TimeoutLayer deprecated <code>with_speed</code></h4>
 <p>The <code>with_speed</code> API has been deprecated. Please use <code>with_io_timeout</code> instead.</p>
-<h3 id="raw-api"><a class="doc-anchor" href="#raw-api">§</a>Raw API</h3>
+<h3 id="raw-api-3"><a class="doc-anchor" href="#raw-api-3">§</a>Raw API</h3>
 <p>No raw API changes.</p>
-<h2 id="upgrade-to-v044"><a class="doc-anchor" href="#upgrade-to-v044">§</a>Upgrade to v0.44</h2><h3 id="public-api-1"><a class="doc-anchor" href="#public-api-1">§</a>Public API</h3><h4 id="moka-service-configuration"><a class="doc-anchor" href="#moka-service-configuration">§</a>Moka Service Configuration</h4>
+<h2 id="upgrade-to-v044"><a class="doc-anchor" href="#upgrade-to-v044">§</a>Upgrade to v0.44</h2><h3 id="public-api-6"><a class="doc-anchor" href="#public-api-6">§</a>Public API</h3><h4 id="moka-service-configuration"><a class="doc-anchor" href="#moka-service-configuration">§</a>Moka Service Configuration</h4>
 <ul>
 <li>The <code>thread_pool_enabled</code> option has been removed.</li>
 </ul>
 <h4 id="list-prefix-supported"><a class="doc-anchor" href="#list-prefix-supported">§</a>List Prefix Supported</h4>
 <p>After <a href="../rfcs/rfc_3243_list_prefix/index.html" title="mod opendal::docs::rfcs::rfc_3243_list_prefix">RFC: List Prefix</a> landed, we have changed the behavior of <code>list</code> a path without <code>/</code>. OpenDAL used to return <code>NotADirectory</code> error, but now we will return the list of entries that start with given prefix instead.</p>
-<h2 id="upgrade-to-v043"><a class="doc-anchor" href="#upgrade-to-v043">§</a>Upgrade to v0.43</h2><h3 id="public-api-2"><a class="doc-anchor" href="#public-api-2">§</a>Public API</h3><h4 id="list-recursive"><a class="doc-anchor" href="#list-recursive">§</a>List Recursive</h4>
+<h2 id="upgrade-to-v043"><a class="doc-anchor" href="#upgrade-to-v043">§</a>Upgrade to v0.43</h2><h3 id="public-api-7"><a class="doc-anchor" href="#public-api-7">§</a>Public API</h3><h4 id="list-recursive"><a class="doc-anchor" href="#list-recursive">§</a>List Recursive</h4>
 <p>After <a href="../rfcs/rfc_3526_list_recursive/index.html" title="mod opendal::docs::rfcs::rfc_3526_list_recursive">RFC-3526: List Recursive</a> landed, we have changed the <code>list</code> API to accept <code>recursive</code> instead of <code>delimiter</code>:</p>
 <p>Users will need to change the following usage:</p>
 <ul>
@@ -32,7 +207,7 @@
 </tbody></table>
 </div>
 <p>Services like s3, azblob can handle <code>stat(&quot;abc/&quot;)</code> correctly by check if there are objects with prefix <code>abc/</code>.</p>
-<h3 id="raw-api-1"><a class="doc-anchor" href="#raw-api-1">§</a>Raw API</h3><h4 id="lister-align"><a class="doc-anchor" href="#lister-align">§</a>Lister Align</h4>
+<h3 id="raw-api-4"><a class="doc-anchor" href="#raw-api-4">§</a>Raw API</h3><h4 id="lister-align"><a class="doc-anchor" href="#lister-align">§</a>Lister Align</h4>
 <p>We changed our internal <code>lister</code> implementation to align with the <code>list</code> public API for better performance and readability.</p>
 <ul>
 <li>trait <code>Page</code> =&gt; <code>List</code></li>
@@ -41,7 +216,7 @@
 <li>struct <code>BlockingPager</code> =&gt; <code>BlockingLister</code></li>
 </ul>
 <p>Every call to <code>next</code> will return an entry instead a page of entries. Also, we changed our async list api into poll based instead of <code>async_trait</code>.</p>
-<h2 id="upgrade-to-v042"><a class="doc-anchor" href="#upgrade-to-v042">§</a>Upgrade to v0.42</h2><h3 id="public-api-3"><a class="doc-anchor" href="#public-api-3">§</a>Public API</h3><h4 id="msrv-changed"><a class="doc-anchor" href="#msrv-changed">§</a>MSRV Changed</h4>
+<h2 id="upgrade-to-v042"><a class="doc-anchor" href="#upgrade-to-v042">§</a>Upgrade to v0.42</h2><h3 id="public-api-8"><a class="doc-anchor" href="#public-api-8">§</a>Public API</h3><h4 id="msrv-changed"><a class="doc-anchor" href="#msrv-changed">§</a>MSRV Changed</h4>
 <p>OpenDAL bumps it’s MSRV to 1.67.0.</p>
 <h4 id="s3-service-configuration"><a class="doc-anchor" href="#s3-service-configuration">§</a>S3 Service Configuration</h4>
 <ul>
@@ -54,14 +229,14 @@
 </ul>
 <h4 id="ghac-service-configuration"><a class="doc-anchor" href="#ghac-service-configuration">§</a>Ghac Service Configuration</h4>
 <ul>
-<li>The <code>enable_create_simulation</code> option has been removed. We add this option to allow ghac simulate create empty file, but it’s could result in unexpected behavior when users create a file with content length <code>1</code>. So we remove it.</li>
+<li>The <code>enable_create_simulation</code> option has been removed. We add this option to allow ghac simulate create empty file, but it could result in unexpected behavior when users create a file with content length <code>1</code>. So we remove it.</li>
 </ul>
 <h4 id="wasabi-service-removed"><a class="doc-anchor" href="#wasabi-service-removed">§</a>Wasabi Service Removed</h4>
 <p><code>wasabi</code> service native support has been removed. Users who want to access wasabi can use our <code>s3</code> service instead.</p>
 <h2 id="upgrade-to-v041"><a class="doc-anchor" href="#upgrade-to-v041">§</a>Upgrade to v0.41</h2>
 <p>There is no public API and raw API changes.</p>
-<h2 id="upgrade-to-v040"><a class="doc-anchor" href="#upgrade-to-v040">§</a>Upgrade to v0.40</h2><h3 id="public-api-4"><a class="doc-anchor" href="#public-api-4">§</a>Public API</h3><h4 id="rfc-2578-merge-append-into-write"><a class="doc-anchor" href="#rfc-2578-merge-append-into-write">§</a>RFC-2578 Merge Append Into Write</h4>
-<p><a href="crate::docs::rfcs::rfc_2578_merge_append_into_write">RFC-2578</a> merges <code>append</code> into <code>write</code> and removes <code>append</code> API.</p>
+<h2 id="upgrade-to-v040"><a class="doc-anchor" href="#upgrade-to-v040">§</a>Upgrade to v0.40</h2><h3 id="public-api-9"><a class="doc-anchor" href="#public-api-9">§</a>Public API</h3><h4 id="rfc-2578-merge-append-into-write"><a class="doc-anchor" href="#rfc-2578-merge-append-into-write">§</a>RFC-2578 Merge Append Into Write</h4>
+<p><a href="../rfcs/rfc_2758_merge_append_into_write/index.html" title="mod opendal::docs::rfcs::rfc_2758_merge_append_into_write">RFC-2578</a> merges <code>append</code> into <code>write</code> and removes <code>append</code> API.</p>
 <ul>
 <li>For writing a file at once, please use <code>op.write()</code> for convenience.</li>
 <li>For appending a file, please use <code>op.write_with().append(true)</code> instead of <code>op.append()</code>.</li>
@@ -80,7 +255,7 @@
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// Before
 </span><span class="kw">let </span>entries: Vec&lt;Entry&gt; = op.list(<span class="string">"dir/"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
-<span class="kw">for </span>entry <span class="kw">in </span>entris {
+<span class="kw">for </span>entry <span class="kw">in </span>entries {
   <span class="kw">let </span>meta = op.metadata(<span class="kw-2">&amp;</span>entry, Metakey::ContentLength | Metakey::ContentType).<span class="kw">await</span><span class="question-mark">?</span>;
   <span class="macro">println!</span>(<span class="string">"{} {}"</span>, entry.name(), entry.metadata().content_length());
 }
@@ -89,7 +264,7 @@
 </span><span class="kw">let </span>entries: Vec&lt;Entry&gt; = op
   .list_with(<span class="string">"dir/"</span>)
   .metakey(Metakey::ContentLength | Metakey::ContentType).<span class="kw">await</span><span class="question-mark">?</span>;
-<span class="kw">for </span>entry <span class="kw">in </span>entris {
+<span class="kw">for </span>entry <span class="kw">in </span>entries {
   <span class="macro">println!</span>(<span class="string">"{} {}"</span>, entry.name(), entry.metadata().content_length());
 }</code></pre></div>
 <h4 id="rfc-2852-native-capability"><a class="doc-anchor" href="#rfc-2852-native-capability">§</a>RFC-2852: Native Capability</h4>
@@ -98,7 +273,7 @@
 <li><code>native_capability</code> returns <code>true</code> if the capability is supported natively.</li>
 <li><code>full_capability</code> returns <code>true</code> if the capability is supported, maybe via a layer.</li>
 </ul>
-<p>Most of time, you can use <code>full_capability</code> to replace <code>capability</code> call. But if to check if the capability is supported natively for better performance design, please use <code>native_capability</code> instead.</p>
+<p>Most of time, you can use <code>full_capability</code> to replace <code>capability</code> call. But to check if the capability is supported natively for better performance design, please use <code>native_capability</code> instead.</p>
 <h4 id="buffered-writer"><a class="doc-anchor" href="#buffered-writer">§</a>Buffered Writer</h4>
 <p>OpenDAL v0.40 added buffered writer support!</p>
 <p>Users don’t need to specify the <code>content_length()</code> for writer anymore!</p>
@@ -115,26 +290,26 @@
 + op.read_with(path).range(range_start..range_end).await?;
 </code></pre></div><div class="example-wrap"><pre class="language-diff"><code>- let reader = op.range_reader(path, range_start..range_end).await?;
 + let reader = op.reader_with(path).range(range_start..range_end).await?;
-</code></pre></div><h3 id="raw-api-2"><a class="doc-anchor" href="#raw-api-2">§</a>Raw API</h3><h4 id="rfc-3017-remove-write-copy-from"><a class="doc-anchor" href="#rfc-3017-remove-write-copy-from">§</a>RFC-3017 Remove Write Copy From</h4>
-<p><a href="opendal::docs::rfcs::rfc_3017_remove_write_copy_from">RFC-3017</a> removes <code>copy_from</code> API from the <code>oio::Write</code> trait. Users who implements services and layers by hand should remove this API.</p>
-<h2 id="upgrade-to-v039"><a class="doc-anchor" href="#upgrade-to-v039">§</a>Upgrade to v0.39</h2><h3 id="public-api-5"><a class="doc-anchor" href="#public-api-5">§</a>Public API</h3><h4 id="service-s3-role-arn-behavior"><a class="doc-anchor" href="#service-s3-role-arn-behavior">§</a>Service S3 Role Arn Behavior</h4>
+</code></pre></div><h3 id="raw-api-5"><a class="doc-anchor" href="#raw-api-5">§</a>Raw API</h3><h4 id="rfc-3017-remove-write-copy-from"><a class="doc-anchor" href="#rfc-3017-remove-write-copy-from">§</a>RFC-3017 Remove Write Copy From</h4>
+<p><a href="../rfcs/rfc_3017_remove_write_copy_from/index.html" title="mod opendal::docs::rfcs::rfc_3017_remove_write_copy_from">RFC-3017</a> removes <code>copy_from</code> API from the <code>oio::Write</code> trait. Users who implements services and layers by hand should remove this API.</p>
+<h2 id="upgrade-to-v039"><a class="doc-anchor" href="#upgrade-to-v039">§</a>Upgrade to v0.39</h2><h3 id="public-api-10"><a class="doc-anchor" href="#public-api-10">§</a>Public API</h3><h4 id="service-s3-role-arn-behavior"><a class="doc-anchor" href="#service-s3-role-arn-behavior">§</a>Service S3 Role Arn Behavior</h4>
 <p>In PR #2687, OpenDAL changed the behavior when <code>role_arn</code> has been specified.</p>
 <p>OpenDAL used to override role_arn simply. But since this version, OpenDAL will make sure to use assume_role with specified <code>role_arn</code> and <code>external_id</code> (if supplied).</p>
 <h4 id="retrylayer-supports-retryinterceptor"><a class="doc-anchor" href="#retrylayer-supports-retryinterceptor">§</a>RetryLayer supports RetryInterceptor</h4>
 <p>In PR #2666, <code>RetryLayer</code> supports <code>RetryInterceptor</code>. To implement this change, <code>RetryLayer</code> changed it’s in-memory layout by adding a new generic parameter <code>I</code> to <code>RetryLayer&lt;I&gt;</code>.</p>
 <p>Users who stores <code>RetryLayer</code> in struct or enum will need to change the type if they don’t want to use default behavior.</p>
-<h3 id="raw-api-3"><a class="doc-anchor" href="#raw-api-3">§</a>Raw API</h3>
+<h3 id="raw-api-6"><a class="doc-anchor" href="#raw-api-6">§</a>Raw API</h3>
 <p>In PR #2698, OpenDAL re-org the internal structure of <code>opendal::raw::oio</code> and changed some APIs name.</p>
 <h2 id="upgrade-to-v038"><a class="doc-anchor" href="#upgrade-to-v038">§</a>Upgrade to v0.38</h2>
 <p>There are no public API changes.</p>
-<h3 id="raw-api-4"><a class="doc-anchor" href="#raw-api-4">§</a>Raw API</h3>
+<h3 id="raw-api-7"><a class="doc-anchor" href="#raw-api-7">§</a>Raw API</h3>
 <p>OpenDAL add the <code>Write::sink</code> API to enable streaming writing. This is a breaking change for users who depend on the raw API.</p>
-<p>For a quick fix, users who have implemented <code>opendal::raw::oio::Write</code> can return an <code>Unsupported</code> error for <code>Write::sink()</code>. </p>
-<p>More detailes could be found at <a href="../rfcs/rfc_2083_writer_sink_api/index.html" title="mod opendal::docs::rfcs::rfc_2083_writer_sink_api">RFC: Writer <code>sink</code> API</a>.</p>
+<p>For a quick fix, users who have implemented <code>opendal::raw::oio::Write</code> can return an <code>Unsupported</code> error for <code>Write::sink()</code>.</p>
+<p>More details could be found at <a href="../rfcs/rfc_2083_writer_sink_api/index.html" title="mod opendal::docs::rfcs::rfc_2083_writer_sink_api">RFC: Writer <code>sink</code> API</a>.</p>
 <h2 id="upgrade-to-v037"><a class="doc-anchor" href="#upgrade-to-v037">§</a>Upgrade to v0.37</h2>
 <p>In v0.37.0, OpenDAL bump the version of <code>reqsign</code> to v0.13.0.</p>
 <p>There are no public API and raw API changes.</p>
-<h2 id="upgrade-to-v036"><a class="doc-anchor" href="#upgrade-to-v036">§</a>Upgrade to v0.36</h2><h3 id="public-api-6"><a class="doc-anchor" href="#public-api-6">§</a>Public API</h3>
+<h2 id="upgrade-to-v036"><a class="doc-anchor" href="#upgrade-to-v036">§</a>Upgrade to v0.36</h2><h3 id="public-api-11"><a class="doc-anchor" href="#public-api-11">§</a>Public API</h3>
 <p>In v0.36, OpenDAL improving the <code>xxx_with</code> API by allow it to be called in chain:</p>
 <p>After this change, all <code>xxx_with</code> alike call will be changed from</p>
 
@@ -166,10 +341,10 @@
   .override_content_disposition(<span class="string">"&lt;content_disposition&gt;"</span>)
   .call()<span class="question-mark">?</span>;</code></pre></div>
 <p>Along with this change, users don’t need to call <code>OpXxx</code> anymore so we moved it to <code>raw</code> API.</p>
-<p>More detailes could be found at <a href="../rfcs/rfc_2299_chain_based_operator_api/index.html" title="mod opendal::docs::rfcs::rfc_2299_chain_based_operator_api">RFC: Chain Based Operator API</a>.</p>
-<h3 id="raw-api-5"><a class="doc-anchor" href="#raw-api-5">§</a>Raw API</h3>
+<p>More details could be found at <a href="../rfcs/rfc_2299_chain_based_operator_api/index.html" title="mod opendal::docs::rfcs::rfc_2299_chain_based_operator_api">RFC: Chain Based Operator API</a>.</p>
+<h3 id="raw-api-8"><a class="doc-anchor" href="#raw-api-8">§</a>Raw API</h3>
 <p>Migrated <code>opendal::ops</code> to <code>opendal::raw::ops</code>.</p>
-<h2 id="upgrade-to-v035"><a class="doc-anchor" href="#upgrade-to-v035">§</a>Upgrade to v0.35</h2><h3 id="public-api-7"><a class="doc-anchor" href="#public-api-7">§</a>Public API</h3>
+<h2 id="upgrade-to-v035"><a class="doc-anchor" href="#upgrade-to-v035">§</a>Upgrade to v0.35</h2><h3 id="public-api-12"><a class="doc-anchor" href="#public-api-12">§</a>Public API</h3>
 <ul>
 <li>OpenDAL removes rarely used <code>Operator::from_env</code> and <code>Operator::from_iter</code> APIs
 <ul>
@@ -177,24 +352,24 @@
 </ul>
 </li>
 </ul>
-<h3 id="raw-api-6"><a class="doc-anchor" href="#raw-api-6">§</a>Raw API</h3>
+<h3 id="raw-api-9"><a class="doc-anchor" href="#raw-api-9">§</a>Raw API</h3>
 <ul>
 <li>OpenDAL adds <code>append</code> support with could break existing layers. Please make sure <code>append</code> requests have been forward correctly.</li>
 <li>After the merging of <code>scan</code> and <code>list</code>, OpenDAL removes the <code>scan</code> from raw API. Please use <code>list_without_delimiter</code> instead.</li>
 </ul>
-<h2 id="upgrade-to-v034"><a class="doc-anchor" href="#upgrade-to-v034">§</a>Upgrade to v0.34</h2><h3 id="public-api-8"><a class="doc-anchor" href="#public-api-8">§</a>Public API</h3>
+<h2 id="upgrade-to-v034"><a class="doc-anchor" href="#upgrade-to-v034">§</a>Upgrade to v0.34</h2><h3 id="public-api-13"><a class="doc-anchor" href="#public-api-13">§</a>Public API</h3>
 <ul>
-<li>OpenDAL raises it’s MSRV to 1.65 for dependences changes</li>
+<li>OpenDAL raises it’s MSRV to 1.65 for dependencies changes</li>
 <li><code>OperatorInfo::can_scan</code> has been removed, to check if underlying services support scan a dir natively, please use <code>Capability::list_without_delimiter</code> instead.</li>
 </ul>
-<h3 id="raw-api-7"><a class="doc-anchor" href="#raw-api-7">§</a>Raw API</h3><h4 id="merged-scan-into-list"><a class="doc-anchor" href="#merged-scan-into-list">§</a>Merged <code>scan</code> into <code>list</code></h4>
+<h3 id="raw-api-10"><a class="doc-anchor" href="#raw-api-10">§</a>Raw API</h3><h4 id="merged-scan-into-list"><a class="doc-anchor" href="#merged-scan-into-list">§</a>Merged <code>scan</code> into <code>list</code></h4>
 <p>After <code>Capability</code> introduced, we have added <code>delimiter</code> in <code>OpList</code>. Users can specify the delimiter to <code>&quot;&quot;</code> or <code>&quot;/&quot;</code> to control the list behavior.</p>
 <p>Along with this change, <code>Operator::scan()</code> becomes a short alias of <code>Operator::list_with(OpList::new().with_delimiter(&quot;&quot;))</code>.</p>
 <h4 id="typed-kv-adapter"><a class="doc-anchor" href="#typed-kv-adapter">§</a>Typed Kv Adapter</h4>
 <p>In v0.34, OpenDAL adds a typed kv adapter for zero-copy read and write. If you are implemented kv adapter for a rust in-memory data struct, please consider migrate.</p>
-<h2 id="upgrade-to-v033"><a class="doc-anchor" href="#upgrade-to-v033">§</a>Upgrade to v0.33</h2><h3 id="public-api-9"><a class="doc-anchor" href="#public-api-9">§</a>Public API</h3>
+<h2 id="upgrade-to-v033"><a class="doc-anchor" href="#upgrade-to-v033">§</a>Upgrade to v0.33</h2><h3 id="public-api-14"><a class="doc-anchor" href="#public-api-14">§</a>Public API</h3>
 <p>OpenDAL 0.33 has redesigned the <code>Writer</code> API, replacing all instances of <code>writer.append()</code> with <code>writer.write()</code>. For more information, please refer to <a href="../../struct.Writer.html" title="struct opendal::Writer"><code>Writer</code></a>.</p>
-<h3 id="raw-api-8"><a class="doc-anchor" href="#raw-api-8">§</a>Raw API</h3>
+<h3 id="raw-api-11"><a class="doc-anchor" href="#raw-api-11">§</a>Raw API</h3>
 <p>In addition to the redesign of the <code>Writer</code> API, we have removed <code>append</code> from <code>oio::Write</code>. Therefore, users who implement services and layers should also remove it.</p>
 <p>After v0.33 landing, services should handle <code>OpWrite::content_length</code> correctly by following these guidelines:</p>
 <ul>
@@ -213,7 +388,7 @@
 <p>Previously, OpenDAL accepted <code>time::Duration</code> as input for <code>presign_xxx</code>. However, since v0.31, we have changed this to accept <code>std::time::Duration</code> so that users do not need to depend on <code>time</code>. Internally, we migrated from <code>time</code> to <code>chrono</code> for better integration with other parts of the ecosystem.</p>
 <h3 id="disable_ec2_metadata-for-services-s3"><a class="doc-anchor" href="#disable_ec2_metadata-for-services-s3">§</a><code>disable_ec2_metadata</code> for services s3</h3>
 <p>We have added a new configuration option called <code>disable_ec2_metadata</code> for the S3 service in response to a mistake where it was mixed up with another option called <code>disable_config_load</code>. Users who want to disable loading credentials from EC2 metadata should set this option instead.</p>
-<h3 id="services-feature-flag"><a class="doc-anchor" href="#services-feature-flag">§</a>Services Feature Flag</h3>
+<h3 id="services-feature-flag-1"><a class="doc-anchor" href="#services-feature-flag-1">§</a>Services Feature Flag</h3>
 <p>Starting from v0.31, all services in OpenDAL are split into different feature flags. To enable only S3 support, use the following TOML configuration:</p>
 <div class="example-wrap"><pre class="language-toml"><code>opendal = {
     version = &quot;0.31&quot;,
@@ -222,12 +397,12 @@
 }
 </code></pre></div><h2 id="upgrade-to-v030"><a class="doc-anchor" href="#upgrade-to-v030">§</a>Upgrade to v0.30</h2>
 <p>In version 0.30, we made significant breaking changes by removing objects. Our goal in doing so was to provide our users with APIs that are easier to understand and maintain.</p>
-<p>More detailes could be found at <a href="../rfcs/rfc_1477_remove_object_concept/index.html" title="mod opendal::docs::rfcs::rfc_1477_remove_object_concept">RFC: Remove Object Concept</a>.</p>
+<p>More details could be found at <a href="../rfcs/rfc_1477_remove_object_concept/index.html" title="mod opendal::docs::rfcs::rfc_1477_remove_object_concept">RFC: Remove Object Concept</a>.</p>
 <p>To upgrade to OpenDAL v0.30, users need to make the following changes:</p>
 <ul>
 <li>regex replace <code>object\((.*)\).reader\(\)</code> to <code>reader($1)</code>
 <ul>
-<li>replace the function on your case, it’s recomanded to do it one by one</li>
+<li>replace the function on your case, it’s recommended to do it one by one</li>
 </ul>
 </li>
 <li>rename <code>ObjectMetakey</code> =&gt; <code>Metakey</code></li>
@@ -265,7 +440,7 @@ w.close()</code></pre></div>
 +    type BlockingPager: output::BlockingPage;
 }
 </code></pre></div><h3 id="user-defined-layers"><a class="doc-anchor" href="#user-defined-layers">§</a>User defined layers</h3>
-<p>Due to this change, all layers implementation should be changed. If there is not changed over pager, they can by changed like the following:</p>
+<p>Due to this change, all layers implementation should be changed. If there is not changed over pager, they can be changed like the following:</p>
 <div class="example-wrap"><pre class="language-diff"><code>impl&lt;A: Accessor&gt; LayeredAccessor for MyAccessor&lt;A&gt; {
     type Inner = A;
     type Reader = MyReader&lt;A::Reader&gt;;
@@ -303,7 +478,7 @@ w.close()</code></pre></div>
 <div class="example-wrap"><pre class="language-diff"><code>- let op = Operator::new(builder.build()?);
 + let op = Operator::new(builder.build()?).finish();
 </code></pre></div>
-<p>By adding a <code>finish()</code> call, we will erase all generic types so that <code>Operator</code> can still be easily to used everywhere as before.</p>
+<p>By adding a <code>finish()</code> call, we will erase all generic types so that <code>Operator</code> can still be easily used everywhere as before.</p>
 <h3 id="accessor"><a class="doc-anchor" href="#accessor">§</a>Accessor</h3>
 <p>In v0.26, <code>Accessor</code> has been changed into trait with associated types.</p>
 <p>All services need to declare the types returned as <code>Reader</code> or <code>BlockingReader</code>:</p>
@@ -312,7 +487,7 @@ w.close()</code></pre></div>
     <span class="kw">type </span>Reader: output::Read;
     <span class="kw">type </span>BlockingReader: output::BlockingRead;
 }</code></pre></div>
-<p>If your service doesn’t support <code>read</code> or <code>blocking_read</code>, we can use <code>()</code> to represent an dummy reader:</p>
+<p>If your service doesn’t support <code>read</code> or <code>blocking_read</code>, we can use <code>()</code> to represent a dummy reader:</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">impl </span>Accessor <span class="kw">for </span>MyDummyAccessor {
     <span class="kw">type </span>Reader = ();

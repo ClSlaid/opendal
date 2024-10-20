@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/layers/error_context.rs`."><title>error_context.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/layers/error_context.rs`."><title>error_context.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -474,6 +472,14 @@
 <a href="#472" id="472">472</a>
 <a href="#473" id="473">473</a>
 <a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
+<a href="#482" id="482">482</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -493,17 +499,10 @@
 
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
-<span class="kw">use </span>std::io::SeekFrom;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
+<span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::TryFutureExt;
 
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::ListOperation;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::ReadOperation;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteOperation;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -511,37 +510,43 @@
 ///
 /// # Notes
 ///
-/// This layer will adding the following error context into all errors:
+/// This layer will add the following error context into all errors:
 ///
 /// - `service`: The [`Scheme`] of underlying service.
 /// - `operation`: The [`Operation`] of this operation
 /// - `path`: The path of this operation
+///
+/// Some operations may have additional context:
+///
+/// - `range`: The range the read operation is trying to read.
+/// - `read`: The already read size in given reader.
+/// - `size`: The size of the current write operation.
+/// - `written`: The already written size in given writer.
+/// - `listed`: The already listed size in given lister.
 </span><span class="kw">pub struct </span>ErrorContextLayer;
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Layer&lt;A&gt; <span class="kw">for </span>ErrorContextLayer {
-    <span class="kw">type </span>LayeredAccessor = ErrorContextAccessor&lt;A&gt;;
+<span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>ErrorContextLayer {
+    <span class="kw">type </span>LayeredAccess = ErrorContextAccessor&lt;A&gt;;
 
-    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccessor {
+    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess {
         <span class="kw">let </span>meta = inner.info();
         ErrorContextAccessor { meta, inner }
     }
 }
 
 <span class="doccomment">/// Provide error context wrapper for backend.
-</span><span class="kw">pub struct </span>ErrorContextAccessor&lt;A: Accessor&gt; {
-    meta: AccessorInfo,
+</span><span class="kw">pub struct </span>ErrorContextAccessor&lt;A: Access&gt; {
+    meta: Arc&lt;AccessorInfo&gt;,
     inner: A,
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Debug <span class="kw">for </span>ErrorContextAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; Debug <span class="kw">for </span>ErrorContextAccessor&lt;A&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         <span class="self">self</span>.inner.fmt(f)
     }
 }
 
-<span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-#[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-</span><span class="kw">impl</span>&lt;A: Accessor&gt; LayeredAccessor <span class="kw">for </span>ErrorContextAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; LayeredAccess <span class="kw">for </span>ErrorContextAccessor&lt;A&gt; {
     <span class="kw">type </span>Inner = A;
     <span class="kw">type </span>Reader = ErrorContextWrapper&lt;A::Reader&gt;;
     <span class="kw">type </span>BlockingReader = ErrorContextWrapper&lt;A::BlockingReader&gt;;
@@ -554,7 +559,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.inner
     }
 
-    <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
+    <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
         <span class="self">self</span>.meta.clone()
     }
 
@@ -570,25 +575,21 @@
     </span>}
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="kw">let </span>br = args.range();
-
+        <span class="kw">let </span>range = args.range();
         <span class="self">self</span>.inner
             .read(path, args)
             .map_ok(|(rp, r)| {
                 (
                     rp,
-                    ErrorContextWrapper {
-                        scheme: <span class="self">self</span>.meta.scheme(),
-                        path: path.to_string(),
-                        inner: r,
-                    },
+                    ErrorContextWrapper::new(<span class="self">self</span>.meta.scheme(), path.to_string(), r)
+                        .with_range(range),
                 )
             })
             .map_err(|err| {
                 err.with_operation(Operation::Read)
                     .with_context(<span class="string">"service"</span>, <span class="self">self</span>.meta.scheme())
                     .with_context(<span class="string">"path"</span>, path)
-                    .with_context(<span class="string">"range"</span>, br.to_string())
+                    .with_context(<span class="string">"range"</span>, range.to_string())
             })
             .<span class="kw">await
     </span>}
@@ -599,11 +600,7 @@
             .map_ok(|(rp, w)| {
                 (
                     rp,
-                    ErrorContextWrapper {
-                        scheme: <span class="self">self</span>.meta.scheme(),
-                        path: path.to_string(),
-                        inner: w,
-                    },
+                    ErrorContextWrapper::new(<span class="self">self</span>.meta.scheme(), path.to_string(), w),
                 )
             })
             .map_err(|err| {
@@ -666,11 +663,7 @@
             .map_ok(|(rp, p)| {
                 (
                     rp,
-                    ErrorContextWrapper {
-                        scheme: <span class="self">self</span>.meta.scheme(),
-                        path: path.to_string(),
-                        inner: p,
-                    },
+                    ErrorContextWrapper::new(<span class="self">self</span>.meta.scheme(), path.to_string(), p),
                 )
             })
             .map_err(|err| {
@@ -724,22 +717,21 @@
     }
 
     <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
+        <span class="kw">let </span>range = args.range();
         <span class="self">self</span>.inner
             .blocking_read(path, args)
             .map(|(rp, os)| {
                 (
                     rp,
-                    ErrorContextWrapper {
-                        scheme: <span class="self">self</span>.meta.scheme(),
-                        path: path.to_string(),
-                        inner: os,
-                    },
+                    ErrorContextWrapper::new(<span class="self">self</span>.meta.scheme(), path.to_string(), os)
+                        .with_range(range),
                 )
             })
             .map_err(|err| {
                 err.with_operation(Operation::BlockingRead)
                     .with_context(<span class="string">"service"</span>, <span class="self">self</span>.meta.scheme())
                     .with_context(<span class="string">"path"</span>, path)
+                    .with_context(<span class="string">"range"</span>, range.to_string())
             })
     }
 
@@ -749,11 +741,7 @@
             .map(|(rp, os)| {
                 (
                     rp,
-                    ErrorContextWrapper {
-                        scheme: <span class="self">self</span>.meta.scheme(),
-                        path: path.to_string(),
-                        inner: os,
-                    },
+                    ErrorContextWrapper::new(<span class="self">self</span>.meta.scheme(), path.to_string(), os),
                 )
             })
             .map_err(|err| {
@@ -803,11 +791,7 @@
             .map(|(rp, os)| {
                 (
                     rp,
-                    ErrorContextWrapper {
-                        scheme: <span class="self">self</span>.meta.scheme(),
-                        path: path.to_string(),
-                        inner: os,
-                    },
+                    ErrorContextWrapper::new(<span class="self">self</span>.meta.scheme(), path.to_string(), os),
                 )
             })
             .map_err(|err| {
@@ -822,130 +806,160 @@
     scheme: Scheme,
     path: String,
     inner: T,
+    range: BytesRange,
+    processed: u64,
+}
+
+<span class="kw">impl</span>&lt;T&gt; ErrorContextWrapper&lt;T&gt; {
+    <span class="kw">fn </span>new(scheme: Scheme, path: String, inner: T) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            scheme,
+            path,
+            inner,
+            range: BytesRange::default(),
+            processed: <span class="number">0</span>,
+        }
+    }
+
+    <span class="kw">fn </span>with_range(<span class="kw-2">mut </span><span class="self">self</span>, range: BytesRange) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.range = range;
+        <span class="self">self
+    </span>}
 }
 
 <span class="kw">impl</span>&lt;T: oio::Read&gt; oio::Read <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
-    <span class="kw">fn </span>poll_read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="self">self</span>.inner.poll_read(cx, buf).map_err(|err| {
-            err.with_operation(ReadOperation::Read)
-                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
-                .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-                .with_context(<span class="string">"read_buf"</span>, buf.len().to_string())
-        })
-    }
-
-    <span class="kw">fn </span>poll_seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, pos: SeekFrom) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;u64&gt;&gt; {
-        <span class="self">self</span>.inner.poll_seek(cx, pos).map_err(|err| {
-            err.with_operation(ReadOperation::Seek)
-                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
-                .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-        })
-    }
-
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;&gt; {
-        <span class="self">self</span>.inner.poll_next(cx).map_err(|err| {
-            err.with_operation(ReadOperation::Next)
-                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
-                .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-        })
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="self">self</span>.inner
+            .read()
+            .<span class="kw">await
+            </span>.map(|bs| {
+                <span class="self">self</span>.processed += bs.len() <span class="kw">as </span>u64;
+                bs
+            })
+            .map_err(|err| {
+                err.with_operation(Operation::ReaderRead)
+                    .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
+                    .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
+                    .with_context(<span class="string">"range"</span>, <span class="self">self</span>.range.to_string())
+                    .with_context(<span class="string">"read"</span>, <span class="self">self</span>.processed.to_string())
+            })
     }
 }
 
 <span class="kw">impl</span>&lt;T: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
-    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="self">self</span>.inner.read(buf).map_err(|err| {
-            err.with_operation(ReadOperation::BlockingRead)
-                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
-                .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-                .with_context(<span class="string">"read_buf"</span>, buf.len().to_string())
-        })
-    }
-
-    <span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        <span class="self">self</span>.inner.seek(pos).map_err(|err| {
-            err.with_operation(ReadOperation::BlockingSeek)
-                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
-                .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-                .with_context(<span class="string">"seek"</span>, <span class="macro">format!</span>(<span class="string">"{pos:?}"</span>))
-        })
-    }
-
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt; {
-        <span class="self">self</span>.inner.next().map(|v| {
-            v.map_err(|err| {
-                err.with_operation(ReadOperation::BlockingNext)
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="self">self</span>.inner
+            .read()
+            .map(|bs| {
+                <span class="self">self</span>.processed += bs.len() <span class="kw">as </span>u64;
+                bs
+            })
+            .map_err(|err| {
+                err.with_operation(Operation::BlockingReaderRead)
                     .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
                     .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
+                    .with_context(<span class="string">"range"</span>, <span class="self">self</span>.range.to_string())
+                    .with_context(<span class="string">"read"</span>, <span class="self">self</span>.processed.to_string())
             })
-        })
     }
 }
 
-<span class="attr">#[async_trait::async_trait]
-</span><span class="kw">impl</span>&lt;T: oio::Write&gt; oio::Write <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="self">self</span>.inner.poll_write(cx, bs).map_err(|err| {
-            err.with_operation(WriteOperation::Write)
+<span class="kw">impl</span>&lt;T: oio::Write&gt; oio::Write <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>size = bs.len();
+        <span class="self">self</span>.inner
+            .write(bs)
+            .<span class="kw">await
+            </span>.map(|<span class="kw">_</span>| {
+                <span class="self">self</span>.processed += size <span class="kw">as </span>u64;
+            })
+            .map_err(|err| {
+                err.with_operation(Operation::WriterWrite)
+                    .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
+                    .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
+                    .with_context(<span class="string">"size"</span>, size.to_string())
+                    .with_context(<span class="string">"written"</span>, <span class="self">self</span>.processed.to_string())
+            })
+    }
+
+    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.inner.close().<span class="kw">await</span>.map_err(|err| {
+            err.with_operation(Operation::WriterClose)
                 .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
                 .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-                .with_context(<span class="string">"write_buf"</span>, bs.remaining().to_string())
+                .with_context(<span class="string">"written"</span>, <span class="self">self</span>.processed.to_string())
         })
     }
 
-    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="self">self</span>.inner.poll_close(cx).map_err(|err| {
-            err.with_operation(WriteOperation::Close)
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.inner.abort().<span class="kw">await</span>.map_err(|err| {
+            err.with_operation(Operation::WriterAbort)
                 .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
                 .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-        })
-    }
-
-    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="self">self</span>.inner.poll_abort(cx).map_err(|err| {
-            err.with_operation(WriteOperation::Abort)
-                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
-                .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
+                .with_context(<span class="string">"processed"</span>, <span class="self">self</span>.processed.to_string())
         })
     }
 }
 
 <span class="kw">impl</span>&lt;T: oio::BlockingWrite&gt; oio::BlockingWrite <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="self">self</span>.inner.write(bs).map_err(|err| {
-            err.with_operation(WriteOperation::BlockingWrite)
-                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
-                .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-                .with_context(<span class="string">"write_buf"</span>, bs.remaining().to_string())
-        })
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>size = bs.len();
+        <span class="self">self</span>.inner
+            .write(bs)
+            .map(|<span class="kw">_</span>| {
+                <span class="self">self</span>.processed += size <span class="kw">as </span>u64;
+            })
+            .map_err(|err| {
+                err.with_operation(Operation::BlockingWriterWrite)
+                    .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
+                    .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
+                    .with_context(<span class="string">"size"</span>, size.to_string())
+                    .with_context(<span class="string">"written"</span>, <span class="self">self</span>.processed.to_string())
+            })
     }
 
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.inner.close().map_err(|err| {
-            err.with_operation(WriteOperation::BlockingClose)
+            err.with_operation(Operation::BlockingWriterClose)
                 .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
                 .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
+                .with_context(<span class="string">"written"</span>, <span class="self">self</span>.processed.to_string())
         })
     }
 }
 
-<span class="attr">#[async_trait::async_trait]
-</span><span class="kw">impl</span>&lt;T: oio::List&gt; oio::List <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;&gt; {
-        <span class="self">self</span>.inner.poll_next(cx).map_err(|err| {
-            err.with_operation(ListOperation::Next)
-                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
-                .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-        })
+<span class="kw">impl</span>&lt;T: oio::List&gt; oio::List <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
+    <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
+        <span class="self">self</span>.inner
+            .next()
+            .<span class="kw">await
+            </span>.map(|bs| {
+                <span class="self">self</span>.processed += bs.is_some() <span class="kw">as </span>u64;
+                bs
+            })
+            .map_err(|err| {
+                err.with_operation(Operation::ListerNext)
+                    .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
+                    .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
+                    .with_context(<span class="string">"listed"</span>, <span class="self">self</span>.processed.to_string())
+            })
     }
 }
 
 <span class="kw">impl</span>&lt;T: oio::BlockingList&gt; oio::BlockingList <span class="kw">for </span>ErrorContextWrapper&lt;T&gt; {
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
-        <span class="self">self</span>.inner.next().map_err(|err| {
-            err.with_operation(ListOperation::BlockingNext)
-                .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
-                .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
-        })
+        <span class="self">self</span>.inner
+            .next()
+            .map(|bs| {
+                <span class="self">self</span>.processed += bs.is_some() <span class="kw">as </span>u64;
+                bs
+            })
+            .map_err(|err| {
+                err.with_operation(Operation::BlockingListerNext)
+                    .with_context(<span class="string">"service"</span>, <span class="self">self</span>.scheme)
+                    .with_context(<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path)
+                    .with_context(<span class="string">"listed"</span>, <span class="self">self</span>.processed.to_string())
+            })
     }
 }
 </code></pre></div></section></main></body></html>

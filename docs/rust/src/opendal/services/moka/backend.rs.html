@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/moka/backend.rs`."><title>backend.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/moka/backend.rs`."><title>backend.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -216,29 +214,6 @@
 <a href="#214" id="214">214</a>
 <a href="#215" id="215">215</a>
 <a href="#216" id="216">216</a>
-<a href="#217" id="217">217</a>
-<a href="#218" id="218">218</a>
-<a href="#219" id="219">219</a>
-<a href="#220" id="220">220</a>
-<a href="#221" id="221">221</a>
-<a href="#222" id="222">222</a>
-<a href="#223" id="223">223</a>
-<a href="#224" id="224">224</a>
-<a href="#225" id="225">225</a>
-<a href="#226" id="226">226</a>
-<a href="#227" id="227">227</a>
-<a href="#228" id="228">228</a>
-<a href="#229" id="229">229</a>
-<a href="#230" id="230">230</a>
-<a href="#231" id="231">231</a>
-<a href="#232" id="232">232</a>
-<a href="#233" id="233">233</a>
-<a href="#234" id="234">234</a>
-<a href="#235" id="235">235</a>
-<a href="#236" id="236">236</a>
-<a href="#237" id="237">237</a>
-<a href="#238" id="238">238</a>
-<a href="#239" id="239">239</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -256,55 +231,23 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::time::Duration;
 
-<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>log::debug;
 <span class="kw">use </span>moka::sync::CacheBuilder;
 <span class="kw">use </span>moka::sync::SegmentedCache;
-<span class="kw">use </span>serde::Deserialize;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::typed_kv;
-<span class="kw">use </span><span class="kw">crate</span>::raw::ConfigDeserializer;
+<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::services::MokaConfig;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Config for Mokaservices support.
-</span><span class="attr">#[derive(Default, Deserialize)]
-#[serde(default)]
-#[non_exhaustive]
-</span><span class="kw">pub struct </span>MokaConfig {
-    <span class="doccomment">/// Name for this cache instance.
-    </span><span class="kw">pub </span>name: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// Sets the max capacity of the cache.
-    ///
-    /// Refer to [`moka::sync::CacheBuilder::max_capacity`](https://docs.rs/moka/latest/moka/sync/struct.CacheBuilder.html#method.max_capacity)
-    </span><span class="kw">pub </span>max_capacity: <span class="prelude-ty">Option</span>&lt;u64&gt;,
-    <span class="doccomment">/// Sets the time to live of the cache.
-    ///
-    /// Refer to [`moka::sync::CacheBuilder::time_to_live`](https://docs.rs/moka/latest/moka/sync/struct.CacheBuilder.html#method.time_to_live)
-    </span><span class="kw">pub </span>time_to_live: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
-    <span class="doccomment">/// Sets the time to idle of the cache.
-    ///
-    /// Refer to [`moka::sync::CacheBuilder::time_to_idle`](https://docs.rs/moka/latest/moka/sync/struct.CacheBuilder.html#method.time_to_idle)
-    </span><span class="kw">pub </span>time_to_idle: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
-    <span class="doccomment">/// Sets the segments number of the cache.
-    ///
-    /// Refer to [`moka::sync::CacheBuilder::segments`](https://docs.rs/moka/latest/moka/sync/struct.CacheBuilder.html#method.segments)
-    </span><span class="kw">pub </span>num_segments: <span class="prelude-ty">Option</span>&lt;usize&gt;,
-}
-
-<span class="kw">impl </span>Debug <span class="kw">for </span>MokaConfig {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        f.debug_struct(<span class="string">"MokaConfig"</span>)
-            .field(<span class="string">"name"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.name)
-            .field(<span class="string">"max_capacity"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.max_capacity)
-            .field(<span class="string">"time_to_live"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.time_to_live)
-            .field(<span class="string">"time_to_idle"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.time_to_idle)
-            .field(<span class="string">"num_segments"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.num_segments)
-            .finish_non_exhaustive()
+<span class="kw">impl </span>Configurator <span class="kw">for </span>MokaConfig {
+    <span class="kw">type </span>Builder = MokaBuilder;
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Builder {
+        MokaBuilder { config: <span class="self">self </span>}
     }
 }
 
@@ -317,7 +260,7 @@
 
 <span class="kw">impl </span>MokaBuilder {
     <span class="doccomment">/// Name for this cache instance.
-    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>name(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.name = <span class="prelude-val">Some</span>(v.to_owned());
         }
@@ -327,7 +270,7 @@
     <span class="doccomment">/// Sets the max capacity of the cache.
     ///
     /// Refer to [`moka::sync::CacheBuilder::max_capacity`](https://docs.rs/moka/latest/moka/sync/struct.CacheBuilder.html#method.max_capacity)
-    </span><span class="kw">pub fn </span>max_capacity(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: u64) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>max_capacity(<span class="kw-2">mut </span><span class="self">self</span>, v: u64) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>v != <span class="number">0 </span>{
             <span class="self">self</span>.config.max_capacity = <span class="prelude-val">Some</span>(v);
         }
@@ -337,7 +280,7 @@
     <span class="doccomment">/// Sets the time to live of the cache.
     ///
     /// Refer to [`moka::sync::CacheBuilder::time_to_live`](https://docs.rs/moka/latest/moka/sync/struct.CacheBuilder.html#method.time_to_live)
-    </span><span class="kw">pub fn </span>time_to_live(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: Duration) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>time_to_live(<span class="kw-2">mut </span><span class="self">self</span>, v: Duration) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_zero() {
             <span class="self">self</span>.config.time_to_live = <span class="prelude-val">Some</span>(v);
         }
@@ -347,7 +290,7 @@
     <span class="doccomment">/// Sets the time to idle of the cache.
     ///
     /// Refer to [`moka::sync::CacheBuilder::time_to_idle`](https://docs.rs/moka/latest/moka/sync/struct.CacheBuilder.html#method.time_to_idle)
-    </span><span class="kw">pub fn </span>time_to_idle(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: Duration) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>time_to_idle(<span class="kw-2">mut </span><span class="self">self</span>, v: Duration) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_zero() {
             <span class="self">self</span>.config.time_to_idle = <span class="prelude-val">Some</span>(v);
         }
@@ -357,25 +300,29 @@
     <span class="doccomment">/// Sets the segments number of the cache.
     ///
     /// Refer to [`moka::sync::CacheBuilder::segments`](https://docs.rs/moka/latest/moka/sync/struct.CacheBuilder.html#method.segments)
-    </span><span class="kw">pub fn </span>segments(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: usize) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>segments(<span class="kw-2">mut </span><span class="self">self</span>, v: usize) -&gt; <span class="self">Self </span>{
         <span class="macro">assert!</span>(v != <span class="number">0</span>);
         <span class="self">self</span>.config.num_segments = <span class="prelude-val">Some</span>(v);
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Set root path of this backend
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.config.root = <span class="kw">if </span>path.is_empty() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(path.to_string())
+        };
+
         <span class="self">self
     </span>}
 }
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>MokaBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Moka;
-    <span class="kw">type </span>Accessor = MokaBackend;
+    <span class="kw">type </span>Config = MokaConfig;
 
-    <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        MokaBuilder {
-            config: MokaConfig::deserialize(ConfigDeserializer::new(map))
-                .expect(<span class="string">"config deserialize must succeed"</span>),
-        }
-    }
-
-    <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
+    <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
         <span class="macro">debug!</span>(<span class="string">"backend build started: {:?}"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>);
 
         <span class="kw">let </span><span class="kw-2">mut </span>builder: CacheBuilder&lt;String, typed_kv::Value, <span class="kw">_</span>&gt; =
@@ -396,9 +343,15 @@
         }
 
         <span class="macro">debug!</span>(<span class="string">"backend build finished: {:?}"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>);
-        <span class="prelude-val">Ok</span>(MokaBackend::new(Adapter {
+
+        <span class="kw">let </span><span class="kw-2">mut </span>backend = MokaBackend::new(Adapter {
             inner: builder.build(),
-        }))
+        });
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.root {
+            backend = backend.with_root(<span class="kw-2">&amp;</span>v);
+        }
+
+        <span class="prelude-val">Ok</span>(backend)
     }
 }
 
@@ -419,8 +372,7 @@
     }
 }
 
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>typed_kv::Adapter <span class="kw">for </span>Adapter {
+<span class="kw">impl </span>typed_kv::Adapter <span class="kw">for </span>Adapter {
     <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; typed_kv::Info {
         typed_kv::Info::new(
             Scheme::Moka,
@@ -474,7 +426,7 @@
         <span class="kw">if </span>path.is_empty() {
             <span class="prelude-val">Ok</span>(keys.collect())
         } <span class="kw">else </span>{
-            <span class="prelude-val">Ok</span>(keys.filter(|k| k.starts_with(path) &amp;&amp; k != path).collect())
+            <span class="prelude-val">Ok</span>(keys.filter(|k| k.starts_with(path)).collect())
         }
     }
 }

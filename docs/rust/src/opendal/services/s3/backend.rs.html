@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/s3/backend.rs`."><title>backend.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/s3/backend.rs`."><title>backend.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1266,62 +1264,6 @@
 <a href="#1264" id="1264">1264</a>
 <a href="#1265" id="1265">1265</a>
 <a href="#1266" id="1266">1266</a>
-<a href="#1267" id="1267">1267</a>
-<a href="#1268" id="1268">1268</a>
-<a href="#1269" id="1269">1269</a>
-<a href="#1270" id="1270">1270</a>
-<a href="#1271" id="1271">1271</a>
-<a href="#1272" id="1272">1272</a>
-<a href="#1273" id="1273">1273</a>
-<a href="#1274" id="1274">1274</a>
-<a href="#1275" id="1275">1275</a>
-<a href="#1276" id="1276">1276</a>
-<a href="#1277" id="1277">1277</a>
-<a href="#1278" id="1278">1278</a>
-<a href="#1279" id="1279">1279</a>
-<a href="#1280" id="1280">1280</a>
-<a href="#1281" id="1281">1281</a>
-<a href="#1282" id="1282">1282</a>
-<a href="#1283" id="1283">1283</a>
-<a href="#1284" id="1284">1284</a>
-<a href="#1285" id="1285">1285</a>
-<a href="#1286" id="1286">1286</a>
-<a href="#1287" id="1287">1287</a>
-<a href="#1288" id="1288">1288</a>
-<a href="#1289" id="1289">1289</a>
-<a href="#1290" id="1290">1290</a>
-<a href="#1291" id="1291">1291</a>
-<a href="#1292" id="1292">1292</a>
-<a href="#1293" id="1293">1293</a>
-<a href="#1294" id="1294">1294</a>
-<a href="#1295" id="1295">1295</a>
-<a href="#1296" id="1296">1296</a>
-<a href="#1297" id="1297">1297</a>
-<a href="#1298" id="1298">1298</a>
-<a href="#1299" id="1299">1299</a>
-<a href="#1300" id="1300">1300</a>
-<a href="#1301" id="1301">1301</a>
-<a href="#1302" id="1302">1302</a>
-<a href="#1303" id="1303">1303</a>
-<a href="#1304" id="1304">1304</a>
-<a href="#1305" id="1305">1305</a>
-<a href="#1306" id="1306">1306</a>
-<a href="#1307" id="1307">1307</a>
-<a href="#1308" id="1308">1308</a>
-<a href="#1309" id="1309">1309</a>
-<a href="#1310" id="1310">1310</a>
-<a href="#1311" id="1311">1311</a>
-<a href="#1312" id="1312">1312</a>
-<a href="#1313" id="1313">1313</a>
-<a href="#1314" id="1314">1314</a>
-<a href="#1315" id="1315">1315</a>
-<a href="#1316" id="1316">1316</a>
-<a href="#1317" id="1317">1317</a>
-<a href="#1318" id="1318">1318</a>
-<a href="#1319" id="1319">1319</a>
-<a href="#1320" id="1320">1320</a>
-<a href="#1321" id="1321">1321</a>
-<a href="#1322" id="1322">1322</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1343,13 +1285,14 @@
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::fmt::Write;
+<span class="kw">use </span>std::str::FromStr;
 <span class="kw">use </span>std::sync::atomic::AtomicBool;
 <span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>base64::prelude::BASE64_STANDARD;
 <span class="kw">use </span>base64::Engine;
 <span class="kw">use </span>bytes::Buf;
+<span class="kw">use </span>http::Response;
 <span class="kw">use </span>http::StatusCode;
 <span class="kw">use </span>log::debug;
 <span class="kw">use </span>log::warn;
@@ -1361,15 +1304,17 @@
 <span class="kw">use </span>reqsign::AwsCredentialLoad;
 <span class="kw">use </span>reqsign::AwsDefaultLoader;
 <span class="kw">use </span>reqsign::AwsV4Signer;
-<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>reqwest::Url;
 
 <span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_s3_error_code;
-<span class="kw">use </span><span class="kw">super</span>::lister::S3Lister;
+<span class="kw">use </span><span class="kw">super</span>::lister::{S3Lister, S3Listers, S3ObjectVersionsLister};
 <span class="kw">use </span><span class="kw">super</span>::writer::S3Writer;
 <span class="kw">use </span><span class="kw">super</span>::writer::S3Writers;
+<span class="kw">use </span><span class="kw">crate</span>::raw::oio::PageLister;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::services::S3Config;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Allow constructing correct region endpoint if user gives a global endpoint.
@@ -1385,158 +1330,14 @@
 
 <span class="kw">const </span>DEFAULT_BATCH_MAX_OPERATIONS: usize = <span class="number">1000</span>;
 
-<span class="doccomment">/// Config for Aws S3 and compatible services (including minio, digitalocean space, Tencent Cloud Object Storage(COS) and so on) support.
-</span><span class="attr">#[derive(Default, Deserialize)]
-#[serde(default)]
-#[non_exhaustive]
-</span><span class="kw">pub struct </span>S3Config {
-    <span class="doccomment">/// root of this backend.
-    ///
-    /// All operations will happen under this root.
-    ///
-    /// default to `/` if not set.
-    </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// bucket name of this backend.
-    ///
-    /// required.
-    </span><span class="kw">pub </span>bucket: String,
-    <span class="doccomment">/// endpoint of this backend.
-    ///
-    /// Endpoint must be full uri, e.g.
-    ///
-    /// - AWS S3: `https://s3.amazonaws.com` or `https://s3.{region}.amazonaws.com`
-    /// - Cloudflare R2: `https://&lt;ACCOUNT_ID&gt;.r2.cloudflarestorage.com`
-    /// - Aliyun OSS: `https://{region}.aliyuncs.com`
-    /// - Tencent COS: `https://cos.{region}.myqcloud.com`
-    /// - Minio: `http://127.0.0.1:9000`
-    ///
-    /// If user inputs endpoint without scheme like "s3.amazonaws.com", we
-    /// will prepend "https://" before it.
-    ///
-    /// default to `https://s3.amazonaws.com` if not set.
-    </span><span class="kw">pub </span>endpoint: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// Region represent the signing region of this endpoint. This is required
-    /// if you are using the default AWS S3 endpoint.
-    ///
-    /// If using a custom endpoint,
-    /// - If region is set, we will take user's input first.
-    /// - If not, we will try to load it from environment.
-    </span><span class="kw">pub </span>region: <span class="prelude-ty">Option</span>&lt;String&gt;,
-
-    <span class="doccomment">/// access_key_id of this backend.
-    ///
-    /// - If access_key_id is set, we will take user's input first.
-    /// - If not, we will try to load it from environment.
-    </span><span class="kw">pub </span>access_key_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// secret_access_key of this backend.
-    ///
-    /// - If secret_access_key is set, we will take user's input first.
-    /// - If not, we will try to load it from environment.
-    </span><span class="kw">pub </span>secret_access_key: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// security_token (aka, session token) of this backend.
-    ///
-    /// This token will expire after sometime, it's recommended to set security_token
-    /// by hand.
-    </span><span class="kw">pub </span>security_token: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// role_arn for this backend.
-    ///
-    /// If `role_arn` is set, we will use already known config as source
-    /// credential to assume role with `role_arn`.
-    </span><span class="kw">pub </span>role_arn: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// external_id for this backend.
-    </span><span class="kw">pub </span>external_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// Disable config load so that opendal will not load config from
-    /// environment.
-    ///
-    /// For examples:
-    ///
-    /// - envs like `AWS_ACCESS_KEY_ID`
-    /// - files like `~/.aws/config`
-    </span><span class="kw">pub </span>disable_config_load: bool,
-    <span class="doccomment">/// Disable load credential from ec2 metadata.
-    ///
-    /// This option is used to disable the default behavior of opendal
-    /// to load credential from ec2 metadata, a.k.a, IMDSv2
-    </span><span class="kw">pub </span>disable_ec2_metadata: bool,
-    <span class="doccomment">/// Allow anonymous will allow opendal to send request without signing
-    /// when credential is not loaded.
-    </span><span class="kw">pub </span>allow_anonymous: bool,
-    <span class="doccomment">/// server_side_encryption for this backend.
-    ///
-    /// Available values: `AES256`, `aws:kms`.
-    </span><span class="kw">pub </span>server_side_encryption: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// server_side_encryption_aws_kms_key_id for this backend
-    ///
-    /// - If `server_side_encryption` set to `aws:kms`, and `server_side_encryption_aws_kms_key_id`
-    /// is not set, S3 will use aws managed kms key to encrypt data.
-    /// - If `server_side_encryption` set to `aws:kms`, and `server_side_encryption_aws_kms_key_id`
-    /// is a valid kms key id, S3 will use the provided kms key to encrypt data.
-    /// - If the `server_side_encryption_aws_kms_key_id` is invalid or not found, an error will be
-    /// returned.
-    /// - If `server_side_encryption` is not `aws:kms`, setting `server_side_encryption_aws_kms_key_id`
-    /// is a noop.
-    </span><span class="kw">pub </span>server_side_encryption_aws_kms_key_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// server_side_encryption_customer_algorithm for this backend.
-    ///
-    /// Available values: `AES256`.
-    </span><span class="kw">pub </span>server_side_encryption_customer_algorithm: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// server_side_encryption_customer_key for this backend.
-    ///
-    /// # Value
-    ///
-    /// base64 encoded key that matches algorithm specified in
-    /// `server_side_encryption_customer_algorithm`.
-    </span><span class="kw">pub </span>server_side_encryption_customer_key: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// Set server_side_encryption_customer_key_md5 for this backend.
-    ///
-    /// # Value
-    ///
-    /// MD5 digest of key specified in `server_side_encryption_customer_key`.
-    </span><span class="kw">pub </span>server_side_encryption_customer_key_md5: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// default storage_class for this backend.
-    ///
-    /// Available values:
-    /// - `DEEP_ARCHIVE`
-    /// - `GLACIER`
-    /// - `GLACIER_IR`
-    /// - `INTELLIGENT_TIERING`
-    /// - `ONEZONE_IA`
-    /// - `OUTPOSTS`
-    /// - `REDUCED_REDUNDANCY`
-    /// - `STANDARD`
-    /// - `STANDARD_IA`
-    ///
-    /// S3 compatible services don't support all of them
-    </span><span class="kw">pub </span>default_storage_class: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// Enable virtual host style so that opendal will send API requests
-    /// in virtual host style instead of path style.
-    ///
-    /// - By default, opendal will send API to `https://s3.us-east-1.amazonaws.com/bucket_name`
-    /// - Enabled, opendal will send API to `https://bucket_name.s3.us-east-1.amazonaws.com`
-    </span><span class="kw">pub </span>enable_virtual_host_style: bool,
-    <span class="doccomment">/// Set maximum batch operations of this backend.
-    ///
-    /// Some compatible services have a limit on the number of operations in a batch request.
-    /// For example, R2 could return `Internal Error` while batch delete 1000 files.
-    ///
-    /// Please tune this value based on services' document.
-    </span><span class="kw">pub </span>batch_max_operations: <span class="prelude-ty">Option</span>&lt;usize&gt;,
-    <span class="doccomment">/// Disable stat with override so that opendal will not send stat request with override queries.
-    ///
-    /// For example, R2 doesn't support stat with `response_content_type` query.
-    </span><span class="kw">pub </span>disable_stat_with_override: bool,
-}
-
-<span class="kw">impl </span>Debug <span class="kw">for </span>S3Config {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>d = f.debug_struct(<span class="string">"S3Config"</span>);
-
-        d.field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root)
-            .field(<span class="string">"bucket"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.bucket)
-            .field(<span class="string">"endpoint"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.endpoint)
-            .field(<span class="string">"region"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.region);
-
-        d.finish_non_exhaustive()
+<span class="kw">impl </span>Configurator <span class="kw">for </span>S3Config {
+    <span class="kw">type </span>Builder = S3Builder;
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Builder {
+        S3Builder {
+            config: <span class="self">self</span>,
+            customized_credential_load: <span class="prelude-val">None</span>,
+            http_client: <span class="prelude-val">None</span>,
+        }
     }
 }
 
@@ -1548,7 +1349,7 @@
 </span><span class="kw">pub struct </span>S3Builder {
     config: S3Config,
 
-    customed_credential_load: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>AwsCredentialLoad&gt;&gt;,
+    customized_credential_load: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>AwsCredentialLoad&gt;&gt;,
     http_client: <span class="prelude-ty">Option</span>&lt;HttpClient&gt;,
 }
 
@@ -1565,7 +1366,7 @@
     <span class="doccomment">/// Set root of this backend.
     ///
     /// All operations will happen under this root.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -1576,7 +1377,7 @@
     </span>}
 
     <span class="doccomment">/// Set bucket name of this backend.
-    </span><span class="kw">pub fn </span>bucket(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>bucket(<span class="kw-2">mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.bucket = bucket.to_string();
 
         <span class="self">self
@@ -1594,7 +1395,7 @@
     ///
     /// If user inputs endpoint without scheme like "s3.amazonaws.com", we
     /// will prepend "https://" before it.
-    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!endpoint.is_empty() {
             <span class="comment">// Trim trailing `/` so that we can accept `http://127.0.0.1:9000/`
             </span><span class="self">self</span>.config.endpoint = <span class="prelude-val">Some</span>(endpoint.trim_end_matches(<span class="string">'/'</span>).to_string())
@@ -1609,7 +1410,7 @@
     /// If using a custom endpoint,
     /// - If region is set, we will take user's input first.
     /// - If not, we will try to load it from environment.
-    </span><span class="kw">pub fn </span>region(<span class="kw-2">&amp;mut </span><span class="self">self</span>, region: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>region(<span class="kw-2">mut </span><span class="self">self</span>, region: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!region.is_empty() {
             <span class="self">self</span>.config.region = <span class="prelude-val">Some</span>(region.to_string())
         }
@@ -1621,7 +1422,7 @@
     ///
     /// - If access_key_id is set, we will take user's input first.
     /// - If not, we will try to load it from environment.
-    </span><span class="kw">pub fn </span>access_key_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>access_key_id(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.access_key_id = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -1633,7 +1434,7 @@
     ///
     /// - If secret_access_key is set, we will take user's input first.
     /// - If not, we will try to load it from environment.
-    </span><span class="kw">pub fn </span>secret_access_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>secret_access_key(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.secret_access_key = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -1645,7 +1446,7 @@
     ///
     /// If `role_arn` is set, we will use already known config as source
     /// credential to assume role with `role_arn`.
-    </span><span class="kw">pub fn </span>role_arn(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>role_arn(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.role_arn = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -1654,9 +1455,18 @@
     </span>}
 
     <span class="doccomment">/// Set external_id for this backend.
-    </span><span class="kw">pub fn </span>external_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>external_id(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.external_id = <span class="prelude-val">Some</span>(v.to_string())
+        }
+
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Set role_session_name for this backend.
+    </span><span class="kw">pub fn </span>role_session_name(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="kw">if </span>!v.is_empty() {
+            <span class="self">self</span>.config.role_session_name = <span class="prelude-val">Some</span>(v.to_string())
         }
 
         <span class="self">self
@@ -1674,7 +1484,7 @@
     /// - `REDUCED_REDUNDANCY`
     /// - `STANDARD`
     /// - `STANDARD_IA`
-    </span><span class="kw">pub fn </span>default_storage_class(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>default_storage_class(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.default_storage_class = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -1692,7 +1502,7 @@
     ///
     /// SSE related options should be set carefully to make them works.
     /// Please use `server_side_encryption_with_*` helpers if even possible.
-    </span><span class="kw">pub fn </span>server_side_encryption(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>server_side_encryption(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.server_side_encryption = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -1703,13 +1513,12 @@
     <span class="doccomment">/// Set server_side_encryption_aws_kms_key_id for this backend
     ///
     /// - If `server_side_encryption` set to `aws:kms`, and `server_side_encryption_aws_kms_key_id`
-    /// is not set, S3 will use aws managed kms key to encrypt data.
+    ///   is not set, S3 will use aws managed kms key to encrypt data.
     /// - If `server_side_encryption` set to `aws:kms`, and `server_side_encryption_aws_kms_key_id`
-    /// is a valid kms key id, S3 will use the provided kms key to encrypt data.
+    ///   is a valid kms key id, S3 will use the provided kms key to encrypt data.
     /// - If the `server_side_encryption_aws_kms_key_id` is invalid or not found, an error will be
-    /// returned.
-    /// - If `server_side_encryption` is not `aws:kms`, setting `server_side_encryption_aws_kms_key_id`
-    /// is a noop.
+    ///   returned.
+    /// - If `server_side_encryption` is not `aws:kms`, setting `server_side_encryption_aws_kms_key_id` is a noop.
     ///
     /// # Note
     ///
@@ -1717,7 +1526,7 @@
     ///
     /// SSE related options should be set carefully to make them works.
     /// Please use `server_side_encryption_with_*` helpers if even possible.
-    </span><span class="kw">pub fn </span>server_side_encryption_aws_kms_key_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>server_side_encryption_aws_kms_key_id(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.server_side_encryption_aws_kms_key_id = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -1735,7 +1544,7 @@
     ///
     /// SSE related options should be set carefully to make them works.
     /// Please use `server_side_encryption_with_*` helpers if even possible.
-    </span><span class="kw">pub fn </span>server_side_encryption_customer_algorithm(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>server_side_encryption_customer_algorithm(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.server_side_encryption_customer_algorithm = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -1756,7 +1565,7 @@
     ///
     /// SSE related options should be set carefully to make them works.
     /// Please use `server_side_encryption_with_*` helpers if even possible.
-    </span><span class="kw">pub fn </span>server_side_encryption_customer_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>server_side_encryption_customer_key(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.server_side_encryption_customer_key = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -1776,7 +1585,7 @@
     ///
     /// SSE related options should be set carefully to make them works.
     /// Please use `server_side_encryption_with_*` helpers if even possible.
-    </span><span class="kw">pub fn </span>server_side_encryption_customer_key_md5(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>server_side_encryption_customer_key_md5(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
             <span class="self">self</span>.config.server_side_encryption_customer_key_md5 = <span class="prelude-val">Some</span>(v.to_string())
         }
@@ -1789,7 +1598,7 @@
     /// As known as: SSE-KMS
     ///
     /// NOTE: This function should not be used along with other `server_side_encryption_with_` functions.
-    </span><span class="kw">pub fn </span>server_side_encryption_with_aws_managed_kms_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>server_side_encryption_with_aws_managed_kms_key(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.server_side_encryption = <span class="prelude-val">Some</span>(<span class="string">"aws:kms"</span>.to_string());
         <span class="self">self
     </span>}
@@ -1800,9 +1609,9 @@
     ///
     /// NOTE: This function should not be used along with other `server_side_encryption_with_` functions.
     </span><span class="kw">pub fn </span>server_side_encryption_with_customer_managed_kms_key(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        <span class="kw-2">mut </span><span class="self">self</span>,
         aws_kms_key_id: <span class="kw-2">&amp;</span>str,
-    ) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    ) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.server_side_encryption = <span class="prelude-val">Some</span>(<span class="string">"aws:kms"</span>.to_string());
         <span class="self">self</span>.config.server_side_encryption_aws_kms_key_id = <span class="prelude-val">Some</span>(aws_kms_key_id.to_string());
         <span class="self">self
@@ -1813,7 +1622,7 @@
     /// As known as: SSE-S3
     ///
     /// NOTE: This function should not be used along with other `server_side_encryption_with_` functions.
-    </span><span class="kw">pub fn </span>server_side_encryption_with_s3_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>server_side_encryption_with_s3_key(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.server_side_encryption = <span class="prelude-val">Some</span>(<span class="string">"AES256"</span>.to_string());
         <span class="self">self
     </span>}
@@ -1823,11 +1632,7 @@
     /// As known as: SSE-C
     ///
     /// NOTE: This function should not be used along with other `server_side_encryption_with_` functions.
-    </span><span class="kw">pub fn </span>server_side_encryption_with_customer_key(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        algorithm: <span class="kw-2">&amp;</span>str,
-        key: <span class="kw-2">&amp;</span>[u8],
-    ) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>server_side_encryption_with_customer_key(<span class="kw-2">mut </span><span class="self">self</span>, algorithm: <span class="kw-2">&amp;</span>str, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.server_side_encryption_customer_algorithm = <span class="prelude-val">Some</span>(algorithm.to_string());
         <span class="self">self</span>.config.server_side_encryption_customer_key = <span class="prelude-val">Some</span>(BASE64_STANDARD.encode(key));
         <span class="self">self</span>.config.server_side_encryption_customer_key_md5 =
@@ -1839,13 +1644,19 @@
     ///
     /// # Warning
     ///
-    /// security token's lifetime is short and requires users to refresh in time.
-    </span><span class="kw">pub fn </span>security_token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, token: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    /// session token's lifetime is short and requires users to refresh in time.
+    </span><span class="kw">pub fn </span>session_token(<span class="kw-2">mut </span><span class="self">self</span>, token: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!token.is_empty() {
-            <span class="self">self</span>.config.security_token = <span class="prelude-val">Some</span>(token.to_string());
+            <span class="self">self</span>.config.session_token = <span class="prelude-val">Some</span>(token.to_string());
         }
         <span class="self">self
     </span>}
+
+    <span class="doccomment">/// Set temporary credential used in AWS S3 connections
+    </span><span class="attr">#[deprecated(note = <span class="string">"Please use `session_token` instead"</span>)]
+    </span><span class="kw">pub fn </span>security_token(<span class="self">self</span>, token: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.session_token(token)
+    }
 
     <span class="doccomment">/// Disable config load so that opendal will not load config from
     /// environment.
@@ -1854,7 +1665,7 @@
     ///
     /// - envs like `AWS_ACCESS_KEY_ID`
     /// - files like `~/.aws/config`
-    </span><span class="kw">pub fn </span>disable_config_load(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>disable_config_load(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.disable_config_load = <span class="bool-val">true</span>;
         <span class="self">self
     </span>}
@@ -1863,14 +1674,14 @@
     ///
     /// This option is used to disable the default behavior of opendal
     /// to load credential from ec2 metadata, a.k.a, IMDSv2
-    </span><span class="kw">pub fn </span>disable_ec2_metadata(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>disable_ec2_metadata(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.disable_ec2_metadata = <span class="bool-val">true</span>;
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Allow anonymous will allow opendal to send request without signing
     /// when credential is not loaded.
-    </span><span class="kw">pub fn </span>allow_anonymous(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>allow_anonymous(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.allow_anonymous = <span class="bool-val">true</span>;
         <span class="self">self
     </span>}
@@ -1880,7 +1691,7 @@
     ///
     /// - By default, opendal will send API to `https://s3.us-east-1.amazonaws.com/bucket_name`
     /// - Enabled, opendal will send API to `https://bucket_name.s3.us-east-1.amazonaws.com`
-    </span><span class="kw">pub fn </span>enable_virtual_host_style(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>enable_virtual_host_style(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.enable_virtual_host_style = <span class="bool-val">true</span>;
         <span class="self">self
     </span>}
@@ -1888,17 +1699,17 @@
     <span class="doccomment">/// Disable stat with override so that opendal will not send stat request with override queries.
     ///
     /// For example, R2 doesn't support stat with `response_content_type` query.
-    </span><span class="kw">pub fn </span>disable_stat_with_override(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>disable_stat_with_override(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.disable_stat_with_override = <span class="bool-val">true</span>;
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Adding a customed credential load for service.
+    <span class="doccomment">/// Adding a customized credential load for service.
     ///
-    /// If customed_credential_load has been set, we will ignore all other
+    /// If customized_credential_load has been set, we will ignore all other
     /// credential load methods.
-    </span><span class="kw">pub fn </span>customed_credential_load(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cred: Box&lt;<span class="kw">dyn </span>AwsCredentialLoad&gt;) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.customed_credential_load = <span class="prelude-val">Some</span>(cred);
+    </span><span class="kw">pub fn </span>customized_credential_load(<span class="kw-2">mut </span><span class="self">self</span>, cred: Box&lt;<span class="kw">dyn </span>AwsCredentialLoad&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.customized_credential_load = <span class="prelude-val">Some</span>(cred);
         <span class="self">self
     </span>}
 
@@ -1908,8 +1719,15 @@
     ///
     /// This API is part of OpenDAL's Raw API. `HttpClient` could be changed
     /// during minor updates.
-    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.http_client = <span class="prelude-val">Some</span>(client);
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Set bucket versioning status for this backend
+    </span><span class="kw">pub fn </span>enable_versioning(<span class="kw-2">mut </span><span class="self">self</span>, enabled: bool) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.config.enable_versioning = enabled;
+
         <span class="self">self
     </span>}
 
@@ -1952,6 +1770,12 @@
         <span class="comment">// If endpoint contains bucket name, we should trim them.
         </span>endpoint = endpoint.replace(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"//{bucket}."</span>), <span class="string">"//"</span>);
 
+        <span class="comment">// Omit default ports if specified.
+        </span><span class="kw">if let </span><span class="prelude-val">Ok</span>(url) = Url::from_str(<span class="kw-2">&amp;</span>endpoint) {
+            <span class="comment">// Remove the trailing `/` of root path.
+            </span>endpoint = url.to_string().trim_end_matches(<span class="string">'/'</span>).to_string();
+        }
+
         <span class="comment">// Update with endpoint templates.
         </span>endpoint = <span class="kw">if let </span><span class="prelude-val">Some</span>(template) = ENDPOINT_TEMPLATES.get(endpoint.as_str()) {
             template.replace(<span class="string">"{region}"</span>, region)
@@ -1972,8 +1796,19 @@
     }
 
     <span class="doccomment">/// Set maximum batch operations of this backend.
-    </span><span class="kw">pub fn </span>batch_max_operations(<span class="kw-2">&amp;mut </span><span class="self">self</span>, batch_max_operations: usize) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>batch_max_operations(<span class="kw-2">mut </span><span class="self">self</span>, batch_max_operations: usize) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.batch_max_operations = <span class="prelude-val">Some</span>(batch_max_operations);
+
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Set checksum algorithm of this backend.
+    /// This is necessary when writing to AWS S3 Buckets with Object Lock enabled for example.
+    ///
+    /// Available options:
+    /// - "crc32c"
+    </span><span class="kw">pub fn </span>checksum_algorithm(<span class="kw-2">mut </span><span class="self">self</span>, checksum_algorithm: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.config.checksum_algorithm = <span class="prelude-val">Some</span>(checksum_algorithm.to_string());
 
         <span class="self">self
     </span>}
@@ -2062,7 +1897,7 @@
         }
 
         <span class="comment">// Try to detect region by HeadBucket.
-        </span><span class="kw">let </span>req = http::Request::head(<span class="kw-2">&amp;</span>url).body(AsyncBody::Empty).ok()<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>req = http::Request::head(<span class="kw-2">&amp;</span>url).body(Buffer::new()).ok()<span class="question-mark">?</span>;
 
         <span class="kw">let </span>client = HttpClient::new().ok()<span class="question-mark">?</span>;
         <span class="kw">let </span>res = client
@@ -2096,20 +1931,9 @@
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>S3Builder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::S3;
-    <span class="kw">type </span>Accessor = S3Backend;
+    <span class="kw">type </span>Config = S3Config;
 
-    <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>config = S3Config::deserialize(ConfigDeserializer::new(map))
-            .expect(<span class="string">"config deserialize must succeed"</span>);
-
-        S3Builder {
-            config,
-            customed_credential_load: <span class="prelude-val">None</span>,
-            http_client: <span class="prelude-val">None</span>,
-        }
-    }
-
-    <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
+    <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
         <span class="macro">debug!</span>(<span class="string">"backend build started: {:?}"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>);
 
         <span class="kw">let </span>root = normalize_root(<span class="kw-2">&amp;</span><span class="self">self</span>.config.root.clone().unwrap_or_default());
@@ -2173,14 +1997,16 @@
                 })<span class="question-mark">?</span>),
             };
 
-        <span class="kw">let </span>client = <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = <span class="self">self</span>.http_client.take() {
-            client
-        } <span class="kw">else </span>{
-            HttpClient::new().map_err(|err| {
-                err.with_operation(<span class="string">"Builder::build"</span>)
-                    .with_context(<span class="string">"service"</span>, Scheme::S3)
-            })<span class="question-mark">?
-        </span>};
+        <span class="kw">let </span>checksum_algorithm = <span class="kw">match </span><span class="self">self</span>.config.checksum_algorithm.as_deref() {
+            <span class="prelude-val">Some</span>(<span class="string">"crc32c"</span>) =&gt; <span class="prelude-val">Some</span>(ChecksumAlgorithm::Crc32c),
+            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">None</span>,
+            <span class="kw">_ </span>=&gt; {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                    ErrorKind::ConfigInvalid,
+                    <span class="string">"{v} is not a supported checksum_algorithm."</span>,
+                ))
+            }
+        };
 
         <span class="comment">// This is our current config.
         </span><span class="kw">let </span><span class="kw-2">mut </span>cfg = AwsConfig::default();
@@ -2192,7 +2018,7 @@
             }
         }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.region.take() {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.region.clone() {
             cfg.region = <span class="prelude-val">Some</span>(v);
         }
         <span class="kw">if </span>cfg.region.is_none() {
@@ -2212,37 +2038,53 @@
         <span class="macro">debug!</span>(<span class="string">"backend use endpoint: {endpoint}"</span>);
 
         <span class="comment">// Setting all value from user input if available.
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.access_key_id.take() {
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.access_key_id {
             cfg.access_key_id = <span class="prelude-val">Some</span>(v)
         }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.secret_access_key.take() {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.secret_access_key {
             cfg.secret_access_key = <span class="prelude-val">Some</span>(v)
         }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.security_token.take() {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.config.session_token {
             cfg.session_token = <span class="prelude-val">Some</span>(v)
         }
 
+        <span class="kw">let </span>client = <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = <span class="self">self</span>.http_client {
+            client
+        } <span class="kw">else </span>{
+            HttpClient::new().map_err(|err| {
+                err.with_operation(<span class="string">"Builder::build"</span>)
+                    .with_context(<span class="string">"service"</span>, Scheme::S3)
+            })<span class="question-mark">?
+        </span>};
+
         <span class="kw">let </span><span class="kw-2">mut </span>loader: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>AwsCredentialLoad&gt;&gt; = <span class="prelude-val">None</span>;
-        <span class="comment">// If customed_credential_load is set, we will use it.
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.customed_credential_load.take() {
+        <span class="comment">// If customized_credential_load is set, we will use it.
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.customized_credential_load {
             loader = <span class="prelude-val">Some</span>(v);
         }
 
         <span class="comment">// If role_arn is set, we must use AssumeRoleLoad.
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(role_arn) = <span class="self">self</span>.config.role_arn.take() {
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(role_arn) = <span class="self">self</span>.config.role_arn {
             <span class="comment">// use current env as source credential loader.
-            </span><span class="kw">let </span>default_loader = AwsDefaultLoader::new(client.client(), cfg.clone());
+            </span><span class="kw">let </span>default_loader =
+                AwsDefaultLoader::new(GLOBAL_REQWEST_CLIENT.clone().clone(), cfg.clone());
 
             <span class="comment">// Build the config for assume role.
-            </span><span class="kw">let </span>assume_role_cfg = AwsConfig {
+            </span><span class="kw">let </span><span class="kw-2">mut </span>assume_role_cfg = AwsConfig {
                 region: <span class="prelude-val">Some</span>(region.clone()),
                 role_arn: <span class="prelude-val">Some</span>(role_arn),
                 external_id: <span class="self">self</span>.config.external_id.clone(),
                 sts_regional_endpoints: <span class="string">"regional"</span>.to_string(),
                 ..Default::default()
             };
+
+            <span class="comment">// override default role_session_name if set
+            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(name) = <span class="self">self</span>.config.role_session_name {
+                assume_role_cfg.role_session_name = name;
+            }
+
             <span class="kw">let </span>assume_role_loader = AwsAssumeRoleLoader::new(
-                client.client(),
+                GLOBAL_REQWEST_CLIENT.clone().clone(),
                 assume_role_cfg,
                 Box::new(default_loader),
             )
@@ -2260,7 +2102,8 @@
         </span><span class="kw">let </span>loader = <span class="kw">match </span>loader {
             <span class="prelude-val">Some</span>(v) =&gt; v,
             <span class="prelude-val">None </span>=&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>default_loader = AwsDefaultLoader::new(client.client(), cfg);
+                <span class="kw">let </span><span class="kw-2">mut </span>default_loader =
+                    AwsDefaultLoader::new(GLOBAL_REQWEST_CLIENT.clone().clone(), cfg);
                 <span class="kw">if </span><span class="self">self</span>.config.disable_ec2_metadata {
                     default_loader = default_loader.with_disable_ec2_metadata();
                 }
@@ -2275,7 +2118,7 @@
             </span>.config
             .batch_max_operations
             .unwrap_or(DEFAULT_BATCH_MAX_OPERATIONS);
-        <span class="macro">debug!</span>(<span class="string">"backend build finished"</span>);
+
         <span class="prelude-val">Ok</span>(S3Backend {
             core: Arc::new(S3Core {
                 bucket: bucket.to_string(),
@@ -2289,11 +2132,13 @@
                 default_storage_class,
                 allow_anonymous: <span class="self">self</span>.config.allow_anonymous,
                 disable_stat_with_override: <span class="self">self</span>.config.disable_stat_with_override,
+                enable_versioning: <span class="self">self</span>.config.enable_versioning,
                 signer,
                 loader,
                 credential_loaded: AtomicBool::new(<span class="bool-val">false</span>),
                 client,
                 batch_max_operations,
+                checksum_algorithm,
             }),
         })
     }
@@ -2305,17 +2150,15 @@
     core: Arc&lt;S3Core&gt;,
 }
 
-<span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-#[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-</span><span class="kw">impl </span>Accessor <span class="kw">for </span>S3Backend {
-    <span class="kw">type </span>Reader = IncomingAsyncBody;
+<span class="kw">impl </span>Access <span class="kw">for </span>S3Backend {
+    <span class="kw">type </span>Reader = HttpBody;
     <span class="kw">type </span>Writer = S3Writers;
-    <span class="kw">type </span>Lister = oio::PageLister&lt;S3Lister&gt;;
+    <span class="kw">type </span>Lister = S3Listers;
     <span class="kw">type </span>BlockingReader = ();
     <span class="kw">type </span>BlockingWriter = ();
     <span class="kw">type </span>BlockingLister = ();
 
-    <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
+    <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>am = AccessorInfo::default();
         am.set_scheme(Scheme::S3)
             .set_root(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root)
@@ -2327,21 +2170,24 @@
                 stat_with_override_cache_control: !<span class="self">self</span>.core.disable_stat_with_override,
                 stat_with_override_content_disposition: !<span class="self">self</span>.core.disable_stat_with_override,
                 stat_with_override_content_type: !<span class="self">self</span>.core.disable_stat_with_override,
+                stat_with_version: <span class="self">self</span>.core.enable_versioning,
 
                 read: <span class="bool-val">true</span>,
-                read_can_next: <span class="bool-val">true</span>,
-                read_with_range: <span class="bool-val">true</span>,
                 read_with_if_match: <span class="bool-val">true</span>,
                 read_with_if_none_match: <span class="bool-val">true</span>,
                 read_with_override_cache_control: <span class="bool-val">true</span>,
                 read_with_override_content_disposition: <span class="bool-val">true</span>,
                 read_with_override_content_type: <span class="bool-val">true</span>,
+                read_with_version: <span class="self">self</span>.core.enable_versioning,
 
                 write: <span class="bool-val">true</span>,
                 write_can_empty: <span class="bool-val">true</span>,
                 write_can_multi: <span class="bool-val">true</span>,
                 write_with_cache_control: <span class="bool-val">true</span>,
                 write_with_content_type: <span class="bool-val">true</span>,
+                write_with_if_none_match: <span class="bool-val">true</span>,
+                write_with_user_metadata: <span class="bool-val">true</span>,
+
                 <span class="comment">// The min multipart size of S3 is 5 MiB.
                 //
                 // ref: &lt;https://docs.aws.amazon.com/AmazonS3/latest/userguide/qfacts.html&gt;
@@ -2356,12 +2202,15 @@
                 },
 
                 delete: <span class="bool-val">true</span>,
+                delete_with_version: <span class="self">self</span>.core.enable_versioning,
+
                 copy: <span class="bool-val">true</span>,
 
                 list: <span class="bool-val">true</span>,
                 list_with_limit: <span class="bool-val">true</span>,
                 list_with_start_after: <span class="bool-val">true</span>,
                 list_with_recursive: <span class="bool-val">true</span>,
+                list_with_version: <span class="self">self</span>.core.enable_versioning,
 
                 presign: <span class="bool-val">true</span>,
                 presign_stat: <span class="bool-val">true</span>,
@@ -2374,7 +2223,7 @@
                 ..Default::default()
             });
 
-        am
+        am.into()
     }
 
     <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
@@ -2383,44 +2232,69 @@
         <span class="kw">let </span>status = resp.status();
 
         <span class="kw">match </span>status {
-            StatusCode::OK =&gt; parse_into_metadata(path, resp.headers()).map(RpStat::new),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            StatusCode::OK =&gt; {
+                <span class="kw">let </span>headers = resp.headers();
+                <span class="kw">let </span><span class="kw-2">mut </span>meta = parse_into_metadata(path, headers)<span class="question-mark">?</span>;
+
+                <span class="kw">let </span>user_meta: HashMap&lt;String, String&gt; = headers
+                    .iter()
+                    .filter_map(|(name, <span class="kw">_</span>)| {
+                        name.as_str()
+                            .strip_prefix(constants::X_AMZ_META_PREFIX)
+                            .and_then(|stripped_key| {
+                                parse_header_to_str(headers, name)
+                                    .unwrap_or(<span class="prelude-val">None</span>)
+                                    .map(|val| (stripped_key.to_string(), val.to_string()))
+                            })
+                    })
+                    .collect();
+                <span class="kw">if </span>!user_meta.is_empty() {
+                    meta.with_user_metadata(user_meta);
+                }
+
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = parse_header_to_str(headers, <span class="string">"x-amz-version-id"</span>)<span class="question-mark">? </span>{
+                    meta.set_version(v);
+                }
+
+                <span class="prelude-val">Ok</span>(RpStat::new(meta))
+            }
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="kw">let </span>resp = <span class="self">self</span>.core.s3_get_object(path, args).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>resp = <span class="self">self</span>.core.s3_get_object(path, args.range(), <span class="kw-2">&amp;</span>args).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
-
         <span class="kw">match </span>status {
             StatusCode::OK | StatusCode::PARTIAL_CONTENT =&gt; {
-                <span class="kw">let </span>size = parse_content_length(resp.headers())<span class="question-mark">?</span>;
-                <span class="kw">let </span>range = parse_content_range(resp.headers())<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>((
-                    RpRead::new().with_size(size).with_range(range),
-                    resp.into_body(),
-                ))
+                <span class="prelude-val">Ok</span>((RpRead::default(), resp.into_body()))
             }
-            StatusCode::RANGE_NOT_SATISFIABLE =&gt; {
-                resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>((RpRead::new().with_size(<span class="prelude-val">Some</span>(<span class="number">0</span>)), IncomingAsyncBody::empty()))
+            <span class="kw">_ </span>=&gt; {
+                <span class="kw">let </span>(part, <span class="kw-2">mut </span>body) = resp.into_parts();
+                <span class="kw">let </span>buf = body.to_buffer().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)))
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
         }
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
         <span class="kw">let </span>concurrent = args.concurrent();
+        <span class="kw">let </span>executor = args.executor().cloned();
         <span class="kw">let </span>writer = S3Writer::new(<span class="self">self</span>.core.clone(), path, args);
 
-        <span class="kw">let </span>w = oio::MultipartWriter::new(writer, concurrent);
+        <span class="kw">let </span>w = oio::MultipartWriter::new(writer, executor, concurrent);
 
         <span class="prelude-val">Ok</span>((RpWrite::default(), w))
     }
 
-    <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
-        <span class="kw">let </span>resp = <span class="self">self</span>.core.s3_delete_object(path).<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
+        <span class="comment">// This would delete the bucket, do not perform
+        </span><span class="kw">if </span><span class="self">self</span>.core.root == <span class="string">"/" </span>&amp;&amp; path == <span class="string">"/" </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(RpDelete::default());
+        }
+
+        <span class="kw">let </span>resp = <span class="self">self</span>.core.s3_delete_object(path, <span class="kw-2">&amp;</span>args).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
 
@@ -2430,19 +2304,37 @@
             // This is not a standard behavior, only some s3 alike service like GCS XML API do this.
             // ref: &lt;https://cloud.google.com/storage/docs/xml-api/delete-object&gt;
             </span>StatusCode::NOT_FOUND =&gt; <span class="prelude-val">Ok</span>(RpDelete::default()),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
     <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Lister)&gt; {
-        <span class="kw">let </span>l = S3Lister::new(
-            <span class="self">self</span>.core.clone(),
-            path,
-            args.recursive(),
-            args.limit(),
-            args.start_after(),
-        );
-        <span class="prelude-val">Ok</span>((RpList::default(), oio::PageLister::new(l)))
+        <span class="kw">if </span>args.version() &amp;&amp; !<span class="self">self</span>.core.enable_versioning {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                ErrorKind::Unsupported,
+                <span class="string">"the bucket doesn't enable versioning"</span>,
+            ));
+        }
+
+        <span class="kw">let </span>l = <span class="kw">if </span>args.version() {
+            TwoWays::Two(PageLister::new(S3ObjectVersionsLister::new(
+                <span class="self">self</span>.core.clone(),
+                path,
+                args.recursive(),
+                args.limit(),
+                args.start_after(),
+            )))
+        } <span class="kw">else </span>{
+            TwoWays::One(PageLister::new(S3Lister::new(
+                <span class="self">self</span>.core.clone(),
+                path,
+                args.recursive(),
+                args.limit(),
+                args.start_after(),
+            )))
+        };
+
+        <span class="prelude-val">Ok</span>((RpList::default(), l))
     }
 
     <span class="kw">async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, _args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
@@ -2451,14 +2343,8 @@
         <span class="kw">let </span>status = resp.status();
 
         <span class="kw">match </span>status {
-            StatusCode::OK =&gt; {
-                <span class="comment">// According to the documentation, when using copy_object, a 200 error may occur and we need to detect it.
-                // https://docs.aws.amazon.com/AmazonS3/latest/API/API_CopyObject.html#API_CopyObject_RequestSyntax
-                </span>resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-
-                <span class="prelude-val">Ok</span>(RpCopy::default())
-            }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(RpCopy::default()),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -2468,13 +2354,14 @@
         <span class="comment">// We will not send this request out, just for signing.
         </span><span class="kw">let </span><span class="kw-2">mut </span>req = <span class="kw">match </span>op {
             PresignOperation::Stat(v) =&gt; <span class="self">self</span>.core.s3_head_object_request(path, v)<span class="question-mark">?</span>,
-            PresignOperation::Read(v) =&gt; <span class="self">self</span>.core.s3_get_object_request(path, v)<span class="question-mark">?</span>,
-            PresignOperation::Write(<span class="kw">_</span>) =&gt; <span class="self">self</span>.core.s3_put_object_request(
-                path,
-                <span class="prelude-val">None</span>,
-                <span class="kw-2">&amp;</span>OpWrite::default(),
-                AsyncBody::Empty,
-            )<span class="question-mark">?</span>,
+            PresignOperation::Read(v) =&gt; {
+                <span class="self">self</span>.core
+                    .s3_get_object_request(path, BytesRange::default(), <span class="kw-2">&amp;</span>v)<span class="question-mark">?
+            </span>}
+            PresignOperation::Write(<span class="kw">_</span>) =&gt; {
+                <span class="self">self</span>.core
+                    .s3_put_object_request(path, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>OpWrite::default(), Buffer::new())<span class="question-mark">?
+            </span>}
         };
 
         <span class="self">self</span>.core.sign_query(<span class="kw-2">&amp;mut </span>req, expire).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -2506,7 +2393,7 @@
         <span class="kw">let </span>status = resp.status();
 
         <span class="kw">if let </span>StatusCode::OK = status {
-            <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>bs = resp.into_body();
 
             <span class="kw">let </span>result: DeleteObjectsResult =
                 quick_xml::de::from_reader(bs.reader()).map_err(new_xml_deserialize_error)<span class="question-mark">?</span>;
@@ -2522,7 +2409,7 @@
                 <span class="comment">// set the error kind and mark temporary if retryable
                 </span><span class="kw">let </span>(kind, retryable) =
                     parse_s3_error_code(i.code.as_str()).unwrap_or((ErrorKind::Unexpected, <span class="bool-val">false</span>));
-                <span class="kw">let </span><span class="kw-2">mut </span>err: Error = Error::new(kind, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{i:?}"</span>));
+                <span class="kw">let </span><span class="kw-2">mut </span>err: Error = Error::new(kind, <span class="macro">format!</span>(<span class="string">"{i:?}"</span>));
                 <span class="kw">if </span>retryable {
                     err = err.set_temporary();
                 }
@@ -2532,7 +2419,7 @@
 
             <span class="prelude-val">Ok</span>(RpBatch::new(batched_result))
         } <span class="kw">else </span>{
-            <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>)
+            <span class="prelude-val">Err</span>(parse_error(resp))
         }
     }
 }
@@ -2554,9 +2441,9 @@
 
         <span class="kw">for </span>(bucket, enable_virtual_host_style, expected) <span class="kw">in </span>bucket_cases {
             <span class="kw">let </span><span class="kw-2">mut </span>b = S3Builder::default();
-            b.bucket(bucket);
+            b = b.bucket(bucket);
             <span class="kw">if </span>enable_virtual_host_style {
-                b.enable_virtual_host_style();
+                b = b.enable_virtual_host_style();
             }
             <span class="macro">assert_eq!</span>(b.is_bucket_valid(), expected)
         }
@@ -2574,10 +2461,9 @@
         ];
 
         <span class="kw">for </span>endpoint <span class="kw">in </span><span class="kw-2">&amp;</span>endpoint_cases {
-            <span class="kw">let </span><span class="kw-2">mut </span>b = S3Builder::default();
-            b.bucket(<span class="string">"test"</span>);
+            <span class="kw">let </span><span class="kw-2">mut </span>b = S3Builder::default().bucket(<span class="string">"test"</span>);
             <span class="kw">if let </span><span class="prelude-val">Some</span>(endpoint) = endpoint {
-                b.endpoint(endpoint);
+                b = b.endpoint(endpoint);
             }
 
             <span class="kw">let </span>endpoint = b.build_endpoint(<span class="string">"us-east-2"</span>);
@@ -2585,11 +2471,11 @@
         }
 
         <span class="kw">for </span>endpoint <span class="kw">in </span><span class="kw-2">&amp;</span>endpoint_cases {
-            <span class="kw">let </span><span class="kw-2">mut </span>b = S3Builder::default();
-            b.bucket(<span class="string">"test"</span>);
-            b.enable_virtual_host_style();
+            <span class="kw">let </span><span class="kw-2">mut </span>b = S3Builder::default()
+                .bucket(<span class="string">"test"</span>)
+                .enable_virtual_host_style();
             <span class="kw">if let </span><span class="prelude-val">Some</span>(endpoint) = endpoint {
-                b.endpoint(endpoint);
+                b = b.endpoint(endpoint);
             }
 
             <span class="kw">let </span>endpoint = b.build_endpoint(<span class="string">"us-east-2"</span>);

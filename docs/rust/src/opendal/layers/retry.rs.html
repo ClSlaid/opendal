@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/layers/retry.rs`."><title>retry.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/layers/retry.rs`."><title>retry.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1100,334 +1098,6 @@
 <a href="#1098" id="1098">1098</a>
 <a href="#1099" id="1099">1099</a>
 <a href="#1100" id="1100">1100</a>
-<a href="#1101" id="1101">1101</a>
-<a href="#1102" id="1102">1102</a>
-<a href="#1103" id="1103">1103</a>
-<a href="#1104" id="1104">1104</a>
-<a href="#1105" id="1105">1105</a>
-<a href="#1106" id="1106">1106</a>
-<a href="#1107" id="1107">1107</a>
-<a href="#1108" id="1108">1108</a>
-<a href="#1109" id="1109">1109</a>
-<a href="#1110" id="1110">1110</a>
-<a href="#1111" id="1111">1111</a>
-<a href="#1112" id="1112">1112</a>
-<a href="#1113" id="1113">1113</a>
-<a href="#1114" id="1114">1114</a>
-<a href="#1115" id="1115">1115</a>
-<a href="#1116" id="1116">1116</a>
-<a href="#1117" id="1117">1117</a>
-<a href="#1118" id="1118">1118</a>
-<a href="#1119" id="1119">1119</a>
-<a href="#1120" id="1120">1120</a>
-<a href="#1121" id="1121">1121</a>
-<a href="#1122" id="1122">1122</a>
-<a href="#1123" id="1123">1123</a>
-<a href="#1124" id="1124">1124</a>
-<a href="#1125" id="1125">1125</a>
-<a href="#1126" id="1126">1126</a>
-<a href="#1127" id="1127">1127</a>
-<a href="#1128" id="1128">1128</a>
-<a href="#1129" id="1129">1129</a>
-<a href="#1130" id="1130">1130</a>
-<a href="#1131" id="1131">1131</a>
-<a href="#1132" id="1132">1132</a>
-<a href="#1133" id="1133">1133</a>
-<a href="#1134" id="1134">1134</a>
-<a href="#1135" id="1135">1135</a>
-<a href="#1136" id="1136">1136</a>
-<a href="#1137" id="1137">1137</a>
-<a href="#1138" id="1138">1138</a>
-<a href="#1139" id="1139">1139</a>
-<a href="#1140" id="1140">1140</a>
-<a href="#1141" id="1141">1141</a>
-<a href="#1142" id="1142">1142</a>
-<a href="#1143" id="1143">1143</a>
-<a href="#1144" id="1144">1144</a>
-<a href="#1145" id="1145">1145</a>
-<a href="#1146" id="1146">1146</a>
-<a href="#1147" id="1147">1147</a>
-<a href="#1148" id="1148">1148</a>
-<a href="#1149" id="1149">1149</a>
-<a href="#1150" id="1150">1150</a>
-<a href="#1151" id="1151">1151</a>
-<a href="#1152" id="1152">1152</a>
-<a href="#1153" id="1153">1153</a>
-<a href="#1154" id="1154">1154</a>
-<a href="#1155" id="1155">1155</a>
-<a href="#1156" id="1156">1156</a>
-<a href="#1157" id="1157">1157</a>
-<a href="#1158" id="1158">1158</a>
-<a href="#1159" id="1159">1159</a>
-<a href="#1160" id="1160">1160</a>
-<a href="#1161" id="1161">1161</a>
-<a href="#1162" id="1162">1162</a>
-<a href="#1163" id="1163">1163</a>
-<a href="#1164" id="1164">1164</a>
-<a href="#1165" id="1165">1165</a>
-<a href="#1166" id="1166">1166</a>
-<a href="#1167" id="1167">1167</a>
-<a href="#1168" id="1168">1168</a>
-<a href="#1169" id="1169">1169</a>
-<a href="#1170" id="1170">1170</a>
-<a href="#1171" id="1171">1171</a>
-<a href="#1172" id="1172">1172</a>
-<a href="#1173" id="1173">1173</a>
-<a href="#1174" id="1174">1174</a>
-<a href="#1175" id="1175">1175</a>
-<a href="#1176" id="1176">1176</a>
-<a href="#1177" id="1177">1177</a>
-<a href="#1178" id="1178">1178</a>
-<a href="#1179" id="1179">1179</a>
-<a href="#1180" id="1180">1180</a>
-<a href="#1181" id="1181">1181</a>
-<a href="#1182" id="1182">1182</a>
-<a href="#1183" id="1183">1183</a>
-<a href="#1184" id="1184">1184</a>
-<a href="#1185" id="1185">1185</a>
-<a href="#1186" id="1186">1186</a>
-<a href="#1187" id="1187">1187</a>
-<a href="#1188" id="1188">1188</a>
-<a href="#1189" id="1189">1189</a>
-<a href="#1190" id="1190">1190</a>
-<a href="#1191" id="1191">1191</a>
-<a href="#1192" id="1192">1192</a>
-<a href="#1193" id="1193">1193</a>
-<a href="#1194" id="1194">1194</a>
-<a href="#1195" id="1195">1195</a>
-<a href="#1196" id="1196">1196</a>
-<a href="#1197" id="1197">1197</a>
-<a href="#1198" id="1198">1198</a>
-<a href="#1199" id="1199">1199</a>
-<a href="#1200" id="1200">1200</a>
-<a href="#1201" id="1201">1201</a>
-<a href="#1202" id="1202">1202</a>
-<a href="#1203" id="1203">1203</a>
-<a href="#1204" id="1204">1204</a>
-<a href="#1205" id="1205">1205</a>
-<a href="#1206" id="1206">1206</a>
-<a href="#1207" id="1207">1207</a>
-<a href="#1208" id="1208">1208</a>
-<a href="#1209" id="1209">1209</a>
-<a href="#1210" id="1210">1210</a>
-<a href="#1211" id="1211">1211</a>
-<a href="#1212" id="1212">1212</a>
-<a href="#1213" id="1213">1213</a>
-<a href="#1214" id="1214">1214</a>
-<a href="#1215" id="1215">1215</a>
-<a href="#1216" id="1216">1216</a>
-<a href="#1217" id="1217">1217</a>
-<a href="#1218" id="1218">1218</a>
-<a href="#1219" id="1219">1219</a>
-<a href="#1220" id="1220">1220</a>
-<a href="#1221" id="1221">1221</a>
-<a href="#1222" id="1222">1222</a>
-<a href="#1223" id="1223">1223</a>
-<a href="#1224" id="1224">1224</a>
-<a href="#1225" id="1225">1225</a>
-<a href="#1226" id="1226">1226</a>
-<a href="#1227" id="1227">1227</a>
-<a href="#1228" id="1228">1228</a>
-<a href="#1229" id="1229">1229</a>
-<a href="#1230" id="1230">1230</a>
-<a href="#1231" id="1231">1231</a>
-<a href="#1232" id="1232">1232</a>
-<a href="#1233" id="1233">1233</a>
-<a href="#1234" id="1234">1234</a>
-<a href="#1235" id="1235">1235</a>
-<a href="#1236" id="1236">1236</a>
-<a href="#1237" id="1237">1237</a>
-<a href="#1238" id="1238">1238</a>
-<a href="#1239" id="1239">1239</a>
-<a href="#1240" id="1240">1240</a>
-<a href="#1241" id="1241">1241</a>
-<a href="#1242" id="1242">1242</a>
-<a href="#1243" id="1243">1243</a>
-<a href="#1244" id="1244">1244</a>
-<a href="#1245" id="1245">1245</a>
-<a href="#1246" id="1246">1246</a>
-<a href="#1247" id="1247">1247</a>
-<a href="#1248" id="1248">1248</a>
-<a href="#1249" id="1249">1249</a>
-<a href="#1250" id="1250">1250</a>
-<a href="#1251" id="1251">1251</a>
-<a href="#1252" id="1252">1252</a>
-<a href="#1253" id="1253">1253</a>
-<a href="#1254" id="1254">1254</a>
-<a href="#1255" id="1255">1255</a>
-<a href="#1256" id="1256">1256</a>
-<a href="#1257" id="1257">1257</a>
-<a href="#1258" id="1258">1258</a>
-<a href="#1259" id="1259">1259</a>
-<a href="#1260" id="1260">1260</a>
-<a href="#1261" id="1261">1261</a>
-<a href="#1262" id="1262">1262</a>
-<a href="#1263" id="1263">1263</a>
-<a href="#1264" id="1264">1264</a>
-<a href="#1265" id="1265">1265</a>
-<a href="#1266" id="1266">1266</a>
-<a href="#1267" id="1267">1267</a>
-<a href="#1268" id="1268">1268</a>
-<a href="#1269" id="1269">1269</a>
-<a href="#1270" id="1270">1270</a>
-<a href="#1271" id="1271">1271</a>
-<a href="#1272" id="1272">1272</a>
-<a href="#1273" id="1273">1273</a>
-<a href="#1274" id="1274">1274</a>
-<a href="#1275" id="1275">1275</a>
-<a href="#1276" id="1276">1276</a>
-<a href="#1277" id="1277">1277</a>
-<a href="#1278" id="1278">1278</a>
-<a href="#1279" id="1279">1279</a>
-<a href="#1280" id="1280">1280</a>
-<a href="#1281" id="1281">1281</a>
-<a href="#1282" id="1282">1282</a>
-<a href="#1283" id="1283">1283</a>
-<a href="#1284" id="1284">1284</a>
-<a href="#1285" id="1285">1285</a>
-<a href="#1286" id="1286">1286</a>
-<a href="#1287" id="1287">1287</a>
-<a href="#1288" id="1288">1288</a>
-<a href="#1289" id="1289">1289</a>
-<a href="#1290" id="1290">1290</a>
-<a href="#1291" id="1291">1291</a>
-<a href="#1292" id="1292">1292</a>
-<a href="#1293" id="1293">1293</a>
-<a href="#1294" id="1294">1294</a>
-<a href="#1295" id="1295">1295</a>
-<a href="#1296" id="1296">1296</a>
-<a href="#1297" id="1297">1297</a>
-<a href="#1298" id="1298">1298</a>
-<a href="#1299" id="1299">1299</a>
-<a href="#1300" id="1300">1300</a>
-<a href="#1301" id="1301">1301</a>
-<a href="#1302" id="1302">1302</a>
-<a href="#1303" id="1303">1303</a>
-<a href="#1304" id="1304">1304</a>
-<a href="#1305" id="1305">1305</a>
-<a href="#1306" id="1306">1306</a>
-<a href="#1307" id="1307">1307</a>
-<a href="#1308" id="1308">1308</a>
-<a href="#1309" id="1309">1309</a>
-<a href="#1310" id="1310">1310</a>
-<a href="#1311" id="1311">1311</a>
-<a href="#1312" id="1312">1312</a>
-<a href="#1313" id="1313">1313</a>
-<a href="#1314" id="1314">1314</a>
-<a href="#1315" id="1315">1315</a>
-<a href="#1316" id="1316">1316</a>
-<a href="#1317" id="1317">1317</a>
-<a href="#1318" id="1318">1318</a>
-<a href="#1319" id="1319">1319</a>
-<a href="#1320" id="1320">1320</a>
-<a href="#1321" id="1321">1321</a>
-<a href="#1322" id="1322">1322</a>
-<a href="#1323" id="1323">1323</a>
-<a href="#1324" id="1324">1324</a>
-<a href="#1325" id="1325">1325</a>
-<a href="#1326" id="1326">1326</a>
-<a href="#1327" id="1327">1327</a>
-<a href="#1328" id="1328">1328</a>
-<a href="#1329" id="1329">1329</a>
-<a href="#1330" id="1330">1330</a>
-<a href="#1331" id="1331">1331</a>
-<a href="#1332" id="1332">1332</a>
-<a href="#1333" id="1333">1333</a>
-<a href="#1334" id="1334">1334</a>
-<a href="#1335" id="1335">1335</a>
-<a href="#1336" id="1336">1336</a>
-<a href="#1337" id="1337">1337</a>
-<a href="#1338" id="1338">1338</a>
-<a href="#1339" id="1339">1339</a>
-<a href="#1340" id="1340">1340</a>
-<a href="#1341" id="1341">1341</a>
-<a href="#1342" id="1342">1342</a>
-<a href="#1343" id="1343">1343</a>
-<a href="#1344" id="1344">1344</a>
-<a href="#1345" id="1345">1345</a>
-<a href="#1346" id="1346">1346</a>
-<a href="#1347" id="1347">1347</a>
-<a href="#1348" id="1348">1348</a>
-<a href="#1349" id="1349">1349</a>
-<a href="#1350" id="1350">1350</a>
-<a href="#1351" id="1351">1351</a>
-<a href="#1352" id="1352">1352</a>
-<a href="#1353" id="1353">1353</a>
-<a href="#1354" id="1354">1354</a>
-<a href="#1355" id="1355">1355</a>
-<a href="#1356" id="1356">1356</a>
-<a href="#1357" id="1357">1357</a>
-<a href="#1358" id="1358">1358</a>
-<a href="#1359" id="1359">1359</a>
-<a href="#1360" id="1360">1360</a>
-<a href="#1361" id="1361">1361</a>
-<a href="#1362" id="1362">1362</a>
-<a href="#1363" id="1363">1363</a>
-<a href="#1364" id="1364">1364</a>
-<a href="#1365" id="1365">1365</a>
-<a href="#1366" id="1366">1366</a>
-<a href="#1367" id="1367">1367</a>
-<a href="#1368" id="1368">1368</a>
-<a href="#1369" id="1369">1369</a>
-<a href="#1370" id="1370">1370</a>
-<a href="#1371" id="1371">1371</a>
-<a href="#1372" id="1372">1372</a>
-<a href="#1373" id="1373">1373</a>
-<a href="#1374" id="1374">1374</a>
-<a href="#1375" id="1375">1375</a>
-<a href="#1376" id="1376">1376</a>
-<a href="#1377" id="1377">1377</a>
-<a href="#1378" id="1378">1378</a>
-<a href="#1379" id="1379">1379</a>
-<a href="#1380" id="1380">1380</a>
-<a href="#1381" id="1381">1381</a>
-<a href="#1382" id="1382">1382</a>
-<a href="#1383" id="1383">1383</a>
-<a href="#1384" id="1384">1384</a>
-<a href="#1385" id="1385">1385</a>
-<a href="#1386" id="1386">1386</a>
-<a href="#1387" id="1387">1387</a>
-<a href="#1388" id="1388">1388</a>
-<a href="#1389" id="1389">1389</a>
-<a href="#1390" id="1390">1390</a>
-<a href="#1391" id="1391">1391</a>
-<a href="#1392" id="1392">1392</a>
-<a href="#1393" id="1393">1393</a>
-<a href="#1394" id="1394">1394</a>
-<a href="#1395" id="1395">1395</a>
-<a href="#1396" id="1396">1396</a>
-<a href="#1397" id="1397">1397</a>
-<a href="#1398" id="1398">1398</a>
-<a href="#1399" id="1399">1399</a>
-<a href="#1400" id="1400">1400</a>
-<a href="#1401" id="1401">1401</a>
-<a href="#1402" id="1402">1402</a>
-<a href="#1403" id="1403">1403</a>
-<a href="#1404" id="1404">1404</a>
-<a href="#1405" id="1405">1405</a>
-<a href="#1406" id="1406">1406</a>
-<a href="#1407" id="1407">1407</a>
-<a href="#1408" id="1408">1408</a>
-<a href="#1409" id="1409">1409</a>
-<a href="#1410" id="1410">1410</a>
-<a href="#1411" id="1411">1411</a>
-<a href="#1412" id="1412">1412</a>
-<a href="#1413" id="1413">1413</a>
-<a href="#1414" id="1414">1414</a>
-<a href="#1415" id="1415">1415</a>
-<a href="#1416" id="1416">1416</a>
-<a href="#1417" id="1417">1417</a>
-<a href="#1418" id="1418">1418</a>
-<a href="#1419" id="1419">1419</a>
-<a href="#1420" id="1420">1420</a>
-<a href="#1421" id="1421">1421</a>
-<a href="#1422" id="1422">1422</a>
-<a href="#1423" id="1423">1423</a>
-<a href="#1424" id="1424">1424</a>
-<a href="#1425" id="1425">1425</a>
-<a href="#1426" id="1426">1426</a>
-<a href="#1427" id="1427">1427</a>
-<a href="#1428" id="1428">1428</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1447,27 +1117,15 @@
 
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
-<span class="kw">use </span>std::io;
-<span class="kw">use </span>std::pin::Pin;
 <span class="kw">use </span>std::sync::Arc;
-<span class="kw">use </span>std::task::ready;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
 <span class="kw">use </span>std::time::Duration;
 
-<span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>backon::BackoffBuilder;
 <span class="kw">use </span>backon::BlockingRetryable;
-<span class="kw">use </span>backon::ExponentialBackoff;
 <span class="kw">use </span>backon::ExponentialBuilder;
 <span class="kw">use </span>backon::Retryable;
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>log::warn;
 
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::ListOperation;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::ReadOperation;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteOperation;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -1479,21 +1137,53 @@
 /// returns true. If operation still failed, this layer will set error to
 /// `Persistent` which means error has been retried.
 ///
-/// `write` and `blocking_write` don't support retry so far, visit [this issue](https://github.com/apache/opendal/issues/1223) for more details.
+/// # Panics
+///
+/// While retrying `Reader` or `Writer` operations, please make sure either:
+///
+/// - All futures generated by `Reader::read` or `Writer::close` are resolved to `Ready`.
+/// - Or, won't call any `Reader` or `Writer` methods after retry returns final error.
+///
+/// Otherwise, `RetryLayer` could panic while hitting in bad states.
+///
+/// For example, while composing `RetryLayer` with `TimeoutLayer`. The order of layer is sensitive.
+///
+/// ```no_run
+/// # use std::time::Duration;
+///
+/// # use opendal::layers::RetryLayer;
+/// # use opendal::layers::TimeoutLayer;
+/// # use opendal::services;
+/// # use opendal::Operator;
+/// # use opendal::Result;
+///
+/// # fn main() -&gt; Result&lt;()&gt; {
+/// let op = Operator::new(services::Memory::default())?
+///     // This is fine, since timeout happen during retry.
+///     .layer(TimeoutLayer::new().with_io_timeout(Duration::from_nanos(1)))
+///     .layer(RetryLayer::new())
+///     // This is wrong. Since timeout layer will drop future, leaving retry layer in a bad state.
+///     .layer(TimeoutLayer::new().with_io_timeout(Duration::from_nanos(1)))
+///     .finish();
+/// Ok(())
+/// # }
+/// ```
 ///
 /// # Examples
 ///
-/// ```
-/// use anyhow::Result;
-/// use opendal::layers::RetryLayer;
-/// use opendal::services;
-/// use opendal::Operator;
-/// use opendal::Scheme;
+/// ```no_run
+/// # use opendal::layers::RetryLayer;
+/// # use opendal::services;
+/// # use opendal::Operator;
+/// # use opendal::Result;
+/// # use opendal::Scheme;
 ///
-/// let _ = Operator::new(services::Memory::default())
-///     .expect("must init")
+/// # fn main() -&gt; Result&lt;()&gt; {
+/// let _ = Operator::new(services::Memory::default())?
 ///     .layer(RetryLayer::new())
 ///     .finish();
+/// Ok(())
+/// # }
 /// ```
 ///
 /// ## Customize retry interceptor
@@ -1501,29 +1191,31 @@
 /// RetryLayer accepts [`RetryInterceptor`] to allow users to customize
 /// their own retry interceptor logic.
 ///
-/// ```
-/// use std::time::Duration;
+/// ```no_run
+/// # use std::time::Duration;
 ///
-/// use anyhow::Result;
-/// use opendal::layers::RetryInterceptor;
-/// use opendal::layers::RetryLayer;
-/// use opendal::services;
-/// use opendal::Error;
-/// use opendal::Operator;
-/// use opendal::Scheme;
+/// # use opendal::layers::RetryInterceptor;
+/// # use opendal::layers::RetryLayer;
+/// # use opendal::services;
+/// # use opendal::Error;
+/// # use opendal::Operator;
+/// # use opendal::Result;
+/// # use opendal::Scheme;
 ///
 /// struct MyRetryInterceptor;
 ///
 /// impl RetryInterceptor for MyRetryInterceptor {
-///     fn intercept(&amp;self, err: &amp;Error, dur: Duration, ctx: &amp;[(&amp;str, &amp;str)]) {
+///     fn intercept(&amp;self, err: &amp;Error, dur: Duration) {
 ///         // do something
 ///     }
 /// }
 ///
-/// let _ = Operator::new(services::Memory::default())
-///     .expect("must init")
+/// # fn main() -&gt; Result&lt;()&gt; {
+/// let _ = Operator::new(services::Memory::default())?
 ///     .layer(RetryLayer::new().with_notify(MyRetryInterceptor))
 ///     .finish();
+/// Ok(())
+/// # }
 /// ```
 </span><span class="kw">pub struct </span>RetryLayer&lt;I = DefaultRetryInterceptor&gt; {
     builder: ExponentialBuilder,
@@ -1533,7 +1225,7 @@
 <span class="kw">impl</span>&lt;I&gt; Clone <span class="kw">for </span>RetryLayer&lt;I&gt; {
     <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            builder: <span class="self">self</span>.builder.clone(),
+            builder: <span class="self">self</span>.builder,
             notify: <span class="self">self</span>.notify.clone(),
         }
     }
@@ -1552,7 +1244,7 @@
     <span class="doccomment">/// Create a new retry layer.
     /// # Examples
     ///
-    /// ```
+    /// ```no_run
     /// use anyhow::Result;
     /// use opendal::layers::RetryLayer;
     /// use opendal::services;
@@ -1569,7 +1261,7 @@
 
     <span class="doccomment">/// Set the retry interceptor as new notify.
     ///
-    /// ```
+    /// ```no_run
     /// use std::time::Duration;
     ///
     /// use anyhow::Result;
@@ -1583,7 +1275,7 @@
     /// struct MyRetryInterceptor;
     ///
     /// impl RetryInterceptor for MyRetryInterceptor {
-    ///     fn intercept(&amp;self, err: &amp;Error, dur: Duration, ctx: &amp;[(&amp;str, &amp;str)]) {
+    ///     fn intercept(&amp;self, err: &amp;Error, dur: Duration) {
     ///         // do something
     ///     }
     /// }
@@ -1642,13 +1334,13 @@
     </span>}
 }
 
-<span class="kw">impl</span>&lt;A: Accessor, I: RetryInterceptor&gt; Layer&lt;A&gt; <span class="kw">for </span>RetryLayer&lt;I&gt; {
-    <span class="kw">type </span>LayeredAccessor = RetryAccessor&lt;A, I&gt;;
+<span class="kw">impl</span>&lt;A: Access, I: RetryInterceptor&gt; Layer&lt;A&gt; <span class="kw">for </span>RetryLayer&lt;I&gt; {
+    <span class="kw">type </span>LayeredAccess = RetryAccessor&lt;A, I&gt;;
 
-    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccessor {
+    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess {
         RetryAccessor {
-            inner,
-            builder: <span class="self">self</span>.builder.clone(),
+            inner: Arc::new(inner),
+            builder: <span class="self">self</span>.builder,
             notify: <span class="self">self</span>.notify.clone(),
         }
     }
@@ -1666,40 +1358,33 @@
     ///
     /// - err: The error that caused the current retry.
     /// - dur: The duration that will sleep before next retry.
-    /// - ctx: The context (`name`, `value`) of current operation, like `operation` and `path`.
     ///
     /// # Notes
     ///
     /// The intercept must be quick and non-blocking. No heavy IO is
     /// allowed. Otherwise the retry will be blocked.
-    </span><span class="kw">fn </span>intercept(<span class="kw-2">&amp;</span><span class="self">self</span>, err: <span class="kw-2">&amp;</span>Error, dur: Duration, ctx: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span>str, <span class="kw-2">&amp;</span>str)]);
+    </span><span class="kw">fn </span>intercept(<span class="kw-2">&amp;</span><span class="self">self</span>, err: <span class="kw-2">&amp;</span>Error, dur: Duration);
 }
 
 <span class="doccomment">/// The DefaultRetryInterceptor will log the retry error in warning level.
 </span><span class="kw">pub struct </span>DefaultRetryInterceptor;
 
 <span class="kw">impl </span>RetryInterceptor <span class="kw">for </span>DefaultRetryInterceptor {
-    <span class="kw">fn </span>intercept(<span class="kw-2">&amp;</span><span class="self">self</span>, err: <span class="kw-2">&amp;</span>Error, dur: Duration, ctx: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span>str, <span class="kw-2">&amp;</span>str)]) {
-        <span class="kw">let </span>context = ctx
-            .iter()
-            .map(|(k, v)| <span class="macro">format!</span>(<span class="string">"{}={}"</span>, k, v))
-            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
-            .join(<span class="string">" "</span>);
-
+    <span class="kw">fn </span>intercept(<span class="kw-2">&amp;</span><span class="self">self</span>, err: <span class="kw-2">&amp;</span>Error, dur: Duration) {
         <span class="macro">warn!</span>(
-            target: <span class="string">"opendal::service"</span>,
-            <span class="string">"{} -&gt; retry after {}s: error={}"</span>,
-            context, dur.as_secs_f64(), err)
+            target: <span class="string">"opendal::layers::retry"</span>,
+            <span class="string">"will retry after {}s because: {}"</span>,
+            dur.as_secs_f64(), err)
     }
 }
 
-<span class="kw">pub struct </span>RetryAccessor&lt;A: Accessor, I: RetryInterceptor&gt; {
-    inner: A,
+<span class="kw">pub struct </span>RetryAccessor&lt;A: Access, I: RetryInterceptor&gt; {
+    inner: Arc&lt;A&gt;,
     builder: ExponentialBuilder,
     notify: Arc&lt;I&gt;,
 }
 
-<span class="kw">impl</span>&lt;A: Accessor, I: RetryInterceptor&gt; Debug <span class="kw">for </span>RetryAccessor&lt;A, I&gt; {
+<span class="kw">impl</span>&lt;A: Access, I: RetryInterceptor&gt; Debug <span class="kw">for </span>RetryAccessor&lt;A, I&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         f.debug_struct(<span class="string">"RetryAccessor"</span>)
             .field(<span class="string">"inner"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.inner)
@@ -1707,12 +1392,10 @@
     }
 }
 
-<span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-#[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-</span><span class="kw">impl</span>&lt;A: Accessor, I: RetryInterceptor&gt; LayeredAccessor <span class="kw">for </span>RetryAccessor&lt;A, I&gt; {
+<span class="kw">impl</span>&lt;A: Access, I: RetryInterceptor&gt; LayeredAccess <span class="kw">for </span>RetryAccessor&lt;A, I&gt; {
     <span class="kw">type </span>Inner = A;
-    <span class="kw">type </span>Reader = RetryWrapper&lt;A::Reader, I&gt;;
-    <span class="kw">type </span>BlockingReader = RetryWrapper&lt;A::BlockingReader, I&gt;;
+    <span class="kw">type </span>Reader = RetryWrapper&lt;RetryReader&lt;A, A::Reader&gt;, I&gt;;
+    <span class="kw">type </span>BlockingReader = RetryWrapper&lt;RetryReader&lt;A, A::BlockingReader&gt;, I&gt;;
     <span class="kw">type </span>Writer = RetryWrapper&lt;A::Writer, I&gt;;
     <span class="kw">type </span>BlockingWriter = RetryWrapper&lt;A::BlockingWriter, I&gt;;
     <span class="kw">type </span>Lister = RetryWrapper&lt;A::Lister, I&gt;;
@@ -1724,160 +1407,83 @@
 
     <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
         { || <span class="self">self</span>.inner.create_dir(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
-            .notify(|err, dur: Duration| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[
-                        (<span class="string">"operation"</span>, Operation::CreateDir.into_static()),
-                        (<span class="string">"path"</span>, path),
-                    ],
-                )
-            })
+            .notify(|err, dur: Duration| <span class="self">self</span>.notify.intercept(err, dur))
             .map(|v| v.map_err(|e| e.set_persistent()))
             .<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        { || <span class="self">self</span>.inner.read(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+        <span class="kw">let </span>(rp, reader) = { || <span class="self">self</span>.inner.read(path, args.clone()) }
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
-            .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[(<span class="string">"operation"</span>, Operation::Read.into_static()), (<span class="string">"path"</span>, path)],
-                )
-            })
-            .map(|v| {
-                v.map(|(rp, r)| {
-                    (
-                        rp,
-                        RetryWrapper::new(r, <span class="self">self</span>.notify.clone(), path, <span class="self">self</span>.builder.clone()),
-                    )
-                })
-                .map_err(|e| e.set_persistent())
-            })
+            .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .<span class="kw">await
-    </span>}
+            </span>.map_err(|e| e.set_persistent())<span class="question-mark">?</span>;
 
-    <span class="doccomment">/// Return `Interrupted` Error even after retry.
-    ///
-    /// Allowing users to retry the write request from upper logic.
-    </span><span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
+        <span class="kw">let </span>retry_reader = RetryReader::new(<span class="self">self</span>.inner.clone(), path.to_string(), args, reader);
+        <span class="kw">let </span>retry_wrapper = RetryWrapper::new(retry_reader, <span class="self">self</span>.notify.clone(), <span class="self">self</span>.builder);
+
+        <span class="prelude-val">Ok</span>((rp, retry_wrapper))
+    }
+
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
         { || <span class="self">self</span>.inner.write(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
-            .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[
-                        (<span class="string">"operation"</span>, Operation::Write.into_static()),
-                        (<span class="string">"path"</span>, path),
-                    ],
-                )
-            })
+            .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .map(|v| {
-                v.map(|(rp, r)| {
-                    (
-                        rp,
-                        RetryWrapper::new(r, <span class="self">self</span>.notify.clone(), path, <span class="self">self</span>.builder.clone()),
-                    )
-                })
-                .map_err(|e| e.set_persistent())
+                v.map(|(rp, r)| (rp, RetryWrapper::new(r, <span class="self">self</span>.notify.clone(), <span class="self">self</span>.builder)))
+                    .map_err(|e| e.set_persistent())
             })
             .<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
         { || <span class="self">self</span>.inner.stat(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
-            .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[(<span class="string">"operation"</span>, Operation::Stat.into_static()), (<span class="string">"path"</span>, path)],
-                )
-            })
+            .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .map(|v| v.map_err(|e| e.set_persistent()))
             .<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
         { || <span class="self">self</span>.inner.delete(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
-            .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[
-                        (<span class="string">"operation"</span>, Operation::Delete.into_static()),
-                        (<span class="string">"path"</span>, path),
-                    ],
-                )
-            })
+            .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .map(|v| v.map_err(|e| e.set_persistent()))
             .<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
         { || <span class="self">self</span>.inner.copy(from, to, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
-            .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[
-                        (<span class="string">"operation"</span>, Operation::Copy.into_static()),
-                        (<span class="string">"from"</span>, from),
-                        (<span class="string">"to"</span>, to),
-                    ],
-                )
-            })
+            .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .map(|v| v.map_err(|e| e.set_persistent()))
             .<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
         { || <span class="self">self</span>.inner.rename(from, to, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
-            .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[
-                        (<span class="string">"operation"</span>, Operation::Rename.into_static()),
-                        (<span class="string">"from"</span>, from),
-                        (<span class="string">"to"</span>, to),
-                    ],
-                )
-            })
+            .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .map(|v| v.map_err(|e| e.set_persistent()))
             .<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Lister)&gt; {
         { || <span class="self">self</span>.inner.list(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
-            .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[(<span class="string">"operation"</span>, Operation::List.into_static()), (<span class="string">"path"</span>, path)],
-                )
-            })
+            .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .map(|v| {
                 v.map(|(l, p)| {
-                    <span class="kw">let </span>lister =
-                        RetryWrapper::new(p, <span class="self">self</span>.notify.clone(), path, <span class="self">self</span>.builder.clone());
+                    <span class="kw">let </span>lister = RetryWrapper::new(p, <span class="self">self</span>.notify.clone(), <span class="self">self</span>.builder);
                     (l, lister)
                 })
                 .map_err(|e| e.set_persistent())
@@ -1897,652 +1503,353 @@
                 <span class="prelude-val">Ok</span>(RpBatch::new(nrp))
             }
         }
-        .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+        .retry(<span class="self">self</span>.builder)
         .when(|e: <span class="kw-2">&amp;</span>Error| e.is_temporary())
-        .notify(|err, dur| {
-            <span class="self">self</span>.notify.intercept(
-                err,
-                dur,
-                <span class="kw-2">&amp;</span>[
-                    (<span class="string">"operation"</span>, Operation::Batch.into_static()),
-                    (<span class="string">"count"</span>, <span class="kw-2">&amp;</span>args.operation().len().to_string()),
-                ],
-            )
-        })
+        .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
         .<span class="kw">await
         </span>.map_err(|e| e.set_persistent())
     }
 
     <span class="kw">fn </span>blocking_create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
         { || <span class="self">self</span>.inner.blocking_create_dir(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
-            .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[
-                        (<span class="string">"operation"</span>, Operation::BlockingCreateDir.into_static()),
-                        (<span class="string">"path"</span>, path),
-                    ],
-                )
-            })
+            .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .call()
             .map_err(|e| e.set_persistent())
     }
 
     <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
-        { || <span class="self">self</span>.inner.blocking_read(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+        <span class="kw">let </span>(rp, reader) = { || <span class="self">self</span>.inner.blocking_read(path, args.clone()) }
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
-            .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[
-                        (<span class="string">"operation"</span>, Operation::BlockingRead.into_static()),
-                        (<span class="string">"path"</span>, path),
-                    ],
-                )
-            })
+            .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .call()
-            .map(|(rp, r)| {
-                (
-                    rp,
-                    RetryWrapper::new(r, <span class="self">self</span>.notify.clone(), path, <span class="self">self</span>.builder.clone()),
-                )
-            })
-            .map_err(|e| e.set_persistent())
+            .map_err(|e| e.set_persistent())<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>retry_reader = RetryReader::new(<span class="self">self</span>.inner.clone(), path.to_string(), args, reader);
+        <span class="kw">let </span>retry_wrapper = RetryWrapper::new(retry_reader, <span class="self">self</span>.notify.clone(), <span class="self">self</span>.builder);
+
+        <span class="prelude-val">Ok</span>((rp, retry_wrapper))
     }
 
     <span class="kw">fn </span>blocking_write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::BlockingWriter)&gt; {
         { || <span class="self">self</span>.inner.blocking_write(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
-            .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[
-                        (<span class="string">"operation"</span>, Operation::BlockingWrite.into_static()),
-                        (<span class="string">"path"</span>, path),
-                    ],
-                )
-            })
+            .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .call()
-            .map(|(rp, r)| {
-                (
-                    rp,
-                    RetryWrapper::new(r, <span class="self">self</span>.notify.clone(), path, <span class="self">self</span>.builder.clone()),
-                )
-            })
+            .map(|(rp, r)| (rp, RetryWrapper::new(r, <span class="self">self</span>.notify.clone(), <span class="self">self</span>.builder)))
             .map_err(|e| e.set_persistent())
     }
 
     <span class="kw">fn </span>blocking_stat(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
         { || <span class="self">self</span>.inner.blocking_stat(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
-            .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[
-                        (<span class="string">"operation"</span>, Operation::BlockingStat.into_static()),
-                        (<span class="string">"path"</span>, path),
-                    ],
-                )
-            })
+            .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .call()
             .map_err(|e| e.set_persistent())
     }
 
     <span class="kw">fn </span>blocking_delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpDelete) -&gt; <span class="prelude-ty">Result</span>&lt;RpDelete&gt; {
         { || <span class="self">self</span>.inner.blocking_delete(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
-            .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[
-                        (<span class="string">"operation"</span>, Operation::BlockingDelete.into_static()),
-                        (<span class="string">"path"</span>, path),
-                    ],
-                )
-            })
+            .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .call()
             .map_err(|e| e.set_persistent())
     }
 
     <span class="kw">fn </span>blocking_copy(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpCopy) -&gt; <span class="prelude-ty">Result</span>&lt;RpCopy&gt; {
         { || <span class="self">self</span>.inner.blocking_copy(from, to, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
-            .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[
-                        (<span class="string">"operation"</span>, Operation::BlockingCopy.into_static()),
-                        (<span class="string">"from"</span>, from),
-                        (<span class="string">"to"</span>, to),
-                    ],
-                )
-            })
+            .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .call()
             .map_err(|e| e.set_persistent())
     }
 
     <span class="kw">fn </span>blocking_rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>str, to: <span class="kw-2">&amp;</span>str, args: OpRename) -&gt; <span class="prelude-ty">Result</span>&lt;RpRename&gt; {
         { || <span class="self">self</span>.inner.blocking_rename(from, to, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
-            .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[
-                        (<span class="string">"operation"</span>, Operation::BlockingRename.into_static()),
-                        (<span class="string">"from"</span>, from),
-                        (<span class="string">"to"</span>, to),
-                    ],
-                )
-            })
+            .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .call()
             .map_err(|e| e.set_persistent())
     }
 
     <span class="kw">fn </span>blocking_list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::BlockingLister)&gt; {
         { || <span class="self">self</span>.inner.blocking_list(path, args.clone()) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
-            .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[
-                        (<span class="string">"operation"</span>, Operation::BlockingList.into_static()),
-                        (<span class="string">"path"</span>, path),
-                    ],
-                )
-            })
+            .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
             .call()
             .map(|(rp, p)| {
-                <span class="kw">let </span>p = RetryWrapper::new(p, <span class="self">self</span>.notify.clone(), path, <span class="self">self</span>.builder.clone());
+                <span class="kw">let </span>p = RetryWrapper::new(p, <span class="self">self</span>.notify.clone(), <span class="self">self</span>.builder);
                 (rp, p)
             })
             .map_err(|e| e.set_persistent())
     }
 }
 
-<span class="kw">pub struct </span>RetryWrapper&lt;R, I&gt; {
-    inner: R,
-    notify: Arc&lt;I&gt;,
+<span class="kw">pub struct </span>RetryReader&lt;A, R&gt; {
+    inner: Arc&lt;A&gt;,
+    reader: <span class="prelude-ty">Option</span>&lt;R&gt;,
 
     path: String,
+    args: OpRead,
+}
+
+<span class="kw">impl</span>&lt;A, R&gt; RetryReader&lt;A, R&gt; {
+    <span class="kw">fn </span>new(inner: Arc&lt;A&gt;, path: String, args: OpRead, r: R) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            inner,
+            reader: <span class="prelude-val">Some</span>(r),
+
+            path,
+            args,
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;A: Access&gt; oio::Read <span class="kw">for </span>RetryReader&lt;A, A::Reader&gt; {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">loop </span>{
+            <span class="kw">match </span><span class="self">self</span>.reader.take() {
+                <span class="prelude-val">None </span>=&gt; {
+                    <span class="kw">let </span>(<span class="kw">_</span>, r) = <span class="self">self</span>.inner.read(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="self">self</span>.args.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+                    <span class="self">self</span>.reader = <span class="prelude-val">Some</span>(r);
+                    <span class="kw">continue</span>;
+                }
+                <span class="prelude-val">Some</span>(<span class="kw-2">mut </span>reader) =&gt; {
+                    <span class="kw">let </span>buf = reader.read().<span class="kw">await</span><span class="question-mark">?</span>;
+                    <span class="self">self</span>.reader = <span class="prelude-val">Some</span>(reader);
+                    <span class="self">self</span>.args.range_mut().advance(buf.len() <span class="kw">as </span>u64);
+                    <span class="kw">return </span><span class="prelude-val">Ok</span>(buf);
+                }
+            }
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;A: Access&gt; oio::BlockingRead <span class="kw">for </span>RetryReader&lt;A, A::BlockingReader&gt; {
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">loop </span>{
+            <span class="kw">match </span><span class="self">self</span>.reader.take() {
+                <span class="prelude-val">None </span>=&gt; {
+                    <span class="kw">let </span>(<span class="kw">_</span>, r) = <span class="self">self</span>.inner.blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="self">self</span>.args.clone())<span class="question-mark">?</span>;
+                    <span class="self">self</span>.reader = <span class="prelude-val">Some</span>(r);
+                    <span class="kw">continue</span>;
+                }
+                <span class="prelude-val">Some</span>(<span class="kw-2">mut </span>reader) =&gt; {
+                    <span class="kw">let </span>buf = reader.read()<span class="question-mark">?</span>;
+                    <span class="self">self</span>.reader = <span class="prelude-val">Some</span>(reader);
+                    <span class="self">self</span>.args.range_mut().advance(buf.len() <span class="kw">as </span>u64);
+                    <span class="kw">return </span><span class="prelude-val">Ok</span>(buf);
+                }
+            }
+        }
+    }
+}
+
+<span class="kw">pub struct </span>RetryWrapper&lt;R, I&gt; {
+    inner: <span class="prelude-ty">Option</span>&lt;R&gt;,
+    notify: Arc&lt;I&gt;,
+
     builder: ExponentialBuilder,
-    current_backoff: <span class="prelude-ty">Option</span>&lt;ExponentialBackoff&gt;,
-    sleep: <span class="prelude-ty">Option</span>&lt;Pin&lt;Box&lt;tokio::time::Sleep&gt;&gt;&gt;,
 }
 
 <span class="kw">impl</span>&lt;R, I&gt; RetryWrapper&lt;R, I&gt; {
-    <span class="kw">fn </span>new(inner: R, notify: Arc&lt;I&gt;, path: <span class="kw-2">&amp;</span>str, backoff: ExponentialBuilder) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>new(inner: R, notify: Arc&lt;I&gt;, backoff: ExponentialBuilder) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            inner,
+            inner: <span class="prelude-val">Some</span>(inner),
             notify,
-
-            path: path.to_string(),
             builder: backoff,
-            current_backoff: <span class="prelude-val">None</span>,
-            sleep: <span class="prelude-val">None</span>,
         }
+    }
+
+    <span class="kw">fn </span>take_inner(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt; {
+        <span class="self">self</span>.inner.take().ok_or_else(|| {
+            Error::new(
+                ErrorKind::Unexpected,
+                <span class="string">"retry layer is in bad state, please make sure future not dropped before ready"</span>,
+            )
+        })
     }
 }
 
 <span class="kw">impl</span>&lt;R: oio::Read, I: RetryInterceptor&gt; oio::Read <span class="kw">for </span>RetryWrapper&lt;R, I&gt; {
-    <span class="kw">fn </span>poll_read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(sleep) = <span class="self">self</span>.sleep.as_mut() {
-            <span class="macro">ready!</span>(sleep.poll_unpin(cx));
-            <span class="self">self</span>.sleep = <span class="prelude-val">None</span>;
-        }
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">use </span>backon::RetryableWithContext;
 
-        <span class="kw">match </span><span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_read(cx, buf)) {
-            <span class="prelude-val">Ok</span>(v) =&gt; {
-                <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                Poll::Ready(<span class="prelude-val">Ok</span>(v))
-            }
-            <span class="prelude-val">Err</span>(err) <span class="kw">if </span>!err.is_temporary() =&gt; {
-                <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                Poll::Ready(<span class="prelude-val">Err</span>(err))
-            }
-            <span class="prelude-val">Err</span>(err) =&gt; {
-                <span class="kw">let </span>backoff = <span class="kw">match </span><span class="self">self</span>.current_backoff.as_mut() {
-                    <span class="prelude-val">Some</span>(backoff) =&gt; backoff,
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="self">self</span>.current_backoff = <span class="prelude-val">Some</span>(<span class="self">self</span>.builder.build());
-                        <span class="self">self</span>.current_backoff.as_mut().unwrap()
-                    }
-                };
+        <span class="kw">let </span>inner = <span class="self">self</span>.take_inner()<span class="question-mark">?</span>;
 
-                <span class="kw">match </span>backoff.next() {
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                        Poll::Ready(<span class="prelude-val">Err</span>(err))
-                    }
-                    <span class="prelude-val">Some</span>(dur) =&gt; {
-                        <span class="self">self</span>.notify.intercept(
-                            <span class="kw-2">&amp;</span>err,
-                            dur,
-                            <span class="kw-2">&amp;</span>[
-                                (<span class="string">"operation"</span>, ReadOperation::Read.into_static()),
-                                (<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path),
-                            ],
-                        );
-                        <span class="self">self</span>.sleep = <span class="prelude-val">Some</span>(Box::pin(tokio::time::sleep(dur)));
-                        <span class="self">self</span>.poll_read(cx, buf)
-                    }
-                }
+        <span class="kw">let </span>(inner, res) = {
+            |<span class="kw-2">mut </span>r: R| <span class="kw">async move </span>{
+                <span class="kw">let </span>res = r.read().<span class="kw">await</span>;
+
+                (r, res)
             }
         }
-    }
+        .retry(<span class="self">self</span>.builder)
+        .when(|e| e.is_temporary())
+        .context(inner)
+        .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
+        .<span class="kw">await</span>;
 
-    <span class="kw">fn </span>poll_seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, pos: io::SeekFrom) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;u64&gt;&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(sleep) = <span class="self">self</span>.sleep.as_mut() {
-            <span class="macro">ready!</span>(sleep.poll_unpin(cx));
-            <span class="self">self</span>.sleep = <span class="prelude-val">None</span>;
-        }
-
-        <span class="kw">match </span><span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_seek(cx, pos)) {
-            <span class="prelude-val">Ok</span>(v) =&gt; {
-                <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                Poll::Ready(<span class="prelude-val">Ok</span>(v))
-            }
-            <span class="prelude-val">Err</span>(err) <span class="kw">if </span>!err.is_temporary() =&gt; {
-                <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                Poll::Ready(<span class="prelude-val">Err</span>(err))
-            }
-            <span class="prelude-val">Err</span>(err) =&gt; {
-                <span class="kw">let </span>backoff = <span class="kw">match </span><span class="self">self</span>.current_backoff.as_mut() {
-                    <span class="prelude-val">Some</span>(backoff) =&gt; backoff,
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="self">self</span>.current_backoff = <span class="prelude-val">Some</span>(<span class="self">self</span>.builder.build());
-                        <span class="self">self</span>.current_backoff.as_mut().unwrap()
-                    }
-                };
-
-                <span class="kw">match </span>backoff.next() {
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                        Poll::Ready(<span class="prelude-val">Err</span>(err))
-                    }
-                    <span class="prelude-val">Some</span>(dur) =&gt; {
-                        <span class="self">self</span>.notify.intercept(
-                            <span class="kw-2">&amp;</span>err,
-                            dur,
-                            <span class="kw-2">&amp;</span>[
-                                (<span class="string">"operation"</span>, ReadOperation::Seek.into_static()),
-                                (<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path),
-                            ],
-                        );
-                        <span class="self">self</span>.sleep = <span class="prelude-val">Some</span>(Box::pin(tokio::time::sleep(dur)));
-                        <span class="self">self</span>.poll_seek(cx, pos)
-                    }
-                }
-            }
-        }
-    }
-
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(sleep) = <span class="self">self</span>.sleep.as_mut() {
-            <span class="macro">ready!</span>(sleep.poll_unpin(cx));
-            <span class="self">self</span>.sleep = <span class="prelude-val">None</span>;
-        }
-
-        <span class="kw">match </span><span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_next(cx)) {
-            <span class="prelude-val">None </span>=&gt; {
-                <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                Poll::Ready(<span class="prelude-val">None</span>)
-            }
-            <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(v)) =&gt; {
-                <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(v)))
-            }
-            <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)) <span class="kw">if </span>!err.is_temporary() =&gt; {
-                <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)))
-            }
-            <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)) =&gt; {
-                <span class="kw">let </span>backoff = <span class="kw">match </span><span class="self">self</span>.current_backoff.as_mut() {
-                    <span class="prelude-val">Some</span>(backoff) =&gt; backoff,
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="self">self</span>.current_backoff = <span class="prelude-val">Some</span>(<span class="self">self</span>.builder.build());
-                        <span class="self">self</span>.current_backoff.as_mut().unwrap()
-                    }
-                };
-
-                <span class="kw">match </span>backoff.next() {
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                        Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)))
-                    }
-                    <span class="prelude-val">Some</span>(dur) =&gt; {
-                        <span class="self">self</span>.notify.intercept(
-                            <span class="kw-2">&amp;</span>err,
-                            dur,
-                            <span class="kw-2">&amp;</span>[
-                                (<span class="string">"operation"</span>, ReadOperation::Next.into_static()),
-                                (<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path),
-                            ],
-                        );
-                        <span class="self">self</span>.sleep = <span class="prelude-val">Some</span>(Box::pin(tokio::time::sleep(dur)));
-                        <span class="self">self</span>.poll_next(cx)
-                    }
-                }
-            }
-        }
+        <span class="self">self</span>.inner = <span class="prelude-val">Some</span>(inner);
+        res.map_err(|err| err.set_persistent())
     }
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingRead, I: RetryInterceptor&gt; oio::BlockingRead <span class="kw">for </span>RetryWrapper&lt;R, I&gt; {
-    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        { || <span class="self">self</span>.inner.read(buf) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
-            .when(|e| e.is_temporary())
-            .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[
-                        (<span class="string">"operation"</span>, ReadOperation::BlockingRead.into_static()),
-                        (<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path),
-                    ],
-                );
-            })
-            .call()
-            .map_err(|e| e.set_persistent())
-    }
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">use </span>backon::BlockingRetryableWithContext;
 
-    <span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        { || <span class="self">self</span>.inner.seek(pos) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
-            .when(|e| e.is_temporary())
-            .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[
-                        (<span class="string">"operation"</span>, ReadOperation::BlockingSeek.into_static()),
-                        (<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path),
-                    ],
-                );
-            })
-            .call()
-            .map_err(|e| e.set_persistent())
-    }
+        <span class="kw">let </span>inner = <span class="self">self</span>.take_inner()<span class="question-mark">?</span>;
 
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt; {
-        { || <span class="self">self</span>.inner.next().transpose() }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
-            .when(|e| e.is_temporary())
-            .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[
-                        (<span class="string">"operation"</span>, ReadOperation::BlockingNext.into_static()),
-                        (<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path),
-                    ],
-                );
-            })
-            .call()
-            .map_err(|e| e.set_persistent())
-            .transpose()
+        <span class="kw">let </span>(inner, res) = {
+            |<span class="kw-2">mut </span>r: R| {
+                <span class="kw">let </span>res = r.read();
+
+                (r, res)
+            }
+        }
+        .retry(<span class="self">self</span>.builder)
+        .when(|e| e.is_temporary())
+        .context(inner)
+        .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
+        .call();
+
+        <span class="self">self</span>.inner = <span class="prelude-val">Some</span>(inner);
+        res.map_err(|err| err.set_persistent())
     }
 }
 
 <span class="kw">impl</span>&lt;R: oio::Write, I: RetryInterceptor&gt; oio::Write <span class="kw">for </span>RetryWrapper&lt;R, I&gt; {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(sleep) = <span class="self">self</span>.sleep.as_mut() {
-            <span class="macro">ready!</span>(sleep.poll_unpin(cx));
-            <span class="self">self</span>.sleep = <span class="prelude-val">None</span>;
-        }
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">use </span>backon::RetryableWithContext;
 
-        <span class="kw">match </span><span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_write(cx, bs)) {
-            <span class="prelude-val">Ok</span>(v) =&gt; {
-                <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                Poll::Ready(<span class="prelude-val">Ok</span>(v))
-            }
-            <span class="prelude-val">Err</span>(err) <span class="kw">if </span>!err.is_temporary() =&gt; {
-                <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                Poll::Ready(<span class="prelude-val">Err</span>(err))
-            }
-            <span class="prelude-val">Err</span>(err) =&gt; {
-                <span class="kw">let </span>backoff = <span class="kw">match </span><span class="self">self</span>.current_backoff.as_mut() {
-                    <span class="prelude-val">Some</span>(backoff) =&gt; backoff,
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="self">self</span>.current_backoff = <span class="prelude-val">Some</span>(<span class="self">self</span>.builder.build());
-                        <span class="self">self</span>.current_backoff.as_mut().unwrap()
-                    }
-                };
+        <span class="kw">let </span>inner = <span class="self">self</span>.take_inner()<span class="question-mark">?</span>;
 
-                <span class="kw">match </span>backoff.next() {
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                        Poll::Ready(<span class="prelude-val">Err</span>(err))
-                    }
-                    <span class="prelude-val">Some</span>(dur) =&gt; {
-                        <span class="self">self</span>.notify.intercept(
-                            <span class="kw-2">&amp;</span>err,
-                            dur,
-                            <span class="kw-2">&amp;</span>[
-                                (<span class="string">"operation"</span>, WriteOperation::Write.into_static()),
-                                (<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path),
-                            ],
-                        );
-                        <span class="self">self</span>.sleep = <span class="prelude-val">Some</span>(Box::pin(tokio::time::sleep(dur)));
-                        <span class="self">self</span>.poll_write(cx, bs)
-                    }
-                }
+        <span class="kw">let </span>((inner, <span class="kw">_</span>), res) = {
+            |(<span class="kw-2">mut </span>r, bs): (R, Buffer)| <span class="kw">async move </span>{
+                <span class="kw">let </span>res = r.write(bs.clone()).<span class="kw">await</span>;
+
+                ((r, bs), res)
             }
         }
+        .retry(<span class="self">self</span>.builder)
+        .when(|e| e.is_temporary())
+        .context((inner, bs))
+        .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
+        .<span class="kw">await</span>;
+
+        <span class="self">self</span>.inner = <span class="prelude-val">Some</span>(inner);
+        res.map_err(|err| err.set_persistent())
     }
 
-    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(sleep) = <span class="self">self</span>.sleep.as_mut() {
-            <span class="macro">ready!</span>(sleep.poll_unpin(cx));
-            <span class="self">self</span>.sleep = <span class="prelude-val">None</span>;
-        }
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">use </span>backon::RetryableWithContext;
 
-        <span class="kw">match </span><span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_abort(cx)) {
-            <span class="prelude-val">Ok</span>(v) =&gt; {
-                <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                Poll::Ready(<span class="prelude-val">Ok</span>(v))
-            }
-            <span class="prelude-val">Err</span>(err) <span class="kw">if </span>!err.is_temporary() =&gt; {
-                <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                Poll::Ready(<span class="prelude-val">Err</span>(err))
-            }
-            <span class="prelude-val">Err</span>(err) =&gt; {
-                <span class="kw">let </span>backoff = <span class="kw">match </span><span class="self">self</span>.current_backoff.as_mut() {
-                    <span class="prelude-val">Some</span>(backoff) =&gt; backoff,
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="self">self</span>.current_backoff = <span class="prelude-val">Some</span>(<span class="self">self</span>.builder.build());
-                        <span class="self">self</span>.current_backoff.as_mut().unwrap()
-                    }
-                };
+        <span class="kw">let </span>inner = <span class="self">self</span>.take_inner()<span class="question-mark">?</span>;
 
-                <span class="kw">match </span>backoff.next() {
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                        Poll::Ready(<span class="prelude-val">Err</span>(err))
-                    }
-                    <span class="prelude-val">Some</span>(dur) =&gt; {
-                        <span class="self">self</span>.notify.intercept(
-                            <span class="kw-2">&amp;</span>err,
-                            dur,
-                            <span class="kw-2">&amp;</span>[
-                                (<span class="string">"operation"</span>, WriteOperation::Abort.into_static()),
-                                (<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path),
-                            ],
-                        );
-                        <span class="self">self</span>.sleep = <span class="prelude-val">Some</span>(Box::pin(tokio::time::sleep(dur)));
-                        <span class="self">self</span>.poll_abort(cx)
-                    }
-                }
+        <span class="kw">let </span>(inner, res) = {
+            |<span class="kw-2">mut </span>r: R| <span class="kw">async move </span>{
+                <span class="kw">let </span>res = r.abort().<span class="kw">await</span>;
+
+                (r, res)
             }
         }
+        .retry(<span class="self">self</span>.builder)
+        .when(|e| e.is_temporary())
+        .context(inner)
+        .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
+        .<span class="kw">await</span>;
+
+        <span class="self">self</span>.inner = <span class="prelude-val">Some</span>(inner);
+        res.map_err(|err| err.set_persistent())
     }
 
-    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(sleep) = <span class="self">self</span>.sleep.as_mut() {
-            <span class="macro">ready!</span>(sleep.poll_unpin(cx));
-            <span class="self">self</span>.sleep = <span class="prelude-val">None</span>;
-        }
+    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">use </span>backon::RetryableWithContext;
 
-        <span class="kw">match </span><span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_close(cx)) {
-            <span class="prelude-val">Ok</span>(v) =&gt; {
-                <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                Poll::Ready(<span class="prelude-val">Ok</span>(v))
-            }
-            <span class="prelude-val">Err</span>(err) <span class="kw">if </span>!err.is_temporary() =&gt; {
-                <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                Poll::Ready(<span class="prelude-val">Err</span>(err))
-            }
-            <span class="prelude-val">Err</span>(err) =&gt; {
-                <span class="kw">let </span>backoff = <span class="kw">match </span><span class="self">self</span>.current_backoff.as_mut() {
-                    <span class="prelude-val">Some</span>(backoff) =&gt; backoff,
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="self">self</span>.current_backoff = <span class="prelude-val">Some</span>(<span class="self">self</span>.builder.build());
-                        <span class="self">self</span>.current_backoff.as_mut().unwrap()
-                    }
-                };
+        <span class="kw">let </span>inner = <span class="self">self</span>.take_inner()<span class="question-mark">?</span>;
 
-                <span class="kw">match </span>backoff.next() {
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                        Poll::Ready(<span class="prelude-val">Err</span>(err))
-                    }
-                    <span class="prelude-val">Some</span>(dur) =&gt; {
-                        <span class="self">self</span>.notify.intercept(
-                            <span class="kw-2">&amp;</span>err,
-                            dur,
-                            <span class="kw-2">&amp;</span>[
-                                (<span class="string">"operation"</span>, WriteOperation::Close.into_static()),
-                                (<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path),
-                            ],
-                        );
-                        <span class="self">self</span>.sleep = <span class="prelude-val">Some</span>(Box::pin(tokio::time::sleep(dur)));
-                        <span class="self">self</span>.poll_close(cx)
-                    }
-                }
+        <span class="kw">let </span>(inner, res) = {
+            |<span class="kw-2">mut </span>r: R| <span class="kw">async move </span>{
+                <span class="kw">let </span>res = r.close().<span class="kw">await</span>;
+
+                (r, res)
             }
         }
+        .retry(<span class="self">self</span>.builder)
+        .when(|e| e.is_temporary())
+        .context(inner)
+        .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
+        .<span class="kw">await</span>;
+
+        <span class="self">self</span>.inner = <span class="prelude-val">Some</span>(inner);
+        res.map_err(|err| err.set_persistent())
     }
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingWrite, I: RetryInterceptor&gt; oio::BlockingWrite <span class="kw">for </span>RetryWrapper&lt;R, I&gt; {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        { || <span class="self">self</span>.inner.write(bs) }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        { || <span class="self">self</span>.inner.as_mut().unwrap().write(bs.clone()) }
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[
-                        (<span class="string">"operation"</span>, WriteOperation::BlockingWrite.into_static()),
-                        (<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path),
-                    ],
-                );
+                <span class="self">self</span>.notify.intercept(err, dur);
             })
             .call()
             .map_err(|e| e.set_persistent())
     }
 
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        { || <span class="self">self</span>.inner.close() }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+        { || <span class="self">self</span>.inner.as_mut().unwrap().close() }
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[
-                        (<span class="string">"operation"</span>, WriteOperation::BlockingClose.into_static()),
-                        (<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path),
-                    ],
-                );
+                <span class="self">self</span>.notify.intercept(err, dur);
             })
             .call()
             .map_err(|e| e.set_persistent())
     }
 }
 
-<span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-#[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-</span><span class="kw">impl</span>&lt;P: oio::List, I: RetryInterceptor&gt; oio::List <span class="kw">for </span>RetryWrapper&lt;P, I&gt; {
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(sleep) = <span class="self">self</span>.sleep.as_mut() {
-            <span class="macro">ready!</span>(sleep.poll_unpin(cx));
-            <span class="self">self</span>.sleep = <span class="prelude-val">None</span>;
-        }
+<span class="kw">impl</span>&lt;P: oio::List, I: RetryInterceptor&gt; oio::List <span class="kw">for </span>RetryWrapper&lt;P, I&gt; {
+    <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
+        <span class="kw">use </span>backon::RetryableWithContext;
 
-        <span class="kw">match </span><span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_next(cx)) {
-            <span class="prelude-val">Ok</span>(v) =&gt; {
-                <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                Poll::Ready(<span class="prelude-val">Ok</span>(v))
-            }
-            <span class="prelude-val">Err</span>(err) <span class="kw">if </span>!err.is_temporary() =&gt; {
-                <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                Poll::Ready(<span class="prelude-val">Err</span>(err))
-            }
-            <span class="prelude-val">Err</span>(err) =&gt; {
-                <span class="kw">let </span>backoff = <span class="kw">match </span><span class="self">self</span>.current_backoff.as_mut() {
-                    <span class="prelude-val">Some</span>(backoff) =&gt; backoff,
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="self">self</span>.current_backoff = <span class="prelude-val">Some</span>(<span class="self">self</span>.builder.build());
-                        <span class="self">self</span>.current_backoff.as_mut().unwrap()
-                    }
-                };
+        <span class="kw">let </span>inner = <span class="self">self</span>.take_inner()<span class="question-mark">?</span>;
 
-                <span class="kw">match </span>backoff.next() {
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="self">self</span>.current_backoff = <span class="prelude-val">None</span>;
-                        Poll::Ready(<span class="prelude-val">Err</span>(err))
-                    }
-                    <span class="prelude-val">Some</span>(dur) =&gt; {
-                        <span class="self">self</span>.notify.intercept(
-                            <span class="kw-2">&amp;</span>err,
-                            dur,
-                            <span class="kw-2">&amp;</span>[
-                                (<span class="string">"operation"</span>, ListOperation::Next.into_static()),
-                                (<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path),
-                            ],
-                        );
-                        <span class="self">self</span>.sleep = <span class="prelude-val">Some</span>(Box::pin(tokio::time::sleep(dur)));
-                        <span class="self">self</span>.poll_next(cx)
-                    }
-                }
+        <span class="kw">let </span>(inner, res) = {
+            |<span class="kw-2">mut </span>p: P| <span class="kw">async move </span>{
+                <span class="kw">let </span>res = p.next().<span class="kw">await</span>;
+
+                (p, res)
             }
         }
+        .retry(<span class="self">self</span>.builder)
+        .when(|e| e.is_temporary())
+        .context(inner)
+        .notify(|err, dur| <span class="self">self</span>.notify.intercept(err, dur))
+        .<span class="kw">await</span>;
+
+        <span class="self">self</span>.inner = <span class="prelude-val">Some</span>(inner);
+        res.map_err(|err| err.set_persistent())
     }
 }
 
 <span class="kw">impl</span>&lt;P: oio::BlockingList, I: RetryInterceptor&gt; oio::BlockingList <span class="kw">for </span>RetryWrapper&lt;P, I&gt; {
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
-        { || <span class="self">self</span>.inner.next() }
-            .retry(<span class="kw-2">&amp;</span><span class="self">self</span>.builder)
+        { || <span class="self">self</span>.inner.as_mut().unwrap().next() }
+            .retry(<span class="self">self</span>.builder)
             .when(|e| e.is_temporary())
             .notify(|err, dur| {
-                <span class="self">self</span>.notify.intercept(
-                    err,
-                    dur,
-                    <span class="kw-2">&amp;</span>[
-                        (<span class="string">"operation"</span>, ListOperation::BlockingNext.into_static()),
-                        (<span class="string">"path"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.path),
-                    ],
-                );
+                <span class="self">self</span>.notify.intercept(err, dur);
             })
             .call()
             .map_err(|e| e.set_persistent())
@@ -2551,19 +1858,15 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span>std::collections::HashMap;
-    <span class="kw">use </span>std::io;
     <span class="kw">use </span>std::sync::Arc;
     <span class="kw">use </span>std::sync::Mutex;
-    <span class="kw">use </span>std::task::Context;
-    <span class="kw">use </span>std::task::Poll;
 
-    <span class="kw">use </span>async_trait::async_trait;
     <span class="kw">use </span>bytes::Bytes;
-    <span class="kw">use </span>futures::AsyncReadExt;
     <span class="kw">use </span>futures::TryStreamExt;
+    <span class="kw">use </span>tracing_subscriber::filter::LevelFilter;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span><span class="kw">crate</span>::layers::LoggingLayer;
 
     <span class="attr">#[derive(Default, Clone)]
     </span><span class="kw">struct </span>MockBuilder {
@@ -2572,13 +1875,9 @@
 
     <span class="kw">impl </span>Builder <span class="kw">for </span>MockBuilder {
         <span class="kw">const </span>SCHEME: Scheme = Scheme::Custom(<span class="string">"mock"</span>);
-        <span class="kw">type </span>Accessor = MockService;
+        <span class="kw">type </span>Config = ();
 
-        <span class="kw">fn </span>from_map(<span class="kw">_</span>: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-            <span class="self">Self</span>::default()
-        }
-
-        <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
+        <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
             <span class="prelude-val">Ok</span>(MockService {
                 attempt: <span class="self">self</span>.attempt.clone(),
             })
@@ -2590,37 +1889,49 @@
         attempt: Arc&lt;Mutex&lt;usize&gt;&gt;,
     }
 
-    <span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-    #[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-    </span><span class="kw">impl </span>Accessor <span class="kw">for </span>MockService {
+    <span class="kw">impl </span>Access <span class="kw">for </span>MockService {
         <span class="kw">type </span>Reader = MockReader;
-        <span class="kw">type </span>Writer = ();
+        <span class="kw">type </span>Writer = MockWriter;
         <span class="kw">type </span>Lister = MockLister;
         <span class="kw">type </span>BlockingReader = ();
         <span class="kw">type </span>BlockingWriter = ();
         <span class="kw">type </span>BlockingLister = ();
 
-        <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
+        <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>am = AccessorInfo::default();
             am.set_native_capability(Capability {
                 read: <span class="bool-val">true</span>,
+                write: <span class="bool-val">true</span>,
+                write_can_multi: <span class="bool-val">true</span>,
+                stat: <span class="bool-val">true</span>,
                 list: <span class="bool-val">true</span>,
                 list_with_recursive: <span class="bool-val">true</span>,
                 batch: <span class="bool-val">true</span>,
                 ..Default::default()
             });
 
-            am
+            am.into()
         }
 
-        <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
+        <span class="kw">async fn </span>stat(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpStat) -&gt; <span class="prelude-ty">Result</span>&lt;RpStat&gt; {
+            <span class="prelude-val">Ok</span>(RpStat::new(
+                Metadata::new(EntryMode::FILE).with_content_length(<span class="number">13</span>),
+            ))
+        }
+
+        <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
             <span class="prelude-val">Ok</span>((
                 RpRead::new(),
                 MockReader {
+                    buf: Bytes::from(<span class="string">"Hello, World!"</span>).into(),
+                    range: args.range(),
                     attempt: <span class="self">self</span>.attempt.clone(),
-                    pos: <span class="number">0</span>,
                 },
             ))
+        }
+
+        <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
+            <span class="prelude-val">Ok</span>((RpWrite::new(), MockWriter {}))
         }
 
         <span class="kw">async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpList) -&gt; <span class="prelude-ty">Result</span>&lt;(RpList, <span class="self">Self</span>::Lister)&gt; {
@@ -2688,56 +1999,52 @@
 
     <span class="attr">#[derive(Debug, Clone, Default)]
     </span><span class="kw">struct </span>MockReader {
+        buf: Buffer,
+        range: BytesRange,
         attempt: Arc&lt;Mutex&lt;usize&gt;&gt;,
-        pos: u64,
     }
 
     <span class="kw">impl </span>oio::Read <span class="kw">for </span>MockReader {
-        <span class="kw">fn </span>poll_read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
+        <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>attempt = <span class="self">self</span>.attempt.lock().unwrap();
             <span class="kw-2">*</span>attempt += <span class="number">1</span>;
 
-            Poll::Ready(<span class="kw">match </span><span class="kw-2">*</span>attempt {
+            <span class="kw">match </span><span class="kw-2">*</span>attempt {
                 <span class="number">1 </span>=&gt; <span class="prelude-val">Err</span>(
                     Error::new(ErrorKind::Unexpected, <span class="string">"retryable_error from reader"</span>)
                         .set_temporary(),
                 ),
-                <span class="number">2 </span>=&gt; {
-                    buf[..<span class="number">7</span>].copy_from_slice(<span class="string">"Hello, "</span>.as_bytes());
-                    <span class="self">self</span>.pos += <span class="number">7</span>;
-                    <span class="prelude-val">Ok</span>(<span class="number">7</span>)
-                }
-                <span class="number">3 </span>=&gt; <span class="prelude-val">Err</span>(
+                <span class="number">2 </span>=&gt; <span class="prelude-val">Err</span>(
                     Error::new(ErrorKind::Unexpected, <span class="string">"retryable_error from reader"</span>)
                         .set_temporary(),
                 ),
-                <span class="number">4 </span>=&gt; {
-                    buf[..<span class="number">6</span>].copy_from_slice(<span class="string">"World!"</span>.as_bytes());
-                    <span class="self">self</span>.pos += <span class="number">6</span>;
-                    <span class="prelude-val">Ok</span>(<span class="number">6</span>)
-                }
-                <span class="number">5 </span>=&gt; <span class="prelude-val">Ok</span>(<span class="number">0</span>),
+                <span class="comment">// Should read out all data.
+                </span><span class="number">3 </span>=&gt; <span class="prelude-val">Ok</span>(<span class="self">self</span>.buf.slice(<span class="self">self</span>.range.to_range_as_usize())),
+                <span class="number">4 </span>=&gt; <span class="prelude-val">Err</span>(
+                    Error::new(ErrorKind::Unexpected, <span class="string">"retryable_error from reader"</span>)
+                        .set_temporary(),
+                ),
+                <span class="comment">// Should be empty.
+                </span><span class="number">5 </span>=&gt; <span class="prelude-val">Ok</span>(<span class="self">self</span>.buf.slice(<span class="self">self</span>.range.to_range_as_usize())),
                 <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
-            })
-        }
-
-        <span class="kw">fn </span>poll_seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, pos: io::SeekFrom) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;u64&gt;&gt; {
-            <span class="self">self</span>.pos = <span class="kw">match </span>pos {
-                io::SeekFrom::Current(n) =&gt; (<span class="self">self</span>.pos <span class="kw">as </span>i64 + n) <span class="kw">as </span>u64,
-                io::SeekFrom::Start(n) =&gt; n,
-                io::SeekFrom::End(n) =&gt; (<span class="number">13 </span>+ n) <span class="kw">as </span>u64,
-            };
-
-            Poll::Ready(<span class="prelude-val">Ok</span>(<span class="self">self</span>.pos))
-        }
-
-        <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;&gt; {
-            <span class="kw">let </span><span class="kw-2">mut </span>bs = <span class="macro">vec!</span>[<span class="number">0</span>; <span class="number">1</span>];
-            <span class="kw">match </span><span class="macro">ready!</span>(<span class="self">self</span>.poll_read(cx, <span class="kw-2">&amp;mut </span>bs)) {
-                <span class="prelude-val">Ok</span>(<span class="number">0</span>) =&gt; Poll::Ready(<span class="prelude-val">None</span>),
-                <span class="prelude-val">Ok</span>(v) =&gt; Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(Bytes::from(bs[..v].to_vec())))),
-                <span class="prelude-val">Err</span>(err) =&gt; Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err))),
             }
+        }
+    }
+
+    <span class="attr">#[derive(Debug, Clone, Default)]
+    </span><span class="kw">struct </span>MockWriter {}
+
+    <span class="kw">impl </span>oio::Write <span class="kw">for </span>MockWriter {
+        <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+            <span class="prelude-val">Ok</span>(())
+        }
+
+        <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+            <span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="string">"always close failed"</span>).set_temporary())
+        }
+
+        <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+            <span class="prelude-val">Ok</span>(())
         }
     }
 
@@ -2747,9 +2054,9 @@
     }
 
     <span class="kw">impl </span>oio::List <span class="kw">for </span>MockLister {
-        <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;&gt; {
+        <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
             <span class="self">self</span>.attempt += <span class="number">1</span>;
-            <span class="kw">let </span>result = <span class="kw">match </span><span class="self">self</span>.attempt {
+            <span class="kw">match </span><span class="self">self</span>.attempt {
                 <span class="number">1 </span>=&gt; <span class="prelude-val">Err</span>(Error::new(
                     ErrorKind::RateLimited,
                     <span class="string">"retryable rate limited error from lister"</span>,
@@ -2779,32 +2086,67 @@
                 <span class="kw">_ </span>=&gt; {
                     <span class="macro">unreachable!</span>()
                 }
-            };
-
-            Poll::Ready(result)
+            }
         }
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_retry_read() {
-        <span class="kw">let _ </span>= tracing_subscriber::fmt().with_test_writer().try_init();
+        <span class="kw">let _ </span>= tracing_subscriber::fmt()
+            .with_max_level(LevelFilter::TRACE)
+            .with_test_writer()
+            .try_init();
 
         <span class="kw">let </span>builder = MockBuilder::default();
         <span class="kw">let </span>op = Operator::new(builder.clone())
             .unwrap()
+            .layer(LoggingLayer::default())
             .layer(RetryLayer::new())
             .finish();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>r = op.reader(<span class="string">"retryable_error"</span>).<span class="kw">await</span>.unwrap();
+        <span class="kw">let </span>r = op.reader(<span class="string">"retryable_error"</span>).<span class="kw">await</span>.unwrap();
         <span class="kw">let </span><span class="kw-2">mut </span>content = Vec::new();
         <span class="kw">let </span>size = r
-            .read_to_end(<span class="kw-2">&amp;mut </span>content)
+            .read_into(<span class="kw-2">&amp;mut </span>content, ..)
             .<span class="kw">await
             </span>.expect(<span class="string">"read must succeed"</span>);
         <span class="macro">assert_eq!</span>(size, <span class="number">13</span>);
         <span class="macro">assert_eq!</span>(content, <span class="string">"Hello, World!"</span>.as_bytes());
-        <span class="comment">// The error is retryable, we should request it 1 + 10 times.
+        <span class="comment">// The error is retryable, we should request it 3 times.
         </span><span class="macro">assert_eq!</span>(<span class="kw-2">*</span>builder.attempt.lock().unwrap(), <span class="number">5</span>);
+    }
+
+    <span class="doccomment">/// This test is used to reproduce the panic issue while composing retry layer with timeout layer.
+    </span><span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_retry_write_fail_on_close() {
+        <span class="kw">let _ </span>= tracing_subscriber::fmt()
+            .with_max_level(LevelFilter::TRACE)
+            .with_test_writer()
+            .try_init();
+
+        <span class="kw">let </span>builder = MockBuilder::default();
+        <span class="kw">let </span>op = Operator::new(builder.clone())
+            .unwrap()
+            .layer(
+                RetryLayer::new()
+                    .with_min_delay(Duration::from_millis(<span class="number">1</span>))
+                    .with_max_delay(Duration::from_millis(<span class="number">1</span>))
+                    .with_jitter(),
+            )
+            <span class="comment">// Uncomment this to reproduce timeout layer panic.
+            // .layer(TimeoutLayer::new().with_io_timeout(Duration::from_nanos(1)))
+            </span>.layer(LoggingLayer::default())
+            .finish();
+
+        <span class="kw">let </span><span class="kw-2">mut </span>w = op.writer(<span class="string">"test_write"</span>).<span class="kw">await</span>.unwrap();
+        w.write(<span class="string">"aaa"</span>).<span class="kw">await</span>.unwrap();
+        w.write(<span class="string">"bbb"</span>).<span class="kw">await</span>.unwrap();
+        <span class="kw">match </span>w.close().<span class="kw">await </span>{
+            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; (),
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
+                w.abort().<span class="kw">await</span>.unwrap();
+            }
+        };
     }
 
     <span class="attr">#[tokio::test]

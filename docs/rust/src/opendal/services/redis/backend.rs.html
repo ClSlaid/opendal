@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/redis/backend.rs`."><title>backend.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/redis/backend.rs`."><title>backend.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -367,99 +365,6 @@
 <a href="#365" id="365">365</a>
 <a href="#366" id="366">366</a>
 <a href="#367" id="367">367</a>
-<a href="#368" id="368">368</a>
-<a href="#369" id="369">369</a>
-<a href="#370" id="370">370</a>
-<a href="#371" id="371">371</a>
-<a href="#372" id="372">372</a>
-<a href="#373" id="373">373</a>
-<a href="#374" id="374">374</a>
-<a href="#375" id="375">375</a>
-<a href="#376" id="376">376</a>
-<a href="#377" id="377">377</a>
-<a href="#378" id="378">378</a>
-<a href="#379" id="379">379</a>
-<a href="#380" id="380">380</a>
-<a href="#381" id="381">381</a>
-<a href="#382" id="382">382</a>
-<a href="#383" id="383">383</a>
-<a href="#384" id="384">384</a>
-<a href="#385" id="385">385</a>
-<a href="#386" id="386">386</a>
-<a href="#387" id="387">387</a>
-<a href="#388" id="388">388</a>
-<a href="#389" id="389">389</a>
-<a href="#390" id="390">390</a>
-<a href="#391" id="391">391</a>
-<a href="#392" id="392">392</a>
-<a href="#393" id="393">393</a>
-<a href="#394" id="394">394</a>
-<a href="#395" id="395">395</a>
-<a href="#396" id="396">396</a>
-<a href="#397" id="397">397</a>
-<a href="#398" id="398">398</a>
-<a href="#399" id="399">399</a>
-<a href="#400" id="400">400</a>
-<a href="#401" id="401">401</a>
-<a href="#402" id="402">402</a>
-<a href="#403" id="403">403</a>
-<a href="#404" id="404">404</a>
-<a href="#405" id="405">405</a>
-<a href="#406" id="406">406</a>
-<a href="#407" id="407">407</a>
-<a href="#408" id="408">408</a>
-<a href="#409" id="409">409</a>
-<a href="#410" id="410">410</a>
-<a href="#411" id="411">411</a>
-<a href="#412" id="412">412</a>
-<a href="#413" id="413">413</a>
-<a href="#414" id="414">414</a>
-<a href="#415" id="415">415</a>
-<a href="#416" id="416">416</a>
-<a href="#417" id="417">417</a>
-<a href="#418" id="418">418</a>
-<a href="#419" id="419">419</a>
-<a href="#420" id="420">420</a>
-<a href="#421" id="421">421</a>
-<a href="#422" id="422">422</a>
-<a href="#423" id="423">423</a>
-<a href="#424" id="424">424</a>
-<a href="#425" id="425">425</a>
-<a href="#426" id="426">426</a>
-<a href="#427" id="427">427</a>
-<a href="#428" id="428">428</a>
-<a href="#429" id="429">429</a>
-<a href="#430" id="430">430</a>
-<a href="#431" id="431">431</a>
-<a href="#432" id="432">432</a>
-<a href="#433" id="433">433</a>
-<a href="#434" id="434">434</a>
-<a href="#435" id="435">435</a>
-<a href="#436" id="436">436</a>
-<a href="#437" id="437">437</a>
-<a href="#438" id="438">438</a>
-<a href="#439" id="439">439</a>
-<a href="#440" id="440">440</a>
-<a href="#441" id="441">441</a>
-<a href="#442" id="442">442</a>
-<a href="#443" id="443">443</a>
-<a href="#444" id="444">444</a>
-<a href="#445" id="445">445</a>
-<a href="#446" id="446">446</a>
-<a href="#447" id="447">447</a>
-<a href="#448" id="448">448</a>
-<a href="#449" id="449">449</a>
-<a href="#450" id="450">450</a>
-<a href="#451" id="451">451</a>
-<a href="#452" id="452">452</a>
-<a href="#453" id="453">453</a>
-<a href="#454" id="454">454</a>
-<a href="#455" id="455">455</a>
-<a href="#456" id="456">456</a>
-<a href="#457" id="457">457</a>
-<a href="#458" id="458">458</a>
-<a href="#459" id="459">459</a>
-<a href="#460" id="460">460</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -477,87 +382,34 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
+</span><span class="kw">use </span>bb8::RunError;
+<span class="kw">use </span>http::Uri;
+<span class="kw">use </span>redis::cluster::ClusterClient;
+<span class="kw">use </span>redis::cluster::ClusterClientBuilder;
+<span class="kw">use </span>redis::Client;
+<span class="kw">use </span>redis::ConnectionAddr;
+<span class="kw">use </span>redis::ConnectionInfo;
+<span class="kw">use </span>redis::ProtocolVersion;
+<span class="kw">use </span>redis::RedisConnectionInfo;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::path::PathBuf;
 <span class="kw">use </span>std::time::Duration;
-
-<span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>http::Uri;
-<span class="kw">use </span>redis::aio::ConnectionManager;
-<span class="kw">use </span>redis::cluster::ClusterClient;
-<span class="kw">use </span>redis::cluster::ClusterClientBuilder;
-<span class="kw">use </span>redis::cluster_async::ClusterConnection;
-<span class="kw">use </span>redis::AsyncCommands;
-<span class="kw">use </span>redis::Client;
-<span class="kw">use </span>redis::ConnectionAddr;
-<span class="kw">use </span>redis::ConnectionInfo;
-<span class="kw">use </span>redis::RedisConnectionInfo;
-<span class="kw">use </span>redis::RedisError;
-<span class="kw">use </span>serde::Deserialize;
 <span class="kw">use </span>tokio::sync::OnceCell;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::services::RedisConfig;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
+<span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
 <span class="kw">const </span>DEFAULT_REDIS_ENDPOINT: <span class="kw-2">&amp;</span>str = <span class="string">"tcp://127.0.0.1:6379"</span>;
 <span class="kw">const </span>DEFAULT_REDIS_PORT: u16 = <span class="number">6379</span>;
 
-<span class="doccomment">/// Config for Redis services support.
-</span><span class="attr">#[derive(Default, Deserialize, Clone)]
-#[serde(default)]
-#[non_exhaustive]
-</span><span class="kw">pub struct </span>RedisConfig {
-    <span class="doccomment">/// network address of the Redis service. Can be "tcp://127.0.0.1:6379", e.g.
-    ///
-    /// default is "tcp://127.0.0.1:6379"
-    </span>endpoint: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// network address of the Redis cluster service. Can be "tcp://127.0.0.1:6379,tcp://127.0.0.1:6380,tcp://127.0.0.1:6381", e.g.
-    ///
-    /// default is None
-    </span>cluster_endpoints: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// the username to connect redis service.
-    ///
-    /// default is None
-    </span>username: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// the password for authentication
-    ///
-    /// default is None
-    </span>password: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// the working directory of the Redis service. Can be "/path/to/dir"
-    ///
-    /// default is "/"
-    </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// the number of DBs redis can take is unlimited
-    ///
-    /// default is db 0
-    </span>db: i64,
-    <span class="doccomment">/// The default ttl for put operations.
-    </span>default_ttl: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
-}
-
-<span class="kw">impl </span>Debug <span class="kw">for </span>RedisConfig {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>d = f.debug_struct(<span class="string">"RedisConfig"</span>);
-
-        d.field(<span class="string">"db"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.db.to_string());
-        d.field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root);
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(endpoint) = <span class="self">self</span>.endpoint.clone() {
-            d.field(<span class="string">"endpoint"</span>, <span class="kw-2">&amp;</span>endpoint);
-        }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(cluster_endpoints) = <span class="self">self</span>.cluster_endpoints.clone() {
-            d.field(<span class="string">"cluster_endpoints"</span>, <span class="kw-2">&amp;</span>cluster_endpoints);
-        }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(username) = <span class="self">self</span>.username.clone() {
-            d.field(<span class="string">"username"</span>, <span class="kw-2">&amp;</span>username);
-        }
-        <span class="kw">if </span><span class="self">self</span>.password.is_some() {
-            d.field(<span class="string">"password"</span>, <span class="kw-2">&amp;</span><span class="string">"&lt;redacted&gt;"</span>);
-        }
-
-        d.finish_non_exhaustive()
+<span class="kw">impl </span>Configurator <span class="kw">for </span>RedisConfig {
+    <span class="kw">type </span>Builder = RedisBuilder;
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Builder {
+        RedisBuilder { config: <span class="self">self </span>}
     }
 }
 
@@ -583,8 +435,9 @@
     /// currently supported schemes:
     /// - no scheme: will be seen as "tcp"
     /// - "tcp" or "redis": unsecured redis connections
+    /// - "rediss": secured redis connections
     /// - "unix" or "redis+unix": unix socket connection
-    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!endpoint.is_empty() {
             <span class="self">self</span>.config.endpoint = <span class="prelude-val">Some</span>(endpoint.to_owned());
         }
@@ -592,13 +445,14 @@
     </span>}
 
     <span class="doccomment">/// set the network address of redis cluster service.
-    /// This parameter is mutually exclusive with the endponit parameter.
+    /// This parameter is mutually exclusive with the endpoint parameter.
     ///
     /// currently supported schemes:
     /// - no scheme: will be seen as "tcp"
     /// - "tcp" or "redis": unsecured redis connections
+    /// - "rediss": secured redis connections
     /// - "unix" or "redis+unix": unix socket connection
-    </span><span class="kw">pub fn </span>cluster_endpoints(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cluster_endpoints: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>cluster_endpoints(<span class="kw-2">mut </span><span class="self">self</span>, cluster_endpoints: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!cluster_endpoints.is_empty() {
             <span class="self">self</span>.config.cluster_endpoints = <span class="prelude-val">Some</span>(cluster_endpoints.to_owned());
         }
@@ -608,7 +462,7 @@
     <span class="doccomment">/// set the username for redis
     ///
     /// default: no username
-    </span><span class="kw">pub fn </span>username(<span class="kw-2">&amp;mut </span><span class="self">self</span>, username: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>username(<span class="kw-2">mut </span><span class="self">self</span>, username: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!username.is_empty() {
             <span class="self">self</span>.config.username = <span class="prelude-val">Some</span>(username.to_owned());
         }
@@ -618,7 +472,7 @@
     <span class="doccomment">/// set the password for redis
     ///
     /// default: no password
-    </span><span class="kw">pub fn </span>password(<span class="kw-2">&amp;mut </span><span class="self">self</span>, password: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>password(<span class="kw-2">mut </span><span class="self">self</span>, password: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!password.is_empty() {
             <span class="self">self</span>.config.password = <span class="prelude-val">Some</span>(password.to_owned());
         }
@@ -628,7 +482,7 @@
     <span class="doccomment">/// set the db used in redis
     ///
     /// default: 0
-    </span><span class="kw">pub fn </span>db(<span class="kw-2">&amp;mut </span><span class="self">self</span>, db: i64) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>db(<span class="kw-2">mut </span><span class="self">self</span>, db: i64) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.db = db;
         <span class="self">self
     </span>}
@@ -636,7 +490,7 @@
     <span class="doccomment">/// Set the default ttl for redis services.
     ///
     /// If set, we will specify `EX` for write operations.
-    </span><span class="kw">pub fn </span>default_ttl(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ttl: Duration) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>default_ttl(<span class="kw-2">mut </span><span class="self">self</span>, ttl: Duration) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.default_ttl = <span class="prelude-val">Some</span>(ttl);
         <span class="self">self
     </span>}
@@ -644,26 +498,22 @@
     <span class="doccomment">/// set the working directory, all operations will be performed under it.
     ///
     /// default: "/"
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="kw">if </span>!root.is_empty() {
-            <span class="self">self</span>.config.root = <span class="prelude-val">Some</span>(root.to_owned());
-        }
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(root.to_string())
+        };
+
         <span class="self">self
     </span>}
 }
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>RedisBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Redis;
-    <span class="kw">type </span>Accessor = RedisBackend;
+    <span class="kw">type </span>Config = RedisConfig;
 
-    <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>config = RedisConfig::deserialize(ConfigDeserializer::new(map))
-            .expect(<span class="string">"config deserialize must succeed"</span>);
-
-        RedisBuilder { config }
-    }
-
-    <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
+    <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
         <span class="kw">let </span>root = normalize_root(
             <span class="self">self</span>.config
                 .root
@@ -695,7 +545,7 @@
                 conn,
                 default_ttl: <span class="self">self</span>.config.default_ttl,
             })
-            .with_root(<span class="kw-2">&amp;</span>root))
+            .with_normalized_root(root))
         } <span class="kw">else </span>{
             <span class="kw">let </span>endpoint = <span class="self">self
                 </span>.config
@@ -720,7 +570,7 @@
                 conn,
                 default_ttl: <span class="self">self</span>.config.default_ttl,
             })
-            .with_root(<span class="kw-2">&amp;</span>root))
+            .with_normalized_root(root))
         }
     }
 }
@@ -753,6 +603,7 @@
                     host,
                     port,
                     insecure: <span class="bool-val">false</span>,
+                    tls_params: <span class="prelude-val">None</span>,
                 }
             }
             <span class="prelude-val">Some</span>(<span class="string">"unix"</span>) | <span class="prelude-val">Some</span>(<span class="string">"redis+unix"</span>) =&gt; {
@@ -772,6 +623,7 @@
             db: <span class="self">self</span>.config.db,
             username: <span class="self">self</span>.config.username.clone(),
             password: <span class="self">self</span>.config.password.clone(),
+            protocol: ProtocolVersion::RESP2,
         };
 
         <span class="prelude-val">Ok</span>(ConnectionInfo {
@@ -785,17 +637,11 @@
 </span><span class="kw">pub type </span>RedisBackend = kv::Backend&lt;Adapter&gt;;
 
 <span class="attr">#[derive(Clone)]
-</span><span class="kw">enum </span>RedisConnection {
-    Normal(ConnectionManager),
-    Cluster(ClusterConnection),
-}
-
-<span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>Adapter {
     addr: String,
     client: <span class="prelude-ty">Option</span>&lt;Client&gt;,
     cluster_client: <span class="prelude-ty">Option</span>&lt;ClusterClient&gt;,
-    conn: OnceCell&lt;RedisConnection&gt;,
+    conn: OnceCell&lt;bb8::Pool&lt;RedisConnectionManager&gt;&gt;,
 
     default_ttl: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
 }
@@ -811,31 +657,43 @@
 }
 
 <span class="kw">impl </span>Adapter {
-    <span class="kw">async fn </span>conn(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;RedisConnection&gt; {
-        <span class="prelude-val">Ok</span>(<span class="self">self
+    <span class="kw">async fn </span>conn(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;bb8::PooledConnection&lt;<span class="lifetime">'_</span>, RedisConnectionManager&gt;&gt; {
+        <span class="kw">let </span>pool = <span class="self">self
             </span>.conn
             .get_or_try_init(|| <span class="kw">async </span>{
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = <span class="self">self</span>.client.clone() {
-                    ConnectionManager::new(client.clone())
-                        .<span class="kw">await
-                        </span>.map(RedisConnection::Normal)
-                } <span class="kw">else </span>{
-                    <span class="self">self</span>.cluster_client
-                        .clone()
-                        .unwrap()
-                        .get_async_connection()
-                        .<span class="kw">await
-                        </span>.map(RedisConnection::Cluster)
-                }
+                bb8::Pool::builder()
+                    .build(<span class="self">self</span>.get_redis_connection_manager())
+                    .<span class="kw">await
+                    </span>.map_err(|err| {
+                        Error::new(ErrorKind::ConfigInvalid, <span class="string">"connect to redis failed"</span>)
+                            .set_source(err)
+                    })
             })
-            .<span class="kw">await
-            </span>.map_err(format_redis_error)<span class="question-mark">?
-            </span>.clone())
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+        pool.get().<span class="kw">await</span>.map_err(|err| <span class="kw">match </span>err {
+            RunError::TimedOut =&gt; {
+                Error::new(ErrorKind::Unexpected, <span class="string">"get connection from pool failed"</span>).set_temporary()
+            }
+            RunError::User(err) =&gt; err,
+        })
+    }
+
+    <span class="kw">fn </span>get_redis_connection_manager(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RedisConnectionManager {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(_client) = <span class="self">self</span>.client.clone() {
+            RedisConnectionManager {
+                client: <span class="self">self</span>.client.clone(),
+                cluster_client: <span class="prelude-val">None</span>,
+            }
+        } <span class="kw">else </span>{
+            RedisConnectionManager {
+                client: <span class="prelude-val">None</span>,
+                cluster_client: <span class="self">self</span>.cluster_client.clone(),
+            }
+        }
     }
 }
 
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>kv::Adapter <span class="kw">for </span>Adapter {
+<span class="kw">impl </span>kv::Adapter <span class="kw">for </span>Adapter {
     <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; kv::Metadata {
         kv::Metadata::new(
             Scheme::Redis,
@@ -849,75 +707,29 @@
         )
     }
 
-    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
-        <span class="kw">let </span>conn = <span class="self">self</span>.conn().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">match </span>conn {
-            RedisConnection::Normal(<span class="kw-2">mut </span>conn) =&gt; {
-                <span class="kw">let </span>bs = conn.get(key).<span class="kw">await</span>.map_err(format_redis_error)<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(bs)
-            }
-            RedisConnection::Cluster(<span class="kw-2">mut </span>conn) =&gt; {
-                <span class="kw">let </span>bs = conn.get(key).<span class="kw">await</span>.map_err(format_redis_error)<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(bs)
-            }
-        }
+    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>conn = <span class="self">self</span>.conn().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>result = conn.get(key).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(result)
     }
 
-    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>conn = <span class="self">self</span>.conn().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">match </span><span class="self">self</span>.default_ttl {
-            <span class="prelude-val">Some</span>(ttl) =&gt; <span class="kw">match </span>conn {
-                RedisConnection::Normal(<span class="kw-2">mut </span>conn) =&gt; conn
-                    .set_ex(key, value, ttl.as_secs() <span class="kw">as </span>usize)
-                    .<span class="kw">await
-                    </span>.map_err(format_redis_error)<span class="question-mark">?</span>,
-                RedisConnection::Cluster(<span class="kw-2">mut </span>conn) =&gt; conn
-                    .set_ex(key, value, ttl.as_secs() <span class="kw">as </span>usize)
-                    .<span class="kw">await
-                    </span>.map_err(format_redis_error)<span class="question-mark">?</span>,
-            },
-            <span class="prelude-val">None </span>=&gt; <span class="kw">match </span>conn {
-                RedisConnection::Normal(<span class="kw-2">mut </span>conn) =&gt; {
-                    conn.set(key, value).<span class="kw">await</span>.map_err(format_redis_error)<span class="question-mark">?
-                </span>}
-                RedisConnection::Cluster(<span class="kw-2">mut </span>conn) =&gt; {
-                    conn.set(key, value).<span class="kw">await</span>.map_err(format_redis_error)<span class="question-mark">?
-                </span>}
-            },
-        }
+    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>conn = <span class="self">self</span>.conn().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>value = value.to_vec();
+        conn.set(key, value, <span class="self">self</span>.default_ttl).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>conn = <span class="self">self</span>.conn().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">match </span>conn {
-            RedisConnection::Normal(<span class="kw-2">mut </span>conn) =&gt; {
-                <span class="kw">let _</span>: () = conn.del(key).<span class="kw">await</span>.map_err(format_redis_error)<span class="question-mark">?</span>;
-            }
-            RedisConnection::Cluster(<span class="kw-2">mut </span>conn) =&gt; {
-                <span class="kw">let _</span>: () = conn.del(key).<span class="kw">await</span>.map_err(format_redis_error)<span class="question-mark">?</span>;
-            }
-        }
+        <span class="kw">let </span><span class="kw-2">mut </span>conn = <span class="self">self</span>.conn().<span class="kw">await</span><span class="question-mark">?</span>;
+        conn.delete(key).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">async fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>conn = <span class="self">self</span>.conn().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">match </span>conn {
-            RedisConnection::Normal(<span class="kw-2">mut </span>conn) =&gt; {
-                conn.append(key, value).<span class="kw">await</span>.map_err(format_redis_error)<span class="question-mark">?</span>;
-            }
-            RedisConnection::Cluster(<span class="kw-2">mut </span>conn) =&gt; {
-                conn.append(key, value).<span class="kw">await</span>.map_err(format_redis_error)<span class="question-mark">?</span>;
-            }
-        }
+        <span class="kw">let </span><span class="kw-2">mut </span>conn = <span class="self">self</span>.conn().<span class="kw">await</span><span class="question-mark">?</span>;
+        conn.append(key, value).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
-}
-
-<span class="kw">pub fn </span>format_redis_error(e: RedisError) -&gt; Error {
-    Error::new(ErrorKind::Unexpected, e.category())
-        .set_source(e)
-        .set_temporary()
 }
 </code></pre></div></section></main></body></html>

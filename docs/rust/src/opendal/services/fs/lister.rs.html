@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/fs/lister.rs`."><title>lister.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/fs/lister.rs`."><title>lister.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -145,6 +143,27 @@
 <a href="#143" id="143">143</a>
 <a href="#144" id="144">144</a>
 <a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -162,36 +181,32 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::fs::FileType;
-<span class="kw">use </span>std::path::Path;
+</span><span class="kw">use </span>std::path::Path;
 <span class="kw">use </span>std::path::PathBuf;
-<span class="kw">use </span>std::task::ready;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
-
-<span class="kw">use </span>futures::future::BoxFuture;
-<span class="kw">use </span>futures::FutureExt;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::EntryMode;
 <span class="kw">use </span><span class="kw">crate</span>::Metadata;
+<span class="kw">use </span><span class="kw">crate</span>::Metakey;
 <span class="kw">use </span><span class="kw">crate</span>::Result;
 
 <span class="kw">pub struct </span>FsLister&lt;P&gt; {
     root: PathBuf,
 
+    current_path: <span class="prelude-ty">Option</span>&lt;String&gt;,
+
     rd: P,
 
-    fut: <span class="prelude-ty">Option</span>&lt;BoxFuture&lt;<span class="lifetime">'static</span>, (tokio::fs::DirEntry, <span class="prelude-ty">Result</span>&lt;FileType&gt;)&gt;&gt;,
+    op: OpList,
 }
 
 <span class="kw">impl</span>&lt;P&gt; FsLister&lt;P&gt; {
-    <span class="kw">pub fn </span>new(root: <span class="kw-2">&amp;</span>Path, rd: P) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(root: <span class="kw-2">&amp;</span>Path, path: <span class="kw-2">&amp;</span>str, rd: P, arg: OpList) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             root: root.to_owned(),
+            current_path: <span class="prelude-val">Some</span>(path.to_string()),
             rd,
-
-            fut: <span class="prelude-val">None</span>,
+            op: arg,
         }
     }
 }
@@ -202,62 +217,70 @@
 </span><span class="kw">unsafe impl</span>&lt;P&gt; Sync <span class="kw">for </span>FsLister&lt;P&gt; {}
 
 <span class="kw">impl </span>oio::List <span class="kw">for </span>FsLister&lt;tokio::fs::ReadDir&gt; {
-    <span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(fut) = <span class="self">self</span>.fut.as_mut() {
-            <span class="kw">let </span>(de, ft) = <span class="macro">futures::ready!</span>(fut.poll_unpin(cx));
-            <span class="kw">let </span>ft = <span class="kw">match </span>ft {
-                <span class="prelude-val">Ok</span>(ft) =&gt; {
-                    <span class="self">self</span>.fut = <span class="prelude-val">None</span>;
-                    ft
-                }
-                <span class="prelude-val">Err</span>(e) =&gt; {
-                    <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                        <span class="kw">let </span>ft = de.file_type().<span class="kw">await</span>.map_err(new_std_io_error);
-                        (de, ft)
-                    };
-                    <span class="self">self</span>.fut = <span class="prelude-val">Some</span>(Box::pin(fut));
-                    <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(e));
-                }
-            };
+    <span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
+        <span class="comment">// since list should return path itself, we return it first
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(path) = <span class="self">self</span>.current_path.take() {
+            <span class="kw">let </span>e = oio::Entry::new(path.as_str(), Metadata::new(EntryMode::DIR));
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(e));
+        }
 
-            <span class="kw">let </span>entry_path = de.path();
-            <span class="kw">let </span>rel_path = normalize_path(
-                <span class="kw-2">&amp;</span>entry_path
-                    .strip_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>.root)
-                    .expect(<span class="string">"cannot fail because the prefix is iterated"</span>)
-                    .to_string_lossy()
-                    .replace(<span class="string">'\\'</span>, <span class="string">"/"</span>),
-            );
+        <span class="kw">let </span><span class="prelude-val">Some</span>(de) = <span class="self">self</span>.rd.next_entry().<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">? </span><span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
+        };
 
-            <span class="kw">let </span>d = <span class="kw">if </span>ft.is_file() {
-                oio::Entry::new(<span class="kw-2">&amp;</span>rel_path, Metadata::new(EntryMode::FILE))
+        <span class="kw">let </span>entry_path = de.path();
+        <span class="kw">let </span>rel_path = normalize_path(
+            <span class="kw-2">&amp;</span>entry_path
+                .strip_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>.root)
+                .expect(<span class="string">"cannot fail because the prefix is iterated"</span>)
+                .to_string_lossy()
+                .replace(<span class="string">'\\'</span>, <span class="string">"/"</span>),
+        );
+
+        <span class="kw">let </span>default_meta = <span class="self">self</span>.op.metakey() == Metakey::Mode;
+
+        <span class="kw">let </span>metadata = <span class="kw">if </span>default_meta {
+            <span class="kw">let </span>ft = de.file_type().<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
+            <span class="kw">if </span>ft.is_file() {
+                Metadata::new(EntryMode::FILE)
             } <span class="kw">else if </span>ft.is_dir() {
-                <span class="comment">// Make sure we are returning the correct path.
-                </span>oio::Entry::new(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{rel_path}/"</span>), Metadata::new(EntryMode::DIR))
+                Metadata::new(EntryMode::DIR)
             } <span class="kw">else </span>{
-                oio::Entry::new(<span class="kw-2">&amp;</span>rel_path, Metadata::new(EntryMode::Unknown))
-            };
-
-            <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(d)));
-        }
-
-        <span class="kw">let </span>de = <span class="macro">ready!</span>(<span class="self">self</span>.rd.poll_next_entry(cx)).map_err(new_std_io_error)<span class="question-mark">?</span>;
-        <span class="kw">match </span>de {
-            <span class="prelude-val">Some</span>(de) =&gt; {
-                <span class="kw">let </span>fut = <span class="kw">async move </span>{
-                    <span class="kw">let </span>ft = de.file_type().<span class="kw">await</span>.map_err(new_std_io_error);
-                    (de, ft)
-                };
-                <span class="self">self</span>.fut = <span class="prelude-val">Some</span>(Box::pin(fut));
-                <span class="self">self</span>.poll_next(cx)
+                Metadata::new(EntryMode::Unknown)
             }
-            <span class="prelude-val">None </span>=&gt; Poll::Ready(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)),
-        }
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>fs_meta = de.metadata().<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
+            <span class="kw">let </span><span class="kw-2">mut </span>meta = <span class="kw">if </span>fs_meta.file_type().is_file() {
+                Metadata::new(EntryMode::FILE)
+            } <span class="kw">else if </span>fs_meta.file_type().is_dir() {
+                Metadata::new(EntryMode::DIR)
+            } <span class="kw">else </span>{
+                Metadata::new(EntryMode::Unknown)
+            };
+            meta.set_content_length(fs_meta.len());
+            meta.set_last_modified(fs_meta.modified().map_err(new_std_io_error)<span class="question-mark">?</span>.into());
+            meta
+        };
+
+        <span class="kw">let </span>entry = <span class="kw">if </span>metadata.is_dir() {
+            <span class="comment">// Make sure we are returning the correct path.
+            </span>oio::Entry::new(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{rel_path}/"</span>), metadata)
+        } <span class="kw">else </span>{
+            oio::Entry::new(<span class="kw-2">&amp;</span>rel_path, metadata)
+        };
+
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(entry))
     }
 }
 
 <span class="kw">impl </span>oio::BlockingList <span class="kw">for </span>FsLister&lt;std::fs::ReadDir&gt; {
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
+        <span class="comment">// since list should return path itself, we return it first
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(path) = <span class="self">self</span>.current_path.take() {
+            <span class="kw">let </span>e = oio::Entry::new(path.as_str(), Metadata::new(EntryMode::DIR));
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(e));
+        }
+
         <span class="kw">let </span>de = <span class="kw">match </span><span class="self">self</span>.rd.next() {
             <span class="prelude-val">Some</span>(de) =&gt; de.map_err(new_std_io_error)<span class="question-mark">?</span>,
             <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
@@ -272,19 +295,36 @@
                 .replace(<span class="string">'\\'</span>, <span class="string">"/"</span>),
         );
 
-        <span class="comment">// On Windows and most Unix platforms this function is free
-        // (no extra system calls needed), but some Unix platforms may
-        // require the equivalent call to symlink_metadata to learn about
-        // the target file type.
-        </span><span class="kw">let </span>file_type = de.file_type().map_err(new_std_io_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>default_meta = <span class="self">self</span>.op.metakey() == Metakey::Mode;
 
-        <span class="kw">let </span>entry = <span class="kw">if </span>file_type.is_file() {
-            oio::Entry::new(<span class="kw-2">&amp;</span>rel_path, Metadata::new(EntryMode::FILE))
-        } <span class="kw">else if </span>file_type.is_dir() {
-            <span class="comment">// Make sure we are returning the correct path.
-            </span>oio::Entry::new(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{rel_path}/"</span>), Metadata::new(EntryMode::DIR))
+        <span class="kw">let </span>metadata = <span class="kw">if </span>default_meta {
+            <span class="kw">let </span>ft = de.file_type().map_err(new_std_io_error)<span class="question-mark">?</span>;
+            <span class="kw">if </span>ft.is_file() {
+                Metadata::new(EntryMode::FILE)
+            } <span class="kw">else if </span>ft.is_dir() {
+                Metadata::new(EntryMode::DIR)
+            } <span class="kw">else </span>{
+                Metadata::new(EntryMode::Unknown)
+            }
         } <span class="kw">else </span>{
-            oio::Entry::new(<span class="kw-2">&amp;</span>rel_path, Metadata::new(EntryMode::Unknown))
+            <span class="kw">let </span>fs_meta = de.metadata().map_err(new_std_io_error)<span class="question-mark">?</span>;
+            <span class="kw">let </span><span class="kw-2">mut </span>meta = <span class="kw">if </span>fs_meta.file_type().is_file() {
+                Metadata::new(EntryMode::FILE)
+            } <span class="kw">else if </span>fs_meta.file_type().is_dir() {
+                Metadata::new(EntryMode::DIR)
+            } <span class="kw">else </span>{
+                Metadata::new(EntryMode::Unknown)
+            };
+            meta.set_content_length(fs_meta.len());
+            meta.set_last_modified(fs_meta.modified().map_err(new_std_io_error)<span class="question-mark">?</span>.into());
+            meta
+        };
+
+        <span class="kw">let </span>entry = <span class="kw">if </span>metadata.is_dir() {
+            <span class="comment">// Make sure we are returning the correct path.
+            </span>oio::Entry::new(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{rel_path}/"</span>), metadata)
+        } <span class="kw">else </span>{
+            oio::Entry::new(<span class="kw-2">&amp;</span>rel_path, metadata)
         };
 
         <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(entry))

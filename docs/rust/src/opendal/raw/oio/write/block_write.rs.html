@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/raw/oio/write/block_write.rs`."><title>block_write.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/raw/oio/write/block_write.rs`."><title>block_write.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -351,101 +349,6 @@
 <a href="#349" id="349">349</a>
 <a href="#350" id="350">350</a>
 <a href="#351" id="351">351</a>
-<a href="#352" id="352">352</a>
-<a href="#353" id="353">353</a>
-<a href="#354" id="354">354</a>
-<a href="#355" id="355">355</a>
-<a href="#356" id="356">356</a>
-<a href="#357" id="357">357</a>
-<a href="#358" id="358">358</a>
-<a href="#359" id="359">359</a>
-<a href="#360" id="360">360</a>
-<a href="#361" id="361">361</a>
-<a href="#362" id="362">362</a>
-<a href="#363" id="363">363</a>
-<a href="#364" id="364">364</a>
-<a href="#365" id="365">365</a>
-<a href="#366" id="366">366</a>
-<a href="#367" id="367">367</a>
-<a href="#368" id="368">368</a>
-<a href="#369" id="369">369</a>
-<a href="#370" id="370">370</a>
-<a href="#371" id="371">371</a>
-<a href="#372" id="372">372</a>
-<a href="#373" id="373">373</a>
-<a href="#374" id="374">374</a>
-<a href="#375" id="375">375</a>
-<a href="#376" id="376">376</a>
-<a href="#377" id="377">377</a>
-<a href="#378" id="378">378</a>
-<a href="#379" id="379">379</a>
-<a href="#380" id="380">380</a>
-<a href="#381" id="381">381</a>
-<a href="#382" id="382">382</a>
-<a href="#383" id="383">383</a>
-<a href="#384" id="384">384</a>
-<a href="#385" id="385">385</a>
-<a href="#386" id="386">386</a>
-<a href="#387" id="387">387</a>
-<a href="#388" id="388">388</a>
-<a href="#389" id="389">389</a>
-<a href="#390" id="390">390</a>
-<a href="#391" id="391">391</a>
-<a href="#392" id="392">392</a>
-<a href="#393" id="393">393</a>
-<a href="#394" id="394">394</a>
-<a href="#395" id="395">395</a>
-<a href="#396" id="396">396</a>
-<a href="#397" id="397">397</a>
-<a href="#398" id="398">398</a>
-<a href="#399" id="399">399</a>
-<a href="#400" id="400">400</a>
-<a href="#401" id="401">401</a>
-<a href="#402" id="402">402</a>
-<a href="#403" id="403">403</a>
-<a href="#404" id="404">404</a>
-<a href="#405" id="405">405</a>
-<a href="#406" id="406">406</a>
-<a href="#407" id="407">407</a>
-<a href="#408" id="408">408</a>
-<a href="#409" id="409">409</a>
-<a href="#410" id="410">410</a>
-<a href="#411" id="411">411</a>
-<a href="#412" id="412">412</a>
-<a href="#413" id="413">413</a>
-<a href="#414" id="414">414</a>
-<a href="#415" id="415">415</a>
-<a href="#416" id="416">416</a>
-<a href="#417" id="417">417</a>
-<a href="#418" id="418">418</a>
-<a href="#419" id="419">419</a>
-<a href="#420" id="420">420</a>
-<a href="#421" id="421">421</a>
-<a href="#422" id="422">422</a>
-<a href="#423" id="423">423</a>
-<a href="#424" id="424">424</a>
-<a href="#425" id="425">425</a>
-<a href="#426" id="426">426</a>
-<a href="#427" id="427">427</a>
-<a href="#428" id="428">428</a>
-<a href="#429" id="429">429</a>
-<a href="#430" id="430">430</a>
-<a href="#431" id="431">431</a>
-<a href="#432" id="432">432</a>
-<a href="#433" id="433">433</a>
-<a href="#434" id="434">434</a>
-<a href="#435" id="435">435</a>
-<a href="#436" id="436">436</a>
-<a href="#437" id="437">437</a>
-<a href="#438" id="438">438</a>
-<a href="#439" id="439">439</a>
-<a href="#440" id="440">440</a>
-<a href="#441" id="441">441</a>
-<a href="#442" id="442">442</a>
-<a href="#443" id="443">443</a>
-<a href="#444" id="444">444</a>
-<a href="#445" id="445">445</a>
-<a href="#446" id="446">446</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -463,22 +366,18 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::pin::Pin;
-<span class="kw">use </span>std::sync::Arc;
-<span class="kw">use </span>std::task::ready;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
+</span><span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>futures::select;
 <span class="kw">use </span>futures::Future;
 <span class="kw">use </span>futures::FutureExt;
-<span class="kw">use </span>futures::StreamExt;
+<span class="kw">use </span>futures::TryFutureExt;
 <span class="kw">use </span>uuid::Uuid;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// BlockWrite is used to implement [`Write`] based on block
+<span class="doccomment">/// BlockWrite is used to implement [`oio::Write`] based on block
 /// uploads. By implementing BlockWrite, services don't need to
 /// care about the details of uploading blocks.
 ///
@@ -509,118 +408,103 @@
 /// - Don't need initialization before writing.
 /// - Block ID is generated by caller `BlockWrite` instead of services.
 /// - Complete block by an ordered block id list.
-</span><span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-#[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
 </span><span class="kw">pub trait </span>BlockWrite: Send + Sync + Unpin + <span class="lifetime">'static </span>{
     <span class="doccomment">/// write_once is used to write the data to underlying storage at once.
     ///
     /// BlockWriter will call this API when:
     ///
     /// - All the data has been written to the buffer and we can perform the upload at once.
-    </span><span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, body: AsyncBody) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
+    </span><span class="kw">fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, body: Buffer) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend;
 
-    <span class="doccomment">/// write_block will write a block of the data and returns the result
-    /// [`Block`].
+    <span class="doccomment">/// write_block will write a block of the data.
     ///
     /// BlockWriter will call this API and stores the result in
     /// order.
     ///
     /// - block_id is the id of the block.
-    </span><span class="kw">async fn </span>write_block(<span class="kw-2">&amp;</span><span class="self">self</span>, block_id: Uuid, size: u64, body: AsyncBody) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
+    </span><span class="kw">fn </span>write_block(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        block_id: Uuid,
+        size: u64,
+        body: Buffer,
+    ) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend;
 
     <span class="doccomment">/// complete_block will complete the block upload to build the final
     /// file.
-    </span><span class="kw">async fn </span>complete_block(<span class="kw-2">&amp;</span><span class="self">self</span>, block_ids: Vec&lt;Uuid&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
+    </span><span class="kw">fn </span>complete_block(<span class="kw-2">&amp;</span><span class="self">self</span>, block_ids: Vec&lt;Uuid&gt;) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend;
 
     <span class="doccomment">/// abort_block will cancel the block upload and purge all data.
-    </span><span class="kw">async fn </span>abort_block(<span class="kw-2">&amp;</span><span class="self">self</span>, block_ids: Vec&lt;Uuid&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
+    </span><span class="kw">fn </span>abort_block(<span class="kw-2">&amp;</span><span class="self">self</span>, block_ids: Vec&lt;Uuid&gt;) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend;
 }
 
-<span class="doccomment">/// WriteBlockResult is the result returned by [`WriteBlockFuture`].
-///
-/// The error part will carries input `(block_id, bytes, err)` so caller can retry them.
-</span><span class="kw">type </span>WriteBlockResult = std::result::Result&lt;Uuid, (Uuid, oio::ChunkedBytes, Error)&gt;;
-
-<span class="kw">struct </span>WriteBlockFuture(BoxedFuture&lt;WriteBlockResult&gt;);
-
-<span class="doccomment">/// # Safety
-///
-/// wasm32 is a special target that we only have one event-loop for this WriteBlockFuture.
-</span><span class="kw">unsafe impl </span>Send <span class="kw">for </span>WriteBlockFuture {}
-
-<span class="doccomment">/// # Safety
-///
-/// We will only take `&amp;mut Self` reference for WriteBlockFuture.
-</span><span class="kw">unsafe impl </span>Sync <span class="kw">for </span>WriteBlockFuture {}
-
-<span class="kw">impl </span>Future <span class="kw">for </span>WriteBlockFuture {
-    <span class="kw">type </span>Output = WriteBlockResult;
-    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
-        <span class="self">self</span>.get_mut().<span class="number">0</span>.poll_unpin(cx)
-    }
+<span class="kw">struct </span>WriteInput&lt;W: BlockWrite&gt; {
+    w: Arc&lt;W&gt;,
+    executor: Executor,
+    block_id: Uuid,
+    bytes: Buffer,
 }
 
-<span class="kw">impl </span>WriteBlockFuture {
-    <span class="kw">pub fn </span>new&lt;W: BlockWrite&gt;(w: Arc&lt;W&gt;, block_id: Uuid, bytes: oio::ChunkedBytes) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>fut = <span class="kw">async move </span>{
-            w.write_block(
-                block_id,
-                bytes.len() <span class="kw">as </span>u64,
-                AsyncBody::ChunkedBytes(bytes.clone()),
-            )
-            .<span class="kw">await
-            </span><span class="comment">// Return bytes while we got an error to allow retry.
-            </span>.map_err(|err| (block_id, bytes, err))
-            <span class="comment">// Return the successful block id.
-            </span>.map(|<span class="kw">_</span>| block_id)
-        };
-
-        WriteBlockFuture(Box::pin(fut))
-    }
-}
-
-<span class="doccomment">/// BlockWriter will implements [`Write`] based on block
+<span class="doccomment">/// BlockWriter will implements [`oio::Write`] based on block
 /// uploads.
 </span><span class="kw">pub struct </span>BlockWriter&lt;W: BlockWrite&gt; {
-    state: State,
     w: Arc&lt;W&gt;,
+    executor: Executor,
 
+    started: bool,
     block_ids: Vec&lt;Uuid&gt;,
-    cache: <span class="prelude-ty">Option</span>&lt;oio::ChunkedBytes&gt;,
-    futures: ConcurrentFutures&lt;WriteBlockFuture&gt;,
+    cache: <span class="prelude-ty">Option</span>&lt;Buffer&gt;,
+    tasks: ConcurrentTasks&lt;WriteInput&lt;W&gt;, Uuid&gt;,
 }
-
-<span class="kw">enum </span>State {
-    Idle,
-    Close(BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt;),
-    Abort(BoxedFuture&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt;),
-}
-
-<span class="doccomment">/// # Safety
-///
-/// wasm32 is a special target that we only have one event-loop for this state.
-</span><span class="kw">unsafe impl </span>Send <span class="kw">for </span>State {}
-<span class="doccomment">/// # Safety
-///
-/// We will only take `&amp;mut Self` reference for State.
-</span><span class="kw">unsafe impl </span>Sync <span class="kw">for </span>State {}
 
 <span class="kw">impl</span>&lt;W: BlockWrite&gt; BlockWriter&lt;W&gt; {
     <span class="doccomment">/// Create a new BlockWriter.
-    </span><span class="kw">pub fn </span>new(inner: W, concurrent: usize) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            state: State::Idle,
+    </span><span class="kw">pub fn </span>new(inner: W, executor: <span class="prelude-ty">Option</span>&lt;Executor&gt;, concurrent: usize) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>executor = executor.unwrap_or_default();
 
+        <span class="self">Self </span>{
             w: Arc::new(inner),
+            executor: executor.clone(),
+            started: <span class="bool-val">false</span>,
             block_ids: Vec::new(),
             cache: <span class="prelude-val">None</span>,
-            futures: ConcurrentFutures::new(<span class="number">1</span>.max(concurrent)),
+
+            tasks: ConcurrentTasks::new(executor, concurrent, |input| {
+                Box::pin(<span class="kw">async move </span>{
+                    <span class="kw">let </span>fut = input
+                        .w
+                        .write_block(
+                            input.block_id,
+                            input.bytes.len() <span class="kw">as </span>u64,
+                            input.bytes.clone(),
+                        )
+                        .map_ok(|<span class="kw">_</span>| input.block_id);
+                    <span class="kw">match </span>input.executor.timeout() {
+                        <span class="prelude-val">None </span>=&gt; {
+                            <span class="kw">let </span>result = fut.<span class="kw">await</span>;
+                            (input, result)
+                        }
+                        <span class="prelude-val">Some</span>(timeout) =&gt; {
+                            <span class="kw">let </span>result = <span class="macro">select!</span> {
+                                result = fut.fuse() =&gt; {
+                                    result
+                                }
+                                <span class="kw">_ </span>= timeout.fuse() =&gt; {
+                                      <span class="prelude-val">Err</span>(Error::new(
+                                            ErrorKind::Unexpected, <span class="string">"write block timeout"</span>)
+                                                .with_context(<span class="string">"block_id"</span>, input.block_id.to_string())
+                                                .set_temporary())
+                                }
+                            };
+                            (input, result)
+                        }
+                    }
+                })
+            }),
         }
     }
 
-    <span class="kw">fn </span>fill_cache(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; usize {
-        <span class="kw">let </span>size = bs.remaining();
-        <span class="kw">let </span>bs = oio::ChunkedBytes::from_vec(bs.vectored_bytes(size));
+    <span class="kw">fn </span>fill_cache(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; usize {
+        <span class="kw">let </span>size = bs.len();
         <span class="macro">assert!</span>(<span class="self">self</span>.cache.is_none());
         <span class="self">self</span>.cache = <span class="prelude-val">Some</span>(bs);
         size
@@ -631,144 +515,73 @@
 <span class="kw">where
     </span>W: BlockWrite,
 {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="kw">loop </span>{
-            <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.state {
-                State::Idle =&gt; {
-                    <span class="kw">if </span><span class="self">self</span>.futures.has_remaining() {
-                        <span class="comment">// Fill cache with the first write.
-                        </span><span class="kw">if </span><span class="self">self</span>.cache.is_none() {
-                            <span class="kw">let </span>size = <span class="self">self</span>.fill_cache(bs);
-                            <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(size));
-                        }
-
-                        <span class="kw">let </span>cache = <span class="self">self</span>.cache.take().expect(<span class="string">"pending write must exist"</span>);
-                        <span class="self">self</span>.futures.push_back(WriteBlockFuture::new(
-                            <span class="self">self</span>.w.clone(),
-                            Uuid::new_v4(),
-                            cache,
-                        ));
-
-                        <span class="kw">let </span>size = <span class="self">self</span>.fill_cache(bs);
-                        <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(size));
-                    } <span class="kw">else if let </span><span class="prelude-val">Some</span>(res) = <span class="macro">ready!</span>(<span class="self">self</span>.futures.poll_next_unpin(cx)) {
-                        <span class="kw">match </span>res {
-                            <span class="prelude-val">Ok</span>(block_id) =&gt; {
-                                <span class="self">self</span>.block_ids.push(block_id);
-                            }
-                            <span class="prelude-val">Err</span>((block_id, bytes, err)) =&gt; {
-                                <span class="self">self</span>.futures.push_front(WriteBlockFuture::new(
-                                    <span class="self">self</span>.w.clone(),
-                                    block_id,
-                                    bytes,
-                                ));
-                                <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(err));
-                            }
-                        }
-                    }
-                }
-                State::Close(<span class="kw">_</span>) =&gt; {
-                    <span class="macro">unreachable!</span>(<span class="string">"BlockWriter must not go into State::Close during poll_write"</span>)
-                }
-                State::Abort(<span class="kw">_</span>) =&gt; {
-                    <span class="macro">unreachable!</span>(<span class="string">"BlockWriter must not go into State::Abort during poll_write"</span>)
-                }
-            }
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span>!<span class="self">self</span>.started &amp;&amp; <span class="self">self</span>.cache.is_none() {
+            <span class="self">self</span>.fill_cache(bs);
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         }
+
+        <span class="comment">// The block upload process has been started.
+        </span><span class="self">self</span>.started = <span class="bool-val">true</span>;
+
+        <span class="kw">let </span>bytes = <span class="self">self</span>.cache.clone().expect(<span class="string">"pending write must exist"</span>);
+        <span class="self">self</span>.tasks
+            .execute(WriteInput {
+                w: <span class="self">self</span>.w.clone(),
+                executor: <span class="self">self</span>.executor.clone(),
+                block_id: Uuid::new_v4(),
+                bytes,
+            })
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
+        <span class="self">self</span>.fill_cache(bs);
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="kw">loop </span>{
-            <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.state {
-                State::Idle =&gt; {
-                    <span class="comment">// No write block has been sent.
-                    </span><span class="kw">if </span><span class="self">self</span>.futures.is_empty() &amp;&amp; <span class="self">self</span>.block_ids.is_empty() {
-                        <span class="kw">let </span>w = <span class="self">self</span>.w.clone();
-                        <span class="kw">let </span>(size, body) = <span class="kw">match </span><span class="self">self</span>.cache.clone() {
-                            <span class="prelude-val">Some</span>(cache) =&gt; (cache.len(), AsyncBody::ChunkedBytes(cache)),
-                            <span class="prelude-val">None </span>=&gt; (<span class="number">0</span>, AsyncBody::Empty),
-                        };
-                        <span class="comment">// Call write_once if there is no data in buffer and no location.
-                        </span><span class="self">self</span>.state =
-                            State::Close(Box::pin(
-                                <span class="kw">async move </span>{ w.write_once(size <span class="kw">as </span>u64, body).<span class="kw">await </span>},
-                            ));
-                        <span class="kw">continue</span>;
-                    }
+    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span>!<span class="self">self</span>.started {
+            <span class="kw">let </span>(size, body) = <span class="kw">match </span><span class="self">self</span>.cache.clone() {
+                <span class="prelude-val">Some</span>(cache) =&gt; (cache.len(), cache),
+                <span class="prelude-val">None </span>=&gt; (<span class="number">0</span>, Buffer::new()),
+            };
 
-                    <span class="kw">if </span><span class="self">self</span>.futures.has_remaining() {
-                        <span class="kw">if let </span><span class="prelude-val">Some</span>(cache) = <span class="self">self</span>.cache.take() {
-                            <span class="self">self</span>.futures.push_back(WriteBlockFuture::new(
-                                <span class="self">self</span>.w.clone(),
-                                Uuid::new_v4(),
-                                cache,
-                            ));
-                        }
-                    }
-
-                    <span class="kw">if </span>!<span class="self">self</span>.futures.is_empty() {
-                        <span class="kw">while let </span><span class="prelude-val">Some</span>(result) = <span class="macro">ready!</span>(<span class="self">self</span>.futures.poll_next_unpin(cx)) {
-                            <span class="kw">match </span>result {
-                                <span class="prelude-val">Ok</span>(block_id) =&gt; {
-                                    <span class="self">self</span>.block_ids.push(block_id);
-                                }
-                                <span class="prelude-val">Err</span>((block_id, bytes, err)) =&gt; {
-                                    <span class="self">self</span>.futures.push_front(WriteBlockFuture::new(
-                                        <span class="self">self</span>.w.clone(),
-                                        block_id,
-                                        bytes,
-                                    ));
-                                    <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(err));
-                                }
-                            }
-                        }
-                    } <span class="kw">else </span>{
-                        <span class="kw">let </span>w = <span class="self">self</span>.w.clone();
-                        <span class="kw">let </span>block_ids = <span class="self">self</span>.block_ids.clone();
-                        <span class="self">self</span>.state =
-                            State::Close(Box::pin(
-                                <span class="kw">async move </span>{ w.complete_block(block_ids).<span class="kw">await </span>},
-                            ));
-                        <span class="kw">continue</span>;
-                    }
-                }
-                State::Close(fut) =&gt; {
-                    <span class="kw">let </span>res = <span class="macro">futures::ready!</span>(fut.as_mut().poll(cx));
-                    <span class="self">self</span>.state = State::Idle;
-                    <span class="comment">// We should check res first before clean up cache.
-                    </span>res<span class="question-mark">?</span>;
-                    <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
-
-                    <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(()));
-                }
-                State::Abort(<span class="kw">_</span>) =&gt; {
-                    <span class="macro">unreachable!</span>(<span class="string">"BlockWriter must not go into State::Abort during poll_close"</span>)
-                }
-            }
+            <span class="self">self</span>.w.write_once(size <span class="kw">as </span>u64, body).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         }
-    }
 
-    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="kw">loop </span>{
-            <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.state {
-                State::Idle =&gt; {
-                    <span class="kw">let </span>w = <span class="self">self</span>.w.clone();
-                    <span class="kw">let </span>block_ids = <span class="self">self</span>.block_ids.clone();
-                    <span class="self">self</span>.futures.clear();
-                    <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
-                    <span class="self">self</span>.state =
-                        State::Abort(Box::pin(<span class="kw">async move </span>{ w.abort_block(block_ids).<span class="kw">await </span>}));
-                }
-                State::Abort(fut) =&gt; {
-                    <span class="kw">let </span>res = <span class="macro">futures::ready!</span>(fut.as_mut().poll(cx));
-                    <span class="self">self</span>.state = State::Idle;
-                    <span class="kw">return </span>Poll::Ready(res);
-                }
-                State::Close(<span class="kw">_</span>) =&gt; {
-                    <span class="macro">unreachable!</span>(<span class="string">"BlockWriter must not go into State::Close during poll_abort"</span>)
-                }
-            }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(cache) = <span class="self">self</span>.cache.clone() {
+            <span class="self">self</span>.tasks
+                .execute(WriteInput {
+                    w: <span class="self">self</span>.w.clone(),
+                    executor: <span class="self">self</span>.executor.clone(),
+                    block_id: Uuid::new_v4(),
+                    bytes: cache,
+                })
+                .<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
         }
+
+        <span class="kw">loop </span>{
+            <span class="kw">let </span><span class="prelude-val">Some</span>(result) = <span class="self">self</span>.tasks.next().<span class="kw">await</span>.transpose()<span class="question-mark">? </span><span class="kw">else </span>{
+                <span class="kw">break</span>;
+            };
+            <span class="self">self</span>.block_ids.push(result);
+        }
+
+        <span class="kw">let </span>block_ids = <span class="self">self</span>.block_ids.clone();
+        <span class="self">self</span>.w.complete_block(block_ids).<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span>!<span class="self">self</span>.started {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+        }
+
+        <span class="self">self</span>.tasks.clear();
+        <span class="self">self</span>.cache = <span class="prelude-val">None</span>;
+        <span class="self">self</span>.w.abort_block(<span class="self">self</span>.block_ids.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
     }
 }
 
@@ -776,22 +589,21 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>std::collections::HashMap;
     <span class="kw">use </span>std::sync::Mutex;
+    <span class="kw">use </span>std::time::Duration;
 
-    <span class="kw">use </span>bytes::Bytes;
     <span class="kw">use </span>pretty_assertions::assert_eq;
     <span class="kw">use </span>rand::thread_rng;
     <span class="kw">use </span>rand::Rng;
     <span class="kw">use </span>rand::RngCore;
+    <span class="kw">use </span>tokio::time::sleep;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use </span><span class="kw">crate</span>::raw::oio::StreamExt;
-    <span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteBuf;
-    <span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteExt;
+    <span class="kw">use </span><span class="kw">crate</span>::raw::oio::Write;
 
     <span class="kw">struct </span>TestWrite {
         length: u64,
-        bytes: HashMap&lt;Uuid, Bytes&gt;,
-        content: <span class="prelude-ty">Option</span>&lt;Bytes&gt;,
+        bytes: HashMap&lt;Uuid, Buffer&gt;,
+        content: <span class="prelude-ty">Option</span>&lt;Buffer&gt;,
     }
 
     <span class="kw">impl </span>TestWrite {
@@ -806,29 +618,25 @@
         }
     }
 
-    <span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-    #[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-    </span><span class="kw">impl </span>BlockWrite <span class="kw">for </span>Arc&lt;Mutex&lt;TestWrite&gt;&gt; {
-        <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: u64, <span class="kw">_</span>: AsyncBody) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">impl </span>BlockWrite <span class="kw">for </span>Arc&lt;Mutex&lt;TestWrite&gt;&gt; {
+        <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: u64, <span class="kw">_</span>: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
             <span class="prelude-val">Ok</span>(())
         }
 
-        <span class="kw">async fn </span>write_block(<span class="kw-2">&amp;</span><span class="self">self</span>, block_id: Uuid, size: u64, body: AsyncBody) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-            <span class="comment">// We will have 50% percent rate for write part to fail.
-            </span><span class="kw">if </span>thread_rng().gen_bool(<span class="number">5.0 </span>/ <span class="number">10.0</span>) {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::Unexpected, <span class="string">"I'm a crazy monkey!"</span>));
-            }
+        <span class="kw">async fn </span>write_block(<span class="kw-2">&amp;</span><span class="self">self</span>, block_id: Uuid, size: u64, body: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+            <span class="comment">// Add an async sleep here to enforce some pending.
+            </span>sleep(Duration::from_millis(<span class="number">50</span>)).<span class="kw">await</span>;
 
-            <span class="kw">let </span>bs = <span class="kw">match </span>body {
-                AsyncBody::Empty =&gt; Bytes::new(),
-                AsyncBody::Bytes(bs) =&gt; bs,
-                AsyncBody::ChunkedBytes(cb) =&gt; cb.bytes(cb.remaining()),
-                AsyncBody::Stream(s) =&gt; s.collect().<span class="kw">await</span>.unwrap(),
-            };
+            <span class="comment">// We will have 10% percent rate for write part to fail.
+            </span><span class="kw">if </span>thread_rng().gen_bool(<span class="number">1.0 </span>/ <span class="number">10.0</span>) {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(
+                    Error::new(ErrorKind::Unexpected, <span class="string">"I'm a crazy monkey!"</span>).set_temporary()
+                );
+            }
 
             <span class="kw">let </span><span class="kw-2">mut </span>this = <span class="self">self</span>.lock().unwrap();
             this.length += size;
-            this.bytes.insert(block_id, bs);
+            this.bytes.insert(block_id, body);
 
             <span class="prelude-val">Ok</span>(())
         }
@@ -837,9 +645,9 @@
             <span class="kw">let </span><span class="kw-2">mut </span>this = <span class="self">self</span>.lock().unwrap();
             <span class="kw">let </span><span class="kw-2">mut </span>bs = Vec::new();
             <span class="kw">for </span>id <span class="kw">in </span>block_ids {
-                bs.extend_from_slice(<span class="kw-2">&amp;</span>this.bytes[<span class="kw-2">&amp;</span>id]);
+                bs.push(this.bytes[<span class="kw-2">&amp;</span>id].clone());
             }
-            this.content = <span class="prelude-val">Some</span>(bs.into());
+            this.content = <span class="prelude-val">Some</span>(bs.into_iter().flatten().collect());
 
             <span class="prelude-val">Ok</span>(())
         }
@@ -853,7 +661,7 @@
     </span><span class="kw">async fn </span>test_block_writer_with_concurrent_errors() {
         <span class="kw">let </span><span class="kw-2">mut </span>rng = thread_rng();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>w = BlockWriter::new(TestWrite::new(), <span class="number">8</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>w = BlockWriter::new(TestWrite::new(), <span class="prelude-val">Some</span>(Executor::new()), <span class="number">8</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>total_size = <span class="number">0u64</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>expected_content = Vec::new();
 
@@ -867,7 +675,7 @@
             expected_content.extend_from_slice(<span class="kw-2">&amp;</span>bs);
 
             <span class="kw">loop </span>{
-                <span class="kw">match </span>w.write(<span class="kw-2">&amp;</span>bs.as_slice()).<span class="kw">await </span>{
+                <span class="kw">match </span>w.write(bs.clone().into()).<span class="kw">await </span>{
                     <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="kw">break</span>,
                     <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">continue</span>,
                 }
@@ -887,7 +695,7 @@
         <span class="macro">assert!</span>(inner.content.is_some());
         <span class="macro">assert_eq!</span>(
             expected_content,
-            inner.content.clone().unwrap(),
+            inner.content.clone().unwrap().to_bytes(),
             <span class="string">"content must be the same"
         </span>);
     }

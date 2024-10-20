@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/onedrive/writer.rs`."><title>writer.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/onedrive/writer.rs`."><title>writer.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -156,14 +154,6 @@
 <a href="#154" id="154">154</a>
 <a href="#155" id="155">155</a>
 <a href="#156" id="156">156</a>
-<a href="#157" id="157">157</a>
-<a href="#158" id="158">158</a>
-<a href="#159" id="159">159</a>
-<a href="#160" id="160">160</a>
-<a href="#161" id="161">161</a>
-<a href="#162" id="162">162</a>
-<a href="#163" id="163">163</a>
-<a href="#164" id="164">164</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -181,7 +171,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>async_trait::async_trait;
+</span><span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>http::StatusCode;
 
@@ -189,7 +179,6 @@
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">super</span>::graph_model::OneDriveUploadSessionCreationRequestBody;
 <span class="kw">use </span><span class="kw">super</span>::graph_model::OneDriveUploadSessionCreationResponseBody;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::WriteBuf;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -210,16 +199,14 @@
     }
 }
 
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>oio::OneShotWrite <span class="kw">for </span>OneDriveWriter {
-    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>bs = bs.bytes(bs.remaining());
+<span class="kw">impl </span>oio::OneShotWrite <span class="kw">for </span>OneDriveWriter {
+    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>size = bs.len();
 
         <span class="kw">if </span>size &lt;= <span class="self">Self</span>::MAX_SIMPLE_SIZE {
             <span class="self">self</span>.write_simple(bs).<span class="kw">await</span><span class="question-mark">?</span>;
         } <span class="kw">else </span>{
-            <span class="self">self</span>.write_chunked(bs).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="self">self</span>.write_chunked(bs.to_bytes()).<span class="kw">await</span><span class="question-mark">?</span>;
         }
 
         <span class="prelude-val">Ok</span>(())
@@ -227,10 +214,10 @@
 }
 
 <span class="kw">impl </span>OneDriveWriter {
-    <span class="kw">async fn </span>write_simple(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>write_simple(<span class="kw-2">&amp;</span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>resp = <span class="self">self
             </span>.backend
-            .onedrive_upload_simple(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="prelude-val">Some</span>(bs.len()), <span class="kw-2">&amp;</span><span class="self">self</span>.op, AsyncBody::Bytes(bs))
+            .onedrive_upload_simple(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="prelude-val">Some</span>(bs.len()), <span class="kw-2">&amp;</span><span class="self">self</span>.op, bs)
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
@@ -238,11 +225,8 @@
         <span class="kw">match </span>status {
             <span class="comment">// Typical response code: 201 Created
             // Reference: https://learn.microsoft.com/en-us/onedrive/developer/rest-api/api/driveitem_put_content?view=odsp-graph-online#response
-            </span>StatusCode::CREATED | StatusCode::OK =&gt; {
-                resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(())
-            }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            </span>StatusCode::CREATED | StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(()),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -274,7 +258,7 @@
                     offset,
                     chunk_end,
                     total_len,
-                    AsyncBody::Bytes(Bytes::copy_from_slice(chunk)),
+                    Buffer::from(Bytes::copy_from_slice(chunk)),
                 )
                 .<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -283,10 +267,8 @@
             <span class="kw">match </span>status {
                 <span class="comment">// Typical response code: 202 Accepted
                 // Reference: https://learn.microsoft.com/en-us/onedrive/developer/rest-api/api/driveitem_put_content?view=odsp-graph-online#response
-                </span>StatusCode::ACCEPTED | StatusCode::CREATED | StatusCode::OK =&gt; {
-                    resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-                }
-                <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+                </span>StatusCode::ACCEPTED | StatusCode::CREATED | StatusCode::OK =&gt; {}
+                <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp)),
             }
 
             offset += OneDriveWriter::CHUNK_SIZE_FACTOR;
@@ -319,12 +301,12 @@
         <span class="kw">match </span>status {
             <span class="comment">// Reference: https://learn.microsoft.com/en-us/onedrive/developer/rest-api/api/driveitem_createuploadsession?view=odsp-graph-online#response
             </span>StatusCode::OK =&gt; {
-                <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>bs = resp.into_body();
                 <span class="kw">let </span>result: OneDriveUploadSessionCreationResponseBody =
-                    serde_json::from_slice(<span class="kw-2">&amp;</span>bs).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                    serde_json::from_reader(bs.reader()).map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(result)
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 }

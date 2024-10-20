@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/b2/core.rs`."><title>core.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/b2/core.rs`."><title>core.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -680,25 +678,6 @@
 <a href="#678" id="678">678</a>
 <a href="#679" id="679">679</a>
 <a href="#680" id="680">680</a>
-<a href="#681" id="681">681</a>
-<a href="#682" id="682">682</a>
-<a href="#683" id="683">683</a>
-<a href="#684" id="684">684</a>
-<a href="#685" id="685">685</a>
-<a href="#686" id="686">686</a>
-<a href="#687" id="687">687</a>
-<a href="#688" id="688">688</a>
-<a href="#689" id="689">689</a>
-<a href="#690" id="690">690</a>
-<a href="#691" id="691">691</a>
-<a href="#692" id="692">692</a>
-<a href="#693" id="693">693</a>
-<a href="#694" id="694">694</a>
-<a href="#695" id="695">695</a>
-<a href="#696" id="696">696</a>
-<a href="#697" id="697">697</a>
-<a href="#698" id="698">698</a>
-<a href="#699" id="699">699</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -721,6 +700,7 @@
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::time::Duration;
 
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>chrono::DateTime;
 <span class="kw">use </span>chrono::Utc;
 <span class="kw">use </span>http::header;
@@ -771,7 +751,7 @@
 
 <span class="kw">impl </span>B2Core {
     <span class="attr">#[inline]
-    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;AsyncBody&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    </span><span class="kw">pub async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request&lt;Buffer&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="self">self</span>.client.send(req).<span class="kw">await
     </span>}
 
@@ -798,7 +778,7 @@
                         <span class="kw-2">&amp;</span>signer.application_key,
                     )<span class="question-mark">?</span>,
                 )
-                .body(AsyncBody::Empty)
+                .body(Buffer::new())
                 .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
             <span class="kw">let </span>resp = <span class="self">self</span>.client.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -806,19 +786,21 @@
 
             <span class="kw">match </span>status {
                 StatusCode::OK =&gt; {
-                    <span class="kw">let </span>resp_body = <span class="kw-2">&amp;</span>resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                    <span class="kw">let </span>token = serde_json::from_slice::&lt;AuthorizeAccountResponse&gt;(resp_body)
-                        .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
+                    <span class="kw">let </span>resp_body = resp.into_body();
+                    <span class="kw">let </span>token: AuthorizeAccountResponse =
+                        serde_json::from_reader(resp_body.reader())
+                            .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                     signer.auth_info = AuthInfo {
                         authorization_token: token.authorization_token.clone(),
                         api_url: token.api_url.clone(),
                         download_url: token.download_url.clone(),
                         <span class="comment">// This authorization token is valid for at most 24 hours.
-                        </span>expires_in: Utc::now() + chrono::Duration::hours(<span class="number">20</span>),
+                        </span>expires_in: Utc::now()
+                            + chrono::TimeDelta::try_hours(<span class="number">20</span>).expect(<span class="string">"20 hours must be valid"</span>),
                     };
                 }
                 <span class="kw">_ </span>=&gt; {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>);
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(resp));
                 }
             }
             <span class="prelude-val">Ok</span>(signer.auth_info.clone())
@@ -830,8 +812,9 @@
     <span class="kw">pub async fn </span>download_file_by_name(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
-        args: <span class="kw-2">&amp;</span>OpRead,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+        range: BytesRange,
+        _args: <span class="kw-2">&amp;</span>OpRead,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;HttpBody&gt;&gt; {
         <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>auth_info = <span class="self">self</span>.get_auth_info().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -848,16 +831,13 @@
 
         req = req.header(header::AUTHORIZATION, auth_info.authorization_token);
 
-        <span class="kw">let </span>range = args.range();
         <span class="kw">if </span>!range.is_full() {
             req = req.header(header::RANGE, range.to_header());
         }
 
-        <span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.send(req).<span class="kw">await
+        <span class="self">self</span>.client.fetch(req).<span class="kw">await
     </span>}
 
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">async fn </span>get_upload_url(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;GetUploadUrlResponse&gt; {
@@ -873,27 +853,24 @@
         req = req.header(header::AUTHORIZATION, auth_info.authorization_token);
 
         <span class="comment">// Set body
-        </span><span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>resp_body = <span class="kw-2">&amp;</span>resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>resp = serde_json::from_slice::&lt;GetUploadUrlResponse&gt;(resp_body)
+                <span class="kw">let </span>resp_body = resp.into_body();
+                <span class="kw">let </span>resp = serde_json::from_reader(resp_body.reader())
                     .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(resp)
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
     <span class="kw">pub async fn </span>get_download_authorization(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>str,
-        args: <span class="kw-2">&amp;</span>OpRead,
         expire: Duration,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;GetDownloadAuthorizationResponse&gt; {
         <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
@@ -909,10 +886,6 @@
 
         req = req.header(header::AUTHORIZATION, auth_info.authorization_token);
 
-        <span class="kw">let </span>range = args.range();
-        <span class="kw">if </span>!range.is_full() {
-            req = req.header(header::RANGE, range.to_header());
-        }
         <span class="kw">let </span>body = GetDownloadAuthorizationRequest {
             bucket_id: <span class="self">self</span>.bucket_id.clone(),
             file_name_prefix: path,
@@ -922,7 +895,7 @@
         <span class="kw">let </span>body = bytes::Bytes::from(body);
 
         <span class="kw">let </span>req = req
-            .body(AsyncBody::Bytes(body))
+            .body(Buffer::from(body))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -930,12 +903,12 @@
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>resp_body = <span class="kw-2">&amp;</span>resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>resp = serde_json::from_slice::&lt;GetDownloadAuthorizationResponse&gt;(resp_body)
+                <span class="kw">let </span>resp_body = resp.into_body();
+                <span class="kw">let </span>resp = serde_json::from_reader(resp_body.reader())
                     .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(resp)
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -944,8 +917,8 @@
         path: <span class="kw-2">&amp;</span>str,
         size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
         args: <span class="kw-2">&amp;</span>OpWrite,
-        body: AsyncBody,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+        body: Buffer,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>resp = <span class="self">self</span>.get_upload_url().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
@@ -978,11 +951,7 @@
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>start_large_file(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span>str,
-        args: <span class="kw-2">&amp;</span>OpWrite,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>start_large_file(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: <span class="kw-2">&amp;</span>OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>p = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>auth_info = <span class="self">self</span>.get_auth_info().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1000,7 +969,7 @@
         };
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(mime) = args.content_type() {
-            start_large_file_request.content_type = mime.to_owned();
+            mime.clone_into(<span class="kw-2">&amp;mut </span>start_large_file_request.content_type)
         }
 
         <span class="kw">let </span>body =
@@ -1008,7 +977,7 @@
         <span class="kw">let </span>body = bytes::Bytes::from(body);
 
         <span class="kw">let </span>req = req
-            .body(AsyncBody::Bytes(body))
+            .body(Buffer::from(body))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
@@ -1027,21 +996,19 @@
         req = req.header(header::AUTHORIZATION, auth_info.authorization_token);
 
         <span class="comment">// Set body
-        </span><span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.send(req).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>status = resp.status();
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>resp_body = <span class="kw-2">&amp;</span>resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>resp = serde_json::from_slice::&lt;GetUploadPartUrlResponse&gt;(resp_body)
+                <span class="kw">let </span>resp_body = resp.into_body();
+                <span class="kw">let </span>resp = serde_json::from_reader(resp_body.reader())
                     .map_err(new_json_deserialize_error)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(resp)
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -1050,8 +1017,8 @@
         file_id: <span class="kw-2">&amp;</span>str,
         part_number: usize,
         size: u64,
-        body: AsyncBody,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+        body: Buffer,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>resp = <span class="self">self</span>.get_upload_part_url(file_id).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = Request::post(resp.upload_url);
@@ -1074,7 +1041,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         file_id: <span class="kw-2">&amp;</span>str,
         part_sha1_array: Vec&lt;String&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>auth_info = <span class="self">self</span>.get_auth_info().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"{}/b2api/v2/b2_finish_large_file"</span>, auth_info.api_url);
@@ -1092,13 +1059,13 @@
 
         <span class="comment">// Set body
         </span><span class="kw">let </span>req = req
-            .body(AsyncBody::Bytes(body))
+            .body(Buffer::from(body))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>cancel_large_file(<span class="kw-2">&amp;</span><span class="self">self</span>, file_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>cancel_large_file(<span class="kw-2">&amp;</span><span class="self">self</span>, file_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>auth_info = <span class="self">self</span>.get_auth_info().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>url = <span class="macro">format!</span>(<span class="string">"{}/b2api/v2/b2_cancel_large_file"</span>, auth_info.api_url);
@@ -1115,7 +1082,7 @@
 
         <span class="comment">// Set body
         </span><span class="kw">let </span>req = req
-            .body(AsyncBody::Bytes(body))
+            .body(Buffer::from(body))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
@@ -1127,7 +1094,7 @@
         delimiter: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
         limit: <span class="prelude-ty">Option</span>&lt;usize&gt;,
         start_after: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>auth_info = <span class="self">self</span>.get_auth_info().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>url = <span class="macro">format!</span>(
@@ -1160,18 +1127,12 @@
         req = req.header(header::AUTHORIZATION, auth_info.authorization_token);
 
         <span class="comment">// Set body
-        </span><span class="kw">let </span>req = req
-            .body(AsyncBody::Empty)
-            .map_err(new_request_build_error)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>req = req.body(Buffer::new()).map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>copy_file(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        source_file_id: String,
-        to: <span class="kw-2">&amp;</span>str,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>copy_file(<span class="kw-2">&amp;</span><span class="self">self</span>, source_file_id: String, to: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>to = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, to);
 
         <span class="kw">let </span>auth_info = <span class="self">self</span>.get_auth_info().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1192,13 +1153,13 @@
 
         <span class="comment">// Set body
         </span><span class="kw">let </span>req = req
-            .body(AsyncBody::Bytes(body))
+            .body(Buffer::from(body))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>hide_file(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;IncomingAsyncBody&gt;&gt; {
+    <span class="kw">pub async fn </span>hide_file(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>path = build_abs_path(<span class="kw-2">&amp;</span><span class="self">self</span>.root, path);
 
         <span class="kw">let </span>auth_info = <span class="self">self</span>.get_auth_info().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1219,7 +1180,7 @@
 
         <span class="comment">// Set body
         </span><span class="kw">let </span>req = req
-            .body(AsyncBody::Bytes(body))
+            .body(Buffer::from(body))
             .map_err(new_request_build_error)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.send(req).<span class="kw">await
@@ -1348,7 +1309,6 @@
     <span class="kw">pub </span>content_md5: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="kw">pub </span>content_type: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="kw">pub </span>file_name: String,
-    <span class="kw">pub </span>action: String,
 }
 
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>parse_file_info(file: <span class="kw-2">&amp;</span>File) -&gt; Metadata {

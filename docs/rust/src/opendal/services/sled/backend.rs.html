@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/sled/backend.rs`."><title>backend.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/sled/backend.rs`."><title>backend.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -229,6 +227,8 @@
 <a href="#227" id="227">227</a>
 <a href="#228" id="228">228</a>
 <a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -246,16 +246,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::str;
 
-<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>tokio::task;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::services::SledConfig;
 <span class="kw">use </span><span class="kw">crate</span>::Builder;
 <span class="kw">use </span><span class="kw">crate</span>::Error;
 <span class="kw">use </span><span class="kw">crate</span>::ErrorKind;
@@ -265,52 +264,59 @@
 <span class="comment">// https://github.com/spacejam/sled/blob/69294e59c718289ab3cb6bd03ac3b9e1e072a1e7/src/db.rs#L5
 </span><span class="kw">const </span>DEFAULT_TREE_ID: <span class="kw-2">&amp;</span>str = <span class="string">r#"__sled__default"#</span>;
 
-<span class="doccomment">/// Sled service support.
+<span class="kw">impl </span>Configurator <span class="kw">for </span>SledConfig {
+    <span class="kw">type </span>Builder = SledBuilder;
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Builder {
+        SledBuilder { config: <span class="self">self </span>}
+    }
+}
+
+<span class="doccomment">/// Sled services support.
 </span><span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
 #[derive(Default)]
 </span><span class="kw">pub struct </span>SledBuilder {
-    <span class="doccomment">/// That path to the sled data directory.
-    </span>datadir: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    tree: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    config: SledConfig,
+}
+
+<span class="kw">impl </span>Debug <span class="kw">for </span>SledBuilder {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        f.debug_struct(<span class="string">"SledBuilder"</span>)
+            .field(<span class="string">"config"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.config)
+            .finish()
+    }
 }
 
 <span class="kw">impl </span>SledBuilder {
     <span class="doccomment">/// Set the path to the sled data directory. Will create if not exists.
-    </span><span class="kw">pub fn </span>datadir(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.datadir = <span class="prelude-val">Some</span>(path.into());
+    </span><span class="kw">pub fn </span>datadir(<span class="kw-2">mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.config.datadir = <span class="prelude-val">Some</span>(path.into());
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set the root for sled.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.root = <span class="prelude-val">Some</span>(path.into());
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(root.to_string())
+        };
+
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set the tree for sled.
-    </span><span class="kw">pub fn </span>tree(<span class="kw-2">&amp;mut </span><span class="self">self</span>, tree: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.tree = <span class="prelude-val">Some</span>(tree.into());
+    </span><span class="kw">pub fn </span>tree(<span class="kw-2">mut </span><span class="self">self</span>, tree: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.config.tree = <span class="prelude-val">Some</span>(tree.into());
         <span class="self">self
     </span>}
 }
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>SledBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Sled;
-    <span class="kw">type </span>Accessor = SledBackend;
+    <span class="kw">type </span>Config = SledConfig;
 
-    <span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = SledBuilder::default();
-
-        map.get(<span class="string">"datadir"</span>).map(|v| builder.datadir(v));
-        map.get(<span class="string">"root"</span>).map(|v| builder.root(v));
-        map.get(<span class="string">"tree"</span>).map(|v| builder.tree(v));
-
-        builder
-    }
-
-    <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
-        <span class="kw">let </span>datadir_path = <span class="self">self</span>.datadir.take().ok_or_else(|| {
+    <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
+        <span class="kw">let </span>datadir_path = <span class="self">self</span>.config.datadir.ok_or_else(|| {
             Error::new(ErrorKind::ConfigInvalid, <span class="string">"datadir is required but not set"</span>)
                 .with_context(<span class="string">"service"</span>, Scheme::Sled)
         })<span class="question-mark">?</span>;
@@ -323,10 +329,10 @@
         })<span class="question-mark">?</span>;
 
         <span class="comment">// use "default" tree if not set
-        </span><span class="kw">let </span>tree_name = <span class="kw">match </span><span class="self">self</span>.tree.take() {
-            <span class="prelude-val">Some</span>(tree) =&gt; tree,
-            <span class="prelude-val">None </span>=&gt; DEFAULT_TREE_ID.to_string(),
-        };
+        </span><span class="kw">let </span>tree_name = <span class="self">self
+            </span>.config
+            .tree
+            .unwrap_or_else(|| DEFAULT_TREE_ID.to_string());
 
         <span class="kw">let </span>tree = db.open_tree(<span class="kw-2">&amp;</span>tree_name).map_err(|e| {
             Error::new(ErrorKind::ConfigInvalid, <span class="string">"open tree"</span>)
@@ -340,7 +346,7 @@
             datadir: datadir_path,
             tree,
         })
-        .with_root(<span class="self">self</span>.root.as_deref().unwrap_or_default()))
+        .with_root(<span class="self">self</span>.config.root.as_deref().unwrap_or(<span class="string">"/"</span>)))
     }
 }
 
@@ -361,8 +367,7 @@
     }
 }
 
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>kv::Adapter <span class="kw">for </span>Adapter {
+<span class="kw">impl </span>kv::Adapter <span class="kw">for </span>Adapter {
     <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; kv::Metadata {
         kv::Metadata::new(
             Scheme::Sled,
@@ -377,7 +382,7 @@
         )
     }
 
-    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
+    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>cloned_self = <span class="self">self</span>.clone();
         <span class="kw">let </span>cloned_path = path.to_string();
 
@@ -386,27 +391,27 @@
             </span>.map_err(new_task_join_error)<span class="question-mark">?
     </span>}
 
-    <span class="kw">fn </span>blocking_get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
+    <span class="kw">fn </span>blocking_get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">self
             </span>.tree
             .get(path)
             .map_err(parse_error)<span class="question-mark">?
-            </span>.map(|v| v.to_vec()))
+            </span>.map(|v| Buffer::from(v.to_vec())))
     }
 
-    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>cloned_self = <span class="self">self</span>.clone();
         <span class="kw">let </span>cloned_path = path.to_string();
-        <span class="kw">let </span>cloned_value = value.to_vec();
 
-        task::spawn_blocking(<span class="kw">move </span>|| cloned_self.blocking_set(cloned_path.as_str(), <span class="kw-2">&amp;</span>cloned_value))
+        task::spawn_blocking(<span class="kw">move </span>|| cloned_self.blocking_set(cloned_path.as_str(), value))
             .<span class="kw">await
             </span>.map_err(new_task_join_error)<span class="question-mark">?
     </span>}
 
-    <span class="kw">fn </span>blocking_set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.tree.insert(path, value).map_err(parse_error)<span class="question-mark">?</span>;
-
+    <span class="kw">fn </span>blocking_set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.tree
+            .insert(path, value.to_vec())
+            .map_err(parse_error)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -444,9 +449,6 @@
                 Error::new(ErrorKind::Unexpected, <span class="string">"store key is not valid utf-8 string"</span>)
                     .set_source(err)
             })<span class="question-mark">?</span>;
-            <span class="kw">if </span>v == path {
-                <span class="kw">continue</span>;
-            }
 
             res.push(v);
         }

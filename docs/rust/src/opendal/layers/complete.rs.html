@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/layers/complete.rs`."><title>complete.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/layers/complete.rs`."><title>complete.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -921,70 +919,6 @@
 <a href="#919" id="919">919</a>
 <a href="#920" id="920">920</a>
 <a href="#921" id="921">921</a>
-<a href="#922" id="922">922</a>
-<a href="#923" id="923">923</a>
-<a href="#924" id="924">924</a>
-<a href="#925" id="925">925</a>
-<a href="#926" id="926">926</a>
-<a href="#927" id="927">927</a>
-<a href="#928" id="928">928</a>
-<a href="#929" id="929">929</a>
-<a href="#930" id="930">930</a>
-<a href="#931" id="931">931</a>
-<a href="#932" id="932">932</a>
-<a href="#933" id="933">933</a>
-<a href="#934" id="934">934</a>
-<a href="#935" id="935">935</a>
-<a href="#936" id="936">936</a>
-<a href="#937" id="937">937</a>
-<a href="#938" id="938">938</a>
-<a href="#939" id="939">939</a>
-<a href="#940" id="940">940</a>
-<a href="#941" id="941">941</a>
-<a href="#942" id="942">942</a>
-<a href="#943" id="943">943</a>
-<a href="#944" id="944">944</a>
-<a href="#945" id="945">945</a>
-<a href="#946" id="946">946</a>
-<a href="#947" id="947">947</a>
-<a href="#948" id="948">948</a>
-<a href="#949" id="949">949</a>
-<a href="#950" id="950">950</a>
-<a href="#951" id="951">951</a>
-<a href="#952" id="952">952</a>
-<a href="#953" id="953">953</a>
-<a href="#954" id="954">954</a>
-<a href="#955" id="955">955</a>
-<a href="#956" id="956">956</a>
-<a href="#957" id="957">957</a>
-<a href="#958" id="958">958</a>
-<a href="#959" id="959">959</a>
-<a href="#960" id="960">960</a>
-<a href="#961" id="961">961</a>
-<a href="#962" id="962">962</a>
-<a href="#963" id="963">963</a>
-<a href="#964" id="964">964</a>
-<a href="#965" id="965">965</a>
-<a href="#966" id="966">966</a>
-<a href="#967" id="967">967</a>
-<a href="#968" id="968">968</a>
-<a href="#969" id="969">969</a>
-<a href="#970" id="970">970</a>
-<a href="#971" id="971">971</a>
-<a href="#972" id="972">972</a>
-<a href="#973" id="973">973</a>
-<a href="#974" id="974">974</a>
-<a href="#975" id="975">975</a>
-<a href="#976" id="976">976</a>
-<a href="#977" id="977">977</a>
-<a href="#978" id="978">978</a>
-<a href="#979" id="979">979</a>
-<a href="#980" id="980">980</a>
-<a href="#981" id="981">981</a>
-<a href="#982" id="982">982</a>
-<a href="#983" id="983">983</a>
-<a href="#984" id="984">984</a>
-<a href="#985" id="985">985</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -1002,24 +936,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::cmp;
+</span><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::sync::Arc;
-<span class="kw">use </span>std::task::ready;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
 
-<span class="kw">use </span>async_trait::async_trait;
-
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::BufferReader;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::FileReader;
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::FlatLister;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::LazyReader;
 <span class="kw">use </span><span class="kw">crate</span>::raw::oio::PrefixLister;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::RangeReader;
-<span class="kw">use </span><span class="kw">crate</span>::raw::oio::StreamableReader;
-<span class="kw">use </span><span class="kw">crate</span>::raw::TwoWays;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -1103,10 +1026,10 @@
 /// operation is not supported, an error will be returned directly.
 </span><span class="kw">pub struct </span>CompleteLayer;
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Layer&lt;A&gt; <span class="kw">for </span>CompleteLayer {
-    <span class="kw">type </span>LayeredAccessor = CompleteAccessor&lt;A&gt;;
+<span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>CompleteLayer {
+    <span class="kw">type </span>LayeredAccess = CompleteAccessor&lt;A&gt;;
 
-    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccessor {
+    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess {
         CompleteAccessor {
             meta: inner.info(),
             inner: Arc::new(inner),
@@ -1115,24 +1038,24 @@
 }
 
 <span class="doccomment">/// Provide complete wrapper for backend.
-</span><span class="kw">pub struct </span>CompleteAccessor&lt;A: Accessor&gt; {
-    meta: AccessorInfo,
+</span><span class="kw">pub struct </span>CompleteAccessor&lt;A: Access&gt; {
+    meta: Arc&lt;AccessorInfo&gt;,
     inner: Arc&lt;A&gt;,
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Debug <span class="kw">for </span>CompleteAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; Debug <span class="kw">for </span>CompleteAccessor&lt;A&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         <span class="self">self</span>.inner.fmt(f)
     }
 }
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; CompleteAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; CompleteAccessor&lt;A&gt; {
     <span class="kw">fn </span>new_unsupported_error(<span class="kw-2">&amp;</span><span class="self">self</span>, op: <span class="kw">impl </span>Into&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt;) -&gt; Error {
         <span class="kw">let </span>scheme = <span class="self">self</span>.meta.scheme();
         <span class="kw">let </span>op = op.into();
         Error::new(
             ErrorKind::Unsupported,
-            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"service {scheme} doesn't support operation {op}"</span>),
+            <span class="macro">format!</span>(<span class="string">"service {scheme} doesn't support operation {op}"</span>),
         )
         .with_operation(op)
     }
@@ -1144,7 +1067,7 @@
         }
         <span class="kw">if </span>capability.write_can_empty &amp;&amp; capability.list {
             <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw-2">mut </span>w) = <span class="self">self</span>.inner.write(path, OpWrite::default()).<span class="kw">await</span><span class="question-mark">?</span>;
-            oio::WriteExt::close(<span class="kw-2">&amp;mut </span>w).<span class="kw">await</span><span class="question-mark">?</span>;
+            oio::Write::close(<span class="kw-2">&amp;mut </span>w).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">return </span><span class="prelude-val">Ok</span>(RpCreateDir::default());
         }
 
@@ -1193,13 +1116,10 @@
         </span><span class="kw">if </span>path.ends_with(<span class="string">'/'</span>) &amp;&amp; capability.list_with_recursive {
             <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw-2">mut </span>l) = <span class="self">self
                 </span>.inner
-                .list(
-                    path.trim_end_matches(<span class="string">'/'</span>),
-                    OpList::default().with_recursive(<span class="bool-val">true</span>).with_limit(<span class="number">1</span>),
-                )
+                .list(path, OpList::default().with_recursive(<span class="bool-val">true</span>).with_limit(<span class="number">1</span>))
                 .<span class="kw">await</span><span class="question-mark">?</span>;
 
-            <span class="kw">return if </span>oio::ListExt::next(<span class="kw-2">&amp;mut </span>l).<span class="kw">await</span><span class="question-mark">?</span>.is_some() {
+            <span class="kw">return if </span>oio::List::next(<span class="kw-2">&amp;mut </span>l).<span class="kw">await</span><span class="question-mark">?</span>.is_some() {
                 <span class="prelude-val">Ok</span>(RpStat::new(Metadata::new(EntryMode::DIR)))
             } <span class="kw">else </span>{
                 <span class="prelude-val">Err</span>(Error::new(
@@ -1244,10 +1164,9 @@
 
         <span class="comment">// Otherwise, we can simulate stat a dir path via `list`.
         </span><span class="kw">if </span>path.ends_with(<span class="string">'/'</span>) &amp;&amp; capability.list_with_recursive {
-            <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw-2">mut </span>l) = <span class="self">self</span>.inner.blocking_list(
-                path.trim_end_matches(<span class="string">'/'</span>),
-                OpList::default().with_recursive(<span class="bool-val">true</span>).with_limit(<span class="number">1</span>),
-            )<span class="question-mark">?</span>;
+            <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw-2">mut </span>l) = <span class="self">self
+                </span>.inner
+                .blocking_list(path, OpList::default().with_recursive(<span class="bool-val">true</span>).with_limit(<span class="number">1</span>))<span class="question-mark">?</span>;
 
             <span class="kw">return if </span>oio::BlockingList::next(<span class="kw-2">&amp;mut </span>l)<span class="question-mark">?</span>.is_some() {
                 <span class="prelude-val">Ok</span>(RpStat::new(Metadata::new(EntryMode::DIR)))
@@ -1266,92 +1185,6 @@
                 m.with_metakey(bit | Metakey::Complete)
             })
         })
-    }
-
-    <span class="kw">async fn </span>complete_read(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span>str,
-        args: OpRead,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, CompleteReader&lt;A, A::Reader&gt;)&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.native_capability();
-        <span class="kw">if </span>!capability.read {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::Read));
-        }
-
-        <span class="kw">let </span>seekable = capability.read_can_seek;
-        <span class="kw">let </span>streamable = capability.read_can_next;
-        <span class="kw">let </span>buffer_cap = args.buffer();
-
-        <span class="kw">let </span>r = <span class="kw">match </span>(seekable, streamable) {
-            (<span class="bool-val">true</span>, <span class="bool-val">true</span>) =&gt; {
-                <span class="kw">let </span>r = LazyReader::new(<span class="self">self</span>.inner.clone(), path, args);
-                InnerCompleteReader::One(r)
-            }
-            (<span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; {
-                <span class="kw">let </span>r = FileReader::new(<span class="self">self</span>.inner.clone(), path, args);
-                InnerCompleteReader::Two(r)
-            }
-            <span class="kw">_ </span>=&gt; {
-                <span class="kw">let </span>r = RangeReader::new(<span class="self">self</span>.inner.clone(), path, args);
-
-                <span class="kw">if </span>streamable {
-                    InnerCompleteReader::Three(r)
-                } <span class="kw">else </span>{
-                    <span class="kw">let </span>r = oio::into_streamable_read(r, <span class="number">256 </span>* <span class="number">1024</span>);
-                    InnerCompleteReader::Four(r)
-                }
-            }
-        };
-
-        <span class="kw">let </span>r = <span class="kw">match </span>buffer_cap {
-            <span class="prelude-val">None </span>=&gt; CompleteReader::One(r),
-            <span class="prelude-val">Some</span>(cap) =&gt; CompleteReader::Two(BufferReader::new(r, cap)),
-        };
-
-        <span class="prelude-val">Ok</span>((RpRead::new(), r))
-    }
-
-    <span class="kw">fn </span>complete_blocking_read(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span>str,
-        args: OpRead,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, CompleteReader&lt;A, A::BlockingReader&gt;)&gt; {
-        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
-        <span class="kw">if </span>!capability.read || !capability.blocking {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::BlockingRead));
-        }
-
-        <span class="kw">let </span>seekable = capability.read_can_seek;
-        <span class="kw">let </span>streamable = capability.read_can_next;
-        <span class="kw">let </span>buffer_cap = args.buffer();
-
-        <span class="kw">let </span>r = <span class="kw">match </span>(seekable, streamable) {
-            (<span class="bool-val">true</span>, <span class="bool-val">true</span>) =&gt; {
-                <span class="kw">let </span>r = LazyReader::new(<span class="self">self</span>.inner.clone(), path, args);
-                InnerCompleteReader::One(r)
-            }
-            (<span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; {
-                <span class="kw">let </span>r = FileReader::new(<span class="self">self</span>.inner.clone(), path, args);
-                InnerCompleteReader::Two(r)
-            }
-            <span class="kw">_ </span>=&gt; {
-                <span class="kw">let </span>r = RangeReader::new(<span class="self">self</span>.inner.clone(), path, args);
-
-                <span class="kw">if </span>streamable {
-                    InnerCompleteReader::Three(r)
-                } <span class="kw">else </span>{
-                    <span class="kw">let </span>r = oio::into_streamable_read(r, <span class="number">256 </span>* <span class="number">1024</span>);
-                    InnerCompleteReader::Four(r)
-                }
-            }
-        };
-
-        <span class="kw">let </span>r = <span class="kw">match </span>buffer_cap {
-            <span class="prelude-val">None </span>=&gt; CompleteReader::One(r),
-            <span class="prelude-val">Some</span>(cap) =&gt; CompleteReader::Two(BufferReader::new(r, cap)),
-        };
-
-        <span class="prelude-val">Ok</span>((RpRead::new(), r))
     }
 
     <span class="kw">async fn </span>complete_list(
@@ -1451,14 +1284,11 @@
     }
 }
 
-<span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-#[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-</span><span class="kw">impl</span>&lt;A: Accessor&gt; LayeredAccessor <span class="kw">for </span>CompleteAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; LayeredAccess <span class="kw">for </span>CompleteAccessor&lt;A&gt; {
     <span class="kw">type </span>Inner = A;
-    <span class="kw">type </span>Reader = CompleteReader&lt;A, A::Reader&gt;;
-    <span class="kw">type </span>BlockingReader = CompleteReader&lt;A, A::BlockingReader&gt;;
-    <span class="kw">type </span>Writer =
-        TwoWays&lt;CompleteWriter&lt;A::Writer&gt;, oio::ExactBufWriter&lt;CompleteWriter&lt;A::Writer&gt;&gt;&gt;;
+    <span class="kw">type </span>Reader = CompleteReader&lt;A::Reader&gt;;
+    <span class="kw">type </span>BlockingReader = CompleteReader&lt;A::BlockingReader&gt;;
+    <span class="kw">type </span>Writer = CompleteWriter&lt;A::Writer&gt;;
     <span class="kw">type </span>BlockingWriter = CompleteWriter&lt;A::BlockingWriter&gt;;
     <span class="kw">type </span>Lister = CompleteLister&lt;A, A::Lister&gt;;
     <span class="kw">type </span>BlockingLister = CompleteLister&lt;A, A::BlockingLister&gt;;
@@ -1467,17 +1297,14 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.inner
     }
 
-    <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
-        <span class="kw">let </span><span class="kw-2">mut </span>meta = <span class="self">self</span>.meta.clone();
+    <span class="comment">// Todo: May move the logic to the implement of Layer::layer of CompleteAccessor&lt;A&gt;
+    </span><span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>meta = (<span class="kw-2">*</span><span class="self">self</span>.meta).clone();
         <span class="kw">let </span>cap = meta.full_capability_mut();
-        <span class="kw">if </span>cap.read {
-            cap.read_can_next = <span class="bool-val">true</span>;
-            cap.read_can_seek = <span class="bool-val">true</span>;
-        }
         <span class="kw">if </span>cap.list &amp;&amp; cap.write_can_empty {
             cap.create_dir = <span class="bool-val">true</span>;
         }
-        meta
+        meta.into()
     }
 
     <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
@@ -1485,8 +1312,17 @@
     </span>}
 
     <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-        <span class="self">self</span>.complete_read(path, args).<span class="kw">await
-    </span>}
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
+        <span class="kw">if </span>!capability.read {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::Read));
+        }
+
+        <span class="kw">let </span>size = args.range().size();
+        <span class="self">self</span>.inner
+            .read(path, args)
+            .<span class="kw">await
+            </span>.map(|(rp, r)| (rp, CompleteReader::new(r, size)))
+    }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
         <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
@@ -1496,38 +1332,15 @@
         <span class="kw">if </span>args.append() &amp;&amp; !capability.write_can_append {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::Unsupported,
-                <span class="kw-2">&amp;</span><span class="macro">format!</span>(
+                <span class="macro">format!</span>(
                     <span class="string">"service {} doesn't support operation write with append"</span>,
                     <span class="self">self</span>.info().scheme()
                 ),
             ));
         }
 
-        <span class="comment">// Calculate buffer size.
-        </span><span class="kw">let </span>buffer_size = args.buffer().map(|<span class="kw-2">mut </span>size| {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = capability.write_multi_max_size {
-                size = cmp::min(v, size);
-            }
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = capability.write_multi_min_size {
-                size = cmp::max(v, size);
-            }
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = capability.write_multi_align_size {
-                <span class="comment">// Make sure size &gt;= size first.
-                </span>size = cmp::max(v, size);
-                size -= size % v;
-            }
-
-            size
-        });
-
         <span class="kw">let </span>(rp, w) = <span class="self">self</span>.inner.write(path, args.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>w = CompleteWriter::new(w);
-
-        <span class="kw">let </span>w = <span class="kw">match </span>buffer_size {
-            <span class="prelude-val">None </span>=&gt; TwoWays::One(w),
-            <span class="prelude-val">Some</span>(size) =&gt; TwoWays::Two(oio::ExactBufWriter::new(w, size)),
-        };
-
         <span class="prelude-val">Ok</span>((rp, w))
     }
 
@@ -1594,7 +1407,15 @@
     }
 
     <span class="kw">fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::BlockingReader)&gt; {
-        <span class="self">self</span>.complete_blocking_read(path, args)
+        <span class="kw">let </span>capability = <span class="self">self</span>.meta.full_capability();
+        <span class="kw">if </span>!capability.read || !capability.blocking {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.new_unsupported_error(Operation::Read));
+        }
+
+        <span class="kw">let </span>size = args.range().size();
+        <span class="self">self</span>.inner
+            .blocking_read(path, args)
+            .map(|(rp, r)| (rp, CompleteReader::new(r, size)))
     }
 
     <span class="kw">fn </span>blocking_write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::BlockingWriter)&gt; {
@@ -1606,7 +1427,7 @@
         <span class="kw">if </span>args.append() &amp;&amp; !capability.write_can_append {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
                 ErrorKind::Unsupported,
-                <span class="kw-2">&amp;</span><span class="macro">format!</span>(
+                <span class="macro">format!</span>(
                     <span class="string">"service {} doesn't support operation write with append"</span>,
                     <span class="self">self</span>.info().scheme()
                 ),
@@ -1659,18 +1480,72 @@
     }
 }
 
-<span class="kw">pub type </span>CompleteReader&lt;A, R&gt; =
-    TwoWays&lt;InnerCompleteReader&lt;A, R&gt;, BufferReader&lt;InnerCompleteReader&lt;A, R&gt;&gt;&gt;;
-
-<span class="kw">type </span>InnerCompleteReader&lt;A, R&gt; = FourWays&lt;
-    LazyReader&lt;A, R&gt;,
-    FileReader&lt;A, R&gt;,
-    RangeReader&lt;A, R&gt;,
-    StreamableReader&lt;RangeReader&lt;A, R&gt;&gt;,
-&gt;;
-
 <span class="kw">pub type </span>CompleteLister&lt;A, P&gt; =
     FourWays&lt;P, FlatLister&lt;Arc&lt;A&gt;, P&gt;, PrefixLister&lt;P&gt;, PrefixLister&lt;FlatLister&lt;Arc&lt;A&gt;, P&gt;&gt;&gt;;
+
+<span class="kw">pub struct </span>CompleteReader&lt;R&gt; {
+    inner: R,
+    size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
+    read: u64,
+}
+
+<span class="kw">impl</span>&lt;R&gt; CompleteReader&lt;R&gt; {
+    <span class="kw">pub fn </span>new(inner: R, size: <span class="prelude-ty">Option</span>&lt;u64&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            inner,
+            size,
+            read: <span class="number">0</span>,
+        }
+    }
+
+    <span class="kw">pub fn </span>check(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span><span class="prelude-val">Some</span>(size) = <span class="self">self</span>.size <span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+        };
+
+        <span class="kw">match </span><span class="self">self</span>.read.cmp(<span class="kw-2">&amp;</span>size) {
+            Ordering::Equal =&gt; <span class="prelude-val">Ok</span>(()),
+            Ordering::Less =&gt; <span class="prelude-val">Err</span>(
+                Error::new(ErrorKind::Unexpected, <span class="string">"reader got too little data"</span>)
+                    .with_context(<span class="string">"expect"</span>, size)
+                    .with_context(<span class="string">"actual"</span>, <span class="self">self</span>.read),
+            ),
+            Ordering::Greater =&gt; <span class="prelude-val">Err</span>(
+                Error::new(ErrorKind::Unexpected, <span class="string">"reader got too much data"</span>)
+                    .with_context(<span class="string">"expect"</span>, size)
+                    .with_context(<span class="string">"actual"</span>, <span class="self">self</span>.read),
+            ),
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;R: oio::Read&gt; oio::Read <span class="kw">for </span>CompleteReader&lt;R&gt; {
+    <span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">let </span>buf = <span class="self">self</span>.inner.read().<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">if </span>buf.is_empty() {
+            <span class="self">self</span>.check()<span class="question-mark">?</span>;
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.read += buf.len() <span class="kw">as </span>u64;
+        }
+
+        <span class="prelude-val">Ok</span>(buf)
+    }
+}
+
+<span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>CompleteReader&lt;R&gt; {
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="kw">let </span>buf = <span class="self">self</span>.inner.read()<span class="question-mark">?</span>;
+
+        <span class="kw">if </span>buf.is_empty() {
+            <span class="self">self</span>.check()<span class="question-mark">?</span>;
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.read += buf.len() <span class="kw">as </span>u64;
+        }
+
+        <span class="prelude-val">Ok</span>(buf)
+    }
+}
 
 <span class="kw">pub struct </span>CompleteWriter&lt;W&gt; {
     inner: <span class="prelude-ty">Option</span>&lt;W&gt;,
@@ -1688,8 +1563,7 @@
 </span><span class="kw">impl</span>&lt;W&gt; Drop <span class="kw">for </span>CompleteWriter&lt;W&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">if </span><span class="self">self</span>.inner.is_some() {
-            <span class="comment">// Do we need to panic here?
-            </span><span class="macro">log::warn!</span>(<span class="string">"writer has not been closed or aborted, must be a bug"</span>)
+            <span class="macro">log::warn!</span>(<span class="string">"writer has not been closed or aborted, must be a bug"</span>)
         }
     }
 }
@@ -1698,35 +1572,34 @@
 <span class="kw">where
     </span>W: oio::Write,
 {
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="kw">let </span>w = <span class="self">self</span>.inner.as_mut().ok_or_else(|| {
-            Error::new(ErrorKind::Unexpected, <span class="string">"writer has been closed or aborted"</span>)
-        })<span class="question-mark">?</span>;
-        <span class="kw">let </span>n = <span class="macro">ready!</span>(w.poll_write(cx, bs))<span class="question-mark">?</span>;
-
-        Poll::Ready(<span class="prelude-val">Ok</span>(n))
-    }
-
-    <span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
+    <span class="kw">async fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>w = <span class="self">self</span>.inner.as_mut().ok_or_else(|| {
             Error::new(ErrorKind::Unexpected, <span class="string">"writer has been closed or aborted"</span>)
         })<span class="question-mark">?</span>;
 
-        <span class="macro">ready!</span>(w.poll_close(cx))<span class="question-mark">?</span>;
+        w.write(bs).<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>w = <span class="self">self</span>.inner.as_mut().ok_or_else(|| {
+            Error::new(ErrorKind::Unexpected, <span class="string">"writer has been closed or aborted"</span>)
+        })<span class="question-mark">?</span>;
+
+        w.close().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.inner = <span class="prelude-val">None</span>;
 
-        Poll::Ready(<span class="prelude-val">Ok</span>(()))
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
+    <span class="kw">async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>w = <span class="self">self</span>.inner.as_mut().ok_or_else(|| {
             Error::new(ErrorKind::Unexpected, <span class="string">"writer has been closed or aborted"</span>)
         })<span class="question-mark">?</span>;
 
-        <span class="macro">ready!</span>(w.poll_abort(cx))<span class="question-mark">?</span>;
+        w.abort().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.inner = <span class="prelude-val">None</span>;
 
-        Poll::Ready(<span class="prelude-val">Ok</span>(()))
+        <span class="prelude-val">Ok</span>(())
     }
 }
 
@@ -1734,13 +1607,12 @@
 <span class="kw">where
     </span>W: oio::BlockingWrite,
 {
-    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>w = <span class="self">self</span>.inner.as_mut().ok_or_else(|| {
             Error::new(ErrorKind::Unexpected, <span class="string">"writer has been closed or aborted"</span>)
         })<span class="question-mark">?</span>;
-        <span class="kw">let </span>n = w.write(bs)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(n)
+        w.write(bs)
     }
 
     <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
@@ -1758,7 +1630,6 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>std::time::Duration;
 
-    <span class="kw">use </span>async_trait::async_trait;
     <span class="kw">use </span>http::HeaderMap;
     <span class="kw">use </span>http::Method <span class="kw">as </span>HttpMethod;
 
@@ -1769,9 +1640,7 @@
         capability: Capability,
     }
 
-    <span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-    #[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-    </span><span class="kw">impl </span>Accessor <span class="kw">for </span>MockService {
+    <span class="kw">impl </span>Access <span class="kw">for </span>MockService {
         <span class="kw">type </span>Reader = oio::Reader;
         <span class="kw">type </span>Writer = oio::Writer;
         <span class="kw">type </span>Lister = oio::Lister;
@@ -1779,11 +1648,11 @@
         <span class="kw">type </span>BlockingWriter = oio::BlockingWriter;
         <span class="kw">type </span>BlockingLister = oio::BlockingLister;
 
-        <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
+        <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>info = AccessorInfo::default();
             info.set_native_capability(<span class="self">self</span>.capability);
 
-            info
+            info.into()
         }
 
         <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
@@ -1795,7 +1664,7 @@
         }
 
         <span class="kw">async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpRead) -&gt; <span class="prelude-ty">Result</span>&lt;(RpRead, <span class="self">Self</span>::Reader)&gt; {
-            <span class="prelude-val">Ok</span>((RpRead::new(), Box::new(oio::Cursor::new())))
+            <span class="prelude-val">Ok</span>((RpRead::new(), Box::new(bytes::Bytes::new())))
         }
 
         <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
@@ -1867,7 +1736,8 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_writer() {
         <span class="kw">let </span>op = new_test_operator(Capability::default());
-        <span class="kw">let </span>res = op.write(<span class="string">"path"</span>, <span class="macro">vec!</span>[]).<span class="kw">await</span>;
+        <span class="kw">let </span>bs: Vec&lt;u8&gt; = <span class="macro">vec!</span>[];
+        <span class="kw">let </span>res = op.write(<span class="string">"path"</span>, bs).<span class="kw">await</span>;
         <span class="macro">assert!</span>(res.is_err());
         <span class="macro">assert_eq!</span>(res.unwrap_err().kind(), ErrorKind::Unsupported);
 

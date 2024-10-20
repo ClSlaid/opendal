@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/gridfs/backend.rs`."><title>backend.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/gridfs/backend.rs`."><title>backend.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -286,16 +284,6 @@
 <a href="#284" id="284">284</a>
 <a href="#285" id="285">285</a>
 <a href="#286" id="286">286</a>
-<a href="#287" id="287">287</a>
-<a href="#288" id="288">288</a>
-<a href="#289" id="289">289</a>
-<a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
-<a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a>
-<a href="#294" id="294">294</a>
-<a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -316,42 +304,41 @@
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 
-<span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>futures::AsyncReadExt;
 <span class="kw">use </span>futures::AsyncWriteExt;
-<span class="kw">use </span>futures::StreamExt;
 <span class="kw">use </span>mongodb::bson::doc;
+<span class="kw">use </span>mongodb::gridfs::GridFsBucket;
 <span class="kw">use </span>mongodb::options::ClientOptions;
 <span class="kw">use </span>mongodb::options::GridFsBucketOptions;
-<span class="kw">use </span>mongodb::options::GridFsFindOptions;
-<span class="kw">use </span>mongodb::GridFsBucket;
 <span class="kw">use </span>tokio::sync::OnceCell;
 
+<span class="kw">use </span><span class="kw">super</span>::config::GridfsConfig;
 <span class="kw">use </span><span class="kw">crate</span>::raw::adapters::kv;
-<span class="kw">use </span><span class="kw">crate</span>::raw::new_std_io_error;
+<span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
-#[derive(Default)]
-</span><span class="kw">pub struct </span>GridFsBuilder {
-    connection_string: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    database: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    bucket: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    chunk_size: <span class="prelude-ty">Option</span>&lt;u32&gt;,
-    root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-}
-
-<span class="kw">impl </span>Debug <span class="kw">for </span>GridFsBuilder {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        f.debug_struct(<span class="string">"GridFsBuilder"</span>)
-            .field(<span class="string">"database"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.database)
-            .field(<span class="string">"bucket"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.bucket)
-            .field(<span class="string">"chunk_size"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.chunk_size)
-            .field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root)
-            .finish()
+<span class="kw">impl </span>Configurator <span class="kw">for </span>GridfsConfig {
+    <span class="kw">type </span>Builder = GridfsBuilder;
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Builder {
+        GridfsBuilder { config: <span class="self">self </span>}
     }
 }
 
-<span class="kw">impl </span>GridFsBuilder {
+<span class="attr">#[doc = <span class="macro">include_str!</span>(<span class="string">"docs.md"</span>)]
+#[derive(Default)]
+</span><span class="kw">pub struct </span>GridfsBuilder {
+    config: GridfsConfig,
+}
+
+<span class="kw">impl </span>Debug <span class="kw">for </span>GridfsBuilder {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="kw">let </span><span class="kw-2">mut </span>d = f.debug_struct(<span class="string">"GridFsBuilder"</span>);
+        d.field(<span class="string">"config"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.config);
+        d.finish_non_exhaustive()
+    }
+}
+
+<span class="kw">impl </span>GridfsBuilder {
     <span class="doccomment">/// Set the connection_string of the MongoDB service.
     ///
     /// This connection string is used to connect to the MongoDB service. It typically follows the format:
@@ -372,9 +359,9 @@
     /// - ... (any other options you wish to highlight)
     ///
     /// For more information, please refer to [MongoDB Connection String URI Format](https://docs.mongodb.com/manual/reference/connection-string/).
-    </span><span class="kw">pub fn </span>connection_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>connection_string(<span class="kw-2">mut </span><span class="self">self</span>, v: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!v.is_empty() {
-            <span class="self">self</span>.connection_string = <span class="prelude-val">Some</span>(v.to_string());
+            <span class="self">self</span>.config.connection_string = <span class="prelude-val">Some</span>(v.to_string());
         }
         <span class="self">self
     </span>}
@@ -382,27 +369,30 @@
     <span class="doccomment">/// Set the working directory, all operations will be performed under it.
     ///
     /// default: "/"
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="kw">if </span>!root.is_empty() {
-            <span class="self">self</span>.root = <span class="prelude-val">Some</span>(root.to_owned());
-        }
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(root.to_string())
+        };
+
         <span class="self">self
     </span>}
 
     <span class="doccomment">/// Set the database name of the MongoDB GridFs service to read/write.
-    </span><span class="kw">pub fn </span>database(<span class="kw-2">&amp;mut </span><span class="self">self</span>, database: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>database(<span class="kw-2">mut </span><span class="self">self</span>, database: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!database.is_empty() {
-            <span class="self">self</span>.database = <span class="prelude-val">Some</span>(database.to_string());
+            <span class="self">self</span>.config.database = <span class="prelude-val">Some</span>(database.to_string());
         }
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Set the buctet name of the MongoDB GridFs service to read/write.
+    <span class="doccomment">/// Set the bucket name of the MongoDB GridFs service to read/write.
     ///
     /// Default to `fs` if not specified.
-    </span><span class="kw">pub fn </span>bucket(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>bucket(<span class="kw-2">mut </span><span class="self">self</span>, bucket: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!bucket.is_empty() {
-            <span class="self">self</span>.bucket = <span class="prelude-val">Some</span>(bucket.to_string());
+            <span class="self">self</span>.config.bucket = <span class="prelude-val">Some</span>(bucket.to_string());
         }
         <span class="self">self
     </span>}
@@ -410,55 +400,48 @@
     <span class="doccomment">/// Set the chunk size of the MongoDB GridFs service used to break the user file into chunks.
     ///
     /// Default to `255 KiB` if not specified.
-    </span><span class="kw">pub fn </span>chunk_size(<span class="kw-2">&amp;mut </span><span class="self">self</span>, chunk_size: u32) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>chunk_size(<span class="kw-2">mut </span><span class="self">self</span>, chunk_size: u32) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>chunk_size &gt; <span class="number">0 </span>{
-            <span class="self">self</span>.chunk_size = <span class="prelude-val">Some</span>(chunk_size);
+            <span class="self">self</span>.config.chunk_size = <span class="prelude-val">Some</span>(chunk_size);
         }
         <span class="self">self
     </span>}
 }
 
-<span class="kw">impl </span>Builder <span class="kw">for </span>GridFsBuilder {
-    <span class="kw">const </span>SCHEME: Scheme = Scheme::Mongodb;
+<span class="kw">impl </span>Builder <span class="kw">for </span>GridfsBuilder {
+    <span class="kw">const </span>SCHEME: Scheme = Scheme::Gridfs;
+    <span class="kw">type </span>Config = GridfsConfig;
 
-    <span class="kw">type </span>Accessor = GridFsBackend;
-
-    <span class="kw">fn </span>from_map(map: std::collections::HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = <span class="self">Self</span>::default();
-
-        map.get(<span class="string">"connection_string"</span>)
-            .map(|v| builder.connection_string(v));
-        map.get(<span class="string">"database"</span>).map(|v| builder.database(v));
-        map.get(<span class="string">"bucket"</span>).map(|v| builder.bucket(v));
-        map.get(<span class="string">"chunk_size"</span>)
-            .map(|v| builder.chunk_size(v.parse::&lt;u32&gt;().unwrap_or_default()));
-        map.get(<span class="string">"root"</span>).map(|v| builder.root(v));
-
-        builder
-    }
-
-    <span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
-        <span class="kw">let </span>conn = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.connection_string.clone() {
+    <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
+        <span class="kw">let </span>conn = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.config.connection_string.clone() {
             <span class="prelude-val">Some</span>(v) =&gt; v.clone(),
             <span class="prelude-val">None </span>=&gt; {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(
-                    Error::new(ErrorKind::InvalidInput, <span class="string">"connection_string is required"</span>)
+                    Error::new(ErrorKind::ConfigInvalid, <span class="string">"connection_string is required"</span>)
                         .with_context(<span class="string">"service"</span>, Scheme::Gridfs),
                 )
             }
         };
-        <span class="kw">let </span>database = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.database.clone() {
+        <span class="kw">let </span>database = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.config.database.clone() {
             <span class="prelude-val">Some</span>(v) =&gt; v.clone(),
             <span class="prelude-val">None </span>=&gt; {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::InvalidInput, <span class="string">"database is required"</span>)
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::ConfigInvalid, <span class="string">"database is required"</span>)
                     .with_context(<span class="string">"service"</span>, Scheme::Gridfs))
             }
         };
-        <span class="kw">let </span>bucket = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.bucket.clone() {
+        <span class="kw">let </span>bucket = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.config.bucket.clone() {
             <span class="prelude-val">Some</span>(v) =&gt; v.clone(),
             <span class="prelude-val">None </span>=&gt; <span class="string">"fs"</span>.to_string(),
         };
-        <span class="kw">let </span>chunk_size = <span class="self">self</span>.chunk_size.unwrap_or(<span class="number">255</span>);
+        <span class="kw">let </span>chunk_size = <span class="self">self</span>.config.chunk_size.unwrap_or(<span class="number">255</span>);
+
+        <span class="kw">let </span>root = normalize_root(
+            <span class="self">self</span>.config
+                .root
+                .clone()
+                .unwrap_or_else(|| <span class="string">"/"</span>.to_string())
+                .as_str(),
+        );
 
         <span class="prelude-val">Ok</span>(GridFsBackend::new(Adapter {
             connection_string: conn,
@@ -466,7 +449,8 @@
             bucket,
             chunk_size,
             bucket_instance: OnceCell::new(),
-        }))
+        })
+        .with_normalized_root(root))
     }
 }
 
@@ -513,8 +497,7 @@
     </span>}
 }
 
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>kv::Adapter <span class="kw">for </span>Adapter {
+<span class="kw">impl </span>kv::Adapter <span class="kw">for </span>Adapter {
     <span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; kv::Metadata {
         kv::Metadata::new(
             Scheme::Gridfs,
@@ -527,46 +510,43 @@
         )
     }
 
-    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
+    <span class="kw">async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Buffer&gt;&gt; {
         <span class="kw">let </span>bucket = <span class="self">self</span>.get_bucket().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>filter = <span class="macro">doc! </span>{ <span class="string">"filename"</span>: path };
-        <span class="kw">let </span>options = GridFsFindOptions::builder().limit(<span class="prelude-val">Some</span>(<span class="number">1</span>)).build();
-        <span class="kw">let </span><span class="kw-2">mut </span>cursor = bucket
-            .find(filter, options)
+        <span class="kw">let </span>filter = <span class="macro">doc!</span> { <span class="string">"filename"</span>: path };
+        <span class="kw">let </span><span class="prelude-val">Some</span>(doc) = bucket.find_one(filter).<span class="kw">await</span>.map_err(parse_mongodb_error)<span class="question-mark">? </span><span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
+        };
+
+        <span class="kw">let </span><span class="kw-2">mut </span>destination = Vec::new();
+        <span class="kw">let </span>file_id = doc.id;
+        <span class="kw">let </span><span class="kw-2">mut </span>stream = bucket
+            .open_download_stream(file_id)
             .<span class="kw">await
             </span>.map_err(parse_mongodb_error)<span class="question-mark">?</span>;
-
-        <span class="kw">match </span>cursor.next().<span class="kw">await </span>{
-            <span class="prelude-val">Some</span>(doc) =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>destination = Vec::new();
-                <span class="kw">let </span>file_id = doc.map_err(parse_mongodb_error)<span class="question-mark">?</span>.id;
-                bucket
-                    .download_to_futures_0_3_writer(file_id, <span class="kw-2">&amp;mut </span>destination)
-                    .<span class="kw">await
-                    </span>.map_err(parse_mongodb_error)<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(destination))
-            }
-            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-        }
+        stream
+            .read_to_end(<span class="kw-2">&amp;mut </span>destination)
+            .<span class="kw">await
+            </span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Buffer::from(destination)))
     }
 
-    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, value: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>bucket = <span class="self">self</span>.get_bucket().<span class="kw">await</span><span class="question-mark">?</span>;
+
         <span class="comment">// delete old file if exists
-        </span><span class="kw">let </span>filter = <span class="macro">doc! </span>{ <span class="string">"filename"</span>: path };
-        <span class="kw">let </span>options = GridFsFindOptions::builder().limit(<span class="prelude-val">Some</span>(<span class="number">1</span>)).build();
-        <span class="kw">let </span><span class="kw-2">mut </span>cursor = bucket
-            .find(filter, options)
+        </span><span class="kw">let </span>filter = <span class="macro">doc!</span> { <span class="string">"filename"</span>: path };
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(doc) = bucket.find_one(filter).<span class="kw">await</span>.map_err(parse_mongodb_error)<span class="question-mark">? </span>{
+            <span class="kw">let </span>file_id = doc.id;
+            bucket.delete(file_id).<span class="kw">await</span>.map_err(parse_mongodb_error)<span class="question-mark">?</span>;
+        };
+
+        <span class="comment">// set new file
+        </span><span class="kw">let </span><span class="kw-2">mut </span>upload_stream = bucket
+            .open_upload_stream(path)
             .<span class="kw">await
             </span>.map_err(parse_mongodb_error)<span class="question-mark">?</span>;
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(doc) = cursor.next().<span class="kw">await </span>{
-            <span class="kw">let </span>file_id = doc.map_err(parse_mongodb_error)<span class="question-mark">?</span>.id;
-            bucket.delete(file_id).<span class="kw">await</span>.map_err(parse_mongodb_error)<span class="question-mark">?</span>;
-        }
-        <span class="comment">// set new file
-        </span><span class="kw">let </span><span class="kw-2">mut </span>upload_stream = bucket.open_upload_stream(path, <span class="prelude-val">None</span>);
         upload_stream
-            .write_all(value)
+            .write_all(<span class="kw-2">&amp;</span>value.to_vec())
             .<span class="kw">await
             </span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
         upload_stream.close().<span class="kw">await</span>.map_err(new_std_io_error)<span class="question-mark">?</span>;
@@ -576,15 +556,13 @@
 
     <span class="kw">async fn </span>delete(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>bucket = <span class="self">self</span>.get_bucket().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>filter = <span class="macro">doc! </span>{ <span class="string">"filename"</span>: path };
-        <span class="kw">let </span><span class="kw-2">mut </span>cursor = bucket
-            .find(filter, <span class="prelude-val">None</span>)
-            .<span class="kw">await
-            </span>.map_err(parse_mongodb_error)<span class="question-mark">?</span>;
-        <span class="kw">while let </span><span class="prelude-val">Some</span>(doc) = cursor.next().<span class="kw">await </span>{
-            <span class="kw">let </span>file_id = doc.map_err(parse_mongodb_error)<span class="question-mark">?</span>.id;
-            bucket.delete(file_id).<span class="kw">await</span>.map_err(parse_mongodb_error)<span class="question-mark">?</span>;
-        }
+        <span class="kw">let </span>filter = <span class="macro">doc!</span> { <span class="string">"filename"</span>: path };
+        <span class="kw">let </span><span class="prelude-val">Some</span>(doc) = bucket.find_one(filter).<span class="kw">await</span>.map_err(parse_mongodb_error)<span class="question-mark">? </span><span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+        };
+
+        <span class="kw">let </span>file_id = doc.id;
+        bucket.delete(file_id).<span class="kw">await</span>.map_err(parse_mongodb_error)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 }

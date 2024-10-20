@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/alluxio/backend.rs`."><title>backend.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/alluxio/backend.rs`."><title>backend.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -252,40 +250,6 @@
 <a href="#250" id="250">250</a>
 <a href="#251" id="251">251</a>
 <a href="#252" id="252">252</a>
-<a href="#253" id="253">253</a>
-<a href="#254" id="254">254</a>
-<a href="#255" id="255">255</a>
-<a href="#256" id="256">256</a>
-<a href="#257" id="257">257</a>
-<a href="#258" id="258">258</a>
-<a href="#259" id="259">259</a>
-<a href="#260" id="260">260</a>
-<a href="#261" id="261">261</a>
-<a href="#262" id="262">262</a>
-<a href="#263" id="263">263</a>
-<a href="#264" id="264">264</a>
-<a href="#265" id="265">265</a>
-<a href="#266" id="266">266</a>
-<a href="#267" id="267">267</a>
-<a href="#268" id="268">268</a>
-<a href="#269" id="269">269</a>
-<a href="#270" id="270">270</a>
-<a href="#271" id="271">271</a>
-<a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
-<a href="#276" id="276">276</a>
-<a href="#277" id="277">277</a>
-<a href="#278" id="278">278</a>
-<a href="#279" id="279">279</a>
-<a href="#280" id="280">280</a>
-<a href="#281" id="281">281</a>
-<a href="#282" id="282">282</a>
-<a href="#283" id="283">283</a>
-<a href="#284" id="284">284</a>
-<a href="#285" id="285">285</a>
-<a href="#286" id="286">286</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -303,47 +267,29 @@
 // specific language governing permissions and limitations
 // under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::fmt::Formatter;
 <span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>http::Response;
 <span class="kw">use </span>log::debug;
-<span class="kw">use </span>serde::Deserialize;
 
 <span class="kw">use </span><span class="kw">super</span>::core::AlluxioCore;
+<span class="kw">use </span><span class="kw">super</span>::error::parse_error;
 <span class="kw">use </span><span class="kw">super</span>::lister::AlluxioLister;
 <span class="kw">use </span><span class="kw">super</span>::writer::AlluxioWriter;
 <span class="kw">use </span><span class="kw">super</span>::writer::AlluxioWriters;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::services::AlluxioConfig;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Config for alluxio services support.
-</span><span class="attr">#[derive(Default, Deserialize)]
-#[serde(default)]
-#[non_exhaustive]
-</span><span class="kw">pub struct </span>AlluxioConfig {
-    <span class="doccomment">/// root of this backend.
-    ///
-    /// All operations will happen under this root.
-    ///
-    /// default to `/` if not set.
-    </span><span class="kw">pub </span>root: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// endpoint of this backend.
-    ///
-    /// Endpoint must be full uri, mostly like `http://127.0.0.1:39999`.
-    </span><span class="kw">pub </span>endpoint: <span class="prelude-ty">Option</span>&lt;String&gt;,
-}
-
-<span class="kw">impl </span>Debug <span class="kw">for </span>AlluxioConfig {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>d = f.debug_struct(<span class="string">"AlluxioConfig"</span>);
-
-        d.field(<span class="string">"root"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.root)
-            .field(<span class="string">"endpoint"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.endpoint);
-
-        d.finish_non_exhaustive()
+<span class="kw">impl </span>Configurator <span class="kw">for </span>AlluxioConfig {
+    <span class="kw">type </span>Builder = AlluxioBuilder;
+    <span class="kw">fn </span>into_builder(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Builder {
+        AlluxioBuilder {
+            config: <span class="self">self</span>,
+            http_client: <span class="prelude-val">None</span>,
+        }
     }
 }
 
@@ -369,7 +315,7 @@
     <span class="doccomment">/// Set root of this backend.
     ///
     /// All operations will happen under this root.
-    </span><span class="kw">pub fn </span>root(<span class="kw-2">&amp;mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>root(<span class="kw-2">mut </span><span class="self">self</span>, root: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.config.root = <span class="kw">if </span>root.is_empty() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -382,7 +328,7 @@
     <span class="doccomment">/// endpoint of this backend.
     ///
     /// Endpoint must be full uri, mostly like `http://127.0.0.1:39999`.
-    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>endpoint(<span class="kw-2">mut </span><span class="self">self</span>, endpoint: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!endpoint.is_empty() {
             <span class="comment">// Trim trailing `/` so that we can accept `http://127.0.0.1:39999/`
             </span><span class="self">self</span>.config.endpoint = <span class="prelude-val">Some</span>(endpoint.trim_end_matches(<span class="string">'/'</span>).to_string())
@@ -397,7 +343,7 @@
     ///
     /// This API is part of OpenDAL's Raw API. `HttpClient` could be changed
     /// during minor updates.
-    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>http_client(<span class="kw-2">mut </span><span class="self">self</span>, client: HttpClient) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.http_client = <span class="prelude-val">Some</span>(client);
         <span class="self">self
     </span>}
@@ -405,31 +351,10 @@
 
 <span class="kw">impl </span>Builder <span class="kw">for </span>AlluxioBuilder {
     <span class="kw">const </span>SCHEME: Scheme = Scheme::Alluxio;
-    <span class="kw">type </span>Accessor = AlluxioBackend;
-
-    <span class="doccomment">/// Converts a HashMap into an AlluxioBuilder instance.
-    ///
-    /// # Arguments
-    ///
-    /// * `map` - A HashMap containing the configuration values.
-    ///
-    /// # Returns
-    ///
-    /// Returns an instance of AlluxioBuilder.
-    </span><span class="kw">fn </span>from_map(map: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="comment">// Deserialize the configuration from the HashMap.
-        </span><span class="kw">let </span>config = AlluxioConfig::deserialize(ConfigDeserializer::new(map))
-            .expect(<span class="string">"config deserialize must succeed"</span>);
-
-        <span class="comment">// Create an AlluxioBuilder instance with the deserialized config.
-        </span>AlluxioBuilder {
-            config,
-            http_client: <span class="prelude-val">None</span>,
-        }
-    }
+    <span class="kw">type </span>Config = AlluxioConfig;
 
     <span class="doccomment">/// Builds the backend and returns the result of AlluxioBackend.
-    </span><span class="kw">fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Accessor&gt; {
+    </span><span class="kw">fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Access&gt; {
         <span class="macro">debug!</span>(<span class="string">"backend build started: {:?}"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>);
 
         <span class="kw">let </span>root = normalize_root(<span class="kw-2">&amp;</span><span class="self">self</span>.config.root.clone().unwrap_or_default());
@@ -443,7 +368,7 @@
         }<span class="question-mark">?</span>;
         <span class="macro">debug!</span>(<span class="string">"backend use endpoint {}"</span>, <span class="kw-2">&amp;</span>endpoint);
 
-        <span class="kw">let </span>client = <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = <span class="self">self</span>.http_client.take() {
+        <span class="kw">let </span>client = <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = <span class="self">self</span>.http_client {
             client
         } <span class="kw">else </span>{
             HttpClient::new().map_err(|err| {
@@ -467,23 +392,26 @@
     core: Arc&lt;AlluxioCore&gt;,
 }
 
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>Accessor <span class="kw">for </span>AlluxioBackend {
-    <span class="kw">type </span>Reader = IncomingAsyncBody;
+<span class="kw">impl </span>Access <span class="kw">for </span>AlluxioBackend {
+    <span class="kw">type </span>Reader = HttpBody;
     <span class="kw">type </span>Writer = AlluxioWriters;
     <span class="kw">type </span>Lister = oio::PageLister&lt;AlluxioLister&gt;;
     <span class="kw">type </span>BlockingReader = ();
     <span class="kw">type </span>BlockingWriter = ();
     <span class="kw">type </span>BlockingLister = ();
 
-    <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
+    <span class="kw">fn </span>info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>am = AccessorInfo::default();
         am.set_scheme(Scheme::Alluxio)
             .set_root(<span class="kw-2">&amp;</span><span class="self">self</span>.core.root)
             .set_native_capability(Capability {
                 stat: <span class="bool-val">true</span>,
 
-                read: <span class="bool-val">true</span>,
+                <span class="comment">// FIXME:
+                //
+                // alluxio's read support is not implemented correctly
+                // We need to refactor by use [page_read](https://github.com/Alluxio/alluxio-py/blob/main/alluxio/const.py#L18)
+                </span>read: <span class="bool-val">false</span>,
 
                 write: <span class="bool-val">true</span>,
                 write_can_multi: <span class="bool-val">true</span>,
@@ -496,7 +424,7 @@
                 ..Default::default()
             });
 
-        am
+        am.into()
     }
 
     <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, <span class="kw">_</span>: OpCreateDir) -&gt; <span class="prelude-ty">Result</span>&lt;RpCreateDir&gt; {
@@ -514,9 +442,12 @@
         <span class="kw">let </span>stream_id = <span class="self">self</span>.core.open_file(path).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>resp = <span class="self">self</span>.core.read(stream_id, args.range()).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">let </span>size = parse_content_length(resp.headers())<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>((RpRead::new().with_size(size), resp.into_body()))
+        <span class="kw">if </span>!resp.status().is_success() {
+            <span class="kw">let </span>(part, <span class="kw-2">mut </span>body) = resp.into_parts();
+            <span class="kw">let </span>buf = body.to_buffer().<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">return </span><span class="prelude-val">Err</span>(parse_error(Response::from_parts(part, buf)));
+        }
+        <span class="prelude-val">Ok</span>((RpRead::new(), resp.into_body()))
     }
 
     <span class="kw">async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str, args: OpWrite) -&gt; <span class="prelude-ty">Result</span>&lt;(RpWrite, <span class="self">Self</span>::Writer)&gt; {
@@ -545,6 +476,8 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
+    <span class="kw">use </span>std::collections::HashMap;
+
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
     <span class="attr">#[test]
@@ -553,21 +486,18 @@
         map.insert(<span class="string">"root"</span>.to_string(), <span class="string">"/"</span>.to_string());
         map.insert(<span class="string">"endpoint"</span>.to_string(), <span class="string">"http://127.0.0.1:39999"</span>.to_string());
 
-        <span class="kw">let </span>builder = AlluxioBuilder::from_map(map);
+        <span class="kw">let </span>builder = AlluxioConfig::from_iter(map).unwrap();
 
-        <span class="macro">assert_eq!</span>(builder.config.root, <span class="prelude-val">Some</span>(<span class="string">"/"</span>.to_string()));
-        <span class="macro">assert_eq!</span>(
-            builder.config.endpoint,
-            <span class="prelude-val">Some</span>(<span class="string">"http://127.0.0.1:39999"</span>.to_string())
-        );
+        <span class="macro">assert_eq!</span>(builder.root, <span class="prelude-val">Some</span>(<span class="string">"/"</span>.to_string()));
+        <span class="macro">assert_eq!</span>(builder.endpoint, <span class="prelude-val">Some</span>(<span class="string">"http://127.0.0.1:39999"</span>.to_string()));
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_builder_build() {
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = AlluxioBuilder::default();
-        builder.root(<span class="string">"/root"</span>).endpoint(<span class="string">"http://127.0.0.1:39999"</span>);
-
-        <span class="kw">let </span>builder = builder.build();
+        <span class="kw">let </span>builder = AlluxioBuilder::default()
+            .root(<span class="string">"/root"</span>)
+            .endpoint(<span class="string">"http://127.0.0.1:39999"</span>)
+            .build();
 
         <span class="macro">assert!</span>(builder.is_ok());
     }

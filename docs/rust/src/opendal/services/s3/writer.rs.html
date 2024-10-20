@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/s3/writer.rs`."><title>writer.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/services/s3/writer.rs`."><title>writer.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -171,6 +169,25 @@
 <a href="#169" id="169">169</a>
 <a href="#170" id="170">170</a>
 <a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -190,11 +207,13 @@
 
 </span><span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>bytes::Buf;
 <span class="kw">use </span>http::StatusCode;
 
 <span class="kw">use </span><span class="kw">super</span>::core::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">super</span>::error::from_s3_error;
 <span class="kw">use </span><span class="kw">super</span>::error::parse_error;
+<span class="kw">use </span><span class="kw">super</span>::error::S3Error;
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -217,10 +236,8 @@
     }
 }
 
-<span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-#[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-</span><span class="kw">impl </span>oio::MultipartWrite <span class="kw">for </span>S3Writer {
-    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, body: AsyncBody) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+<span class="kw">impl </span>oio::MultipartWrite <span class="kw">for </span>S3Writer {
+    <span class="kw">async fn </span>write_once(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u64, body: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self
             </span>.core
             .s3_put_object_request(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="prelude-val">Some</span>(size), <span class="kw-2">&amp;</span><span class="self">self</span>.op, body)<span class="question-mark">?</span>;
@@ -232,11 +249,8 @@
         <span class="kw">let </span>status = resp.status();
 
         <span class="kw">match </span>status {
-            StatusCode::CREATED | StatusCode::OK =&gt; {
-                resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(())
-            }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            StatusCode::CREATED | StatusCode::OK =&gt; <span class="prelude-val">Ok</span>(()),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -250,15 +264,14 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                <span class="kw">let </span>bs = resp.into_body().bytes().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>bs = resp.into_body();
 
                 <span class="kw">let </span>result: InitiateMultipartUploadResult =
-                    quick_xml::de::from_reader(bytes::Buf::reader(bs))
-                        .map_err(new_xml_deserialize_error)<span class="question-mark">?</span>;
+                    quick_xml::de::from_reader(bs.reader()).map_err(new_xml_deserialize_error)<span class="question-mark">?</span>;
 
                 <span class="prelude-val">Ok</span>(result.upload_id)
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -267,14 +280,21 @@
         upload_id: <span class="kw-2">&amp;</span>str,
         part_number: usize,
         size: u64,
-        body: AsyncBody,
+        body: Buffer,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;oio::MultipartPart&gt; {
         <span class="comment">// AWS S3 requires part number must between [1..=10000]
         </span><span class="kw">let </span>part_number = part_number + <span class="number">1</span>;
 
-        <span class="kw">let </span><span class="kw-2">mut </span>req =
-            <span class="self">self</span>.core
-                .s3_upload_part_request(<span class="kw-2">&amp;</span><span class="self">self</span>.path, upload_id, part_number, size, body)<span class="question-mark">?</span>;
+        <span class="kw">let </span>checksum = <span class="self">self</span>.core.calculate_checksum(<span class="kw-2">&amp;</span>body);
+
+        <span class="kw">let </span><span class="kw-2">mut </span>req = <span class="self">self</span>.core.s3_upload_part_request(
+            <span class="kw-2">&amp;</span><span class="self">self</span>.path,
+            upload_id,
+            part_number,
+            size,
+            body,
+            checksum.clone(),
+        )<span class="question-mark">?</span>;
 
         <span class="self">self</span>.core.sign(<span class="kw-2">&amp;mut </span>req).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -293,20 +313,32 @@
                     })<span class="question-mark">?
                     </span>.to_string();
 
-                resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-
-                <span class="prelude-val">Ok</span>(oio::MultipartPart { part_number, etag })
+                <span class="prelude-val">Ok</span>(oio::MultipartPart {
+                    part_number,
+                    etag,
+                    checksum,
+                })
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
     <span class="kw">async fn </span>complete_part(<span class="kw-2">&amp;</span><span class="self">self</span>, upload_id: <span class="kw-2">&amp;</span>str, parts: <span class="kw-2">&amp;</span>[oio::MultipartPart]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>parts = parts
             .iter()
-            .map(|p| CompleteMultipartUploadRequestPart {
-                part_number: p.part_number,
-                etag: p.etag.clone(),
+            .map(|p| <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.core.checksum_algorithm {
+                <span class="prelude-val">None </span>=&gt; CompleteMultipartUploadRequestPart {
+                    part_number: p.part_number,
+                    etag: p.etag.clone(),
+                    ..Default::default()
+                },
+                <span class="prelude-val">Some</span>(checksum_algorithm) =&gt; <span class="kw">match </span>checksum_algorithm {
+                    ChecksumAlgorithm::Crc32c =&gt; CompleteMultipartUploadRequestPart {
+                        part_number: p.part_number,
+                        etag: p.etag.clone(),
+                        checksum_crc32c: p.checksum.clone(),
+                    },
+                },
             })
             .collect();
 
@@ -319,11 +351,18 @@
 
         <span class="kw">match </span>status {
             StatusCode::OK =&gt; {
-                resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="comment">// still check if there is any error because S3 might return error for status code 200
+                // https://docs.aws.amazon.com/AmazonS3/latest/API/API_CompleteMultipartUpload.html#API_CompleteMultipartUpload_Example_4
+                </span><span class="kw">let </span>(parts, body) = resp.into_parts();
+                <span class="kw">let </span>maybe_error: S3Error =
+                    quick_xml::de::from_reader(body.reader()).map_err(new_xml_deserialize_error)<span class="question-mark">?</span>;
+                <span class="kw">if </span>!maybe_error.code.is_empty() {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(from_s3_error(maybe_error, parts));
+                }
 
                 <span class="prelude-val">Ok</span>(())
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 
@@ -334,11 +373,8 @@
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">match </span>resp.status() {
             <span class="comment">// s3 returns code 204 if abort succeeds.
-            </span>StatusCode::NO_CONTENT =&gt; {
-                resp.into_body().consume().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(())
-            }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp).<span class="kw">await</span><span class="question-mark">?</span>),
+            </span>StatusCode::NO_CONTENT =&gt; <span class="prelude-val">Ok</span>(()),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(parse_error(resp)),
         }
     }
 }

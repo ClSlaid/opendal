@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/layers/tracing.rs`."><title>tracing.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (b11fbfbf3 2024-02-03)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../opendal/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/layers/tracing.rs`."><title>tracing.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="opendal" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0-nightly (8337ba918 2024-06-12)" data-channel="nightly" data-search-js="search-0fe7219eb170c82e.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -366,18 +364,6 @@
 <a href="#364" id="364">364</a>
 <a href="#365" id="365">365</a>
 <a href="#366" id="366">366</a>
-<a href="#367" id="367">367</a>
-<a href="#368" id="368">368</a>
-<a href="#369" id="369">369</a>
-<a href="#370" id="370">370</a>
-<a href="#371" id="371">371</a>
-<a href="#372" id="372">372</a>
-<a href="#373" id="373">373</a>
-<a href="#374" id="374">374</a>
-<a href="#375" id="375">375</a>
-<a href="#376" id="376">376</a>
-<a href="#377" id="377">377</a>
-<a href="#378" id="378">378</a>
 </pre></div><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -396,86 +382,91 @@
 // under the License.
 
 </span><span class="kw">use </span>std::fmt::Debug;
-<span class="kw">use </span>std::io;
-<span class="kw">use </span>std::task::Context;
-<span class="kw">use </span>std::task::Poll;
+<span class="kw">use </span>std::future::Future;
+<span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>tracing::Span;
 
 <span class="kw">use </span><span class="kw">crate</span>::raw::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Add [tracing](https://docs.rs/tracing/) for every operations.
+<span class="doccomment">/// Add [tracing](https://docs.rs/tracing/) for every operation.
 ///
 /// # Examples
 ///
 /// ## Basic Setup
 ///
-/// ```
-/// use anyhow::Result;
-/// use opendal::layers::TracingLayer;
-/// use opendal::services;
-/// use opendal::Operator;
+/// ```no_run
+/// # use opendal::layers::TracingLayer;
+/// # use opendal::services;
+/// # use opendal::Operator;
+/// # use opendal::Result;
 ///
-/// let _ = Operator::new(services::Memory::default())
-///     .expect("must init")
+/// # fn main() -&gt; Result&lt;()&gt; {
+/// let _ = Operator::new(services::Memory::default())?
 ///     .layer(TracingLayer)
 ///     .finish();
+/// Ok(())
+/// # }
 /// ```
 ///
 /// ## Real usage
 ///
 /// ```no_run
-/// use std::error::Error;
+/// # use anyhow::Result;
+/// # use opendal::layers::TracingLayer;
+/// # use opendal::services;
+/// # use opendal::Operator;
+/// # use opentelemetry::KeyValue;
+/// # use opentelemetry_sdk::trace;
+/// # use opentelemetry_sdk::Resource;
+/// # use tracing_subscriber::prelude::*;
+/// # use tracing_subscriber::EnvFilter;
 ///
-/// use anyhow::Result;
-/// use opendal::layers::TracingLayer;
-/// use opendal::services;
-/// use opendal::Operator;
-/// use opentelemetry::global;
-/// use tracing::span;
-/// use tracing_subscriber::prelude::*;
-/// use tracing_subscriber::EnvFilter;
+/// # fn main() -&gt; Result&lt;()&gt; {
+/// use opentelemetry::trace::TracerProvider;
+/// let tracer_provider = opentelemetry_otlp::new_pipeline()
+///     .tracing()
+///     .with_exporter(opentelemetry_otlp::new_exporter().tonic())
+///     .with_trace_config(trace::Config::default().with_resource(Resource::new(vec![
+///         KeyValue::new("service.name", "opendal_example"),
+///     ])))
+///     .install_simple()?;
+/// let tracer = tracer_provider.tracer("opendal_tracer");
+/// let opentelemetry = tracing_opentelemetry::layer().with_tracer(tracer);
 ///
-/// fn main() -&gt; Result&lt;(), Box&lt;dyn Error + Send + Sync + 'static&gt;&gt; {
-///     let tracer = opentelemetry_jaeger::new_pipeline()
-///         .with_service_name("opendal_example")
-///         .install_simple()?;
-///     let opentelemetry = tracing_opentelemetry::layer().with_tracer(tracer);
-///     tracing_subscriber::registry()
-///         .with(EnvFilter::from_default_env())
-///         .with(opentelemetry)
-///         .try_init()?;
+/// tracing_subscriber::registry()
+///     .with(EnvFilter::from_default_env())
+///     .with(opentelemetry)
+///     .try_init()?;
 ///
+/// {
 ///     let runtime = tokio::runtime::Runtime::new()?;
-///
 ///     runtime.block_on(async {
-///         let root = span!(tracing::Level::INFO, "app_start", work_units = 2);
+///         let root = tracing::span!(tracing::Level::INFO, "app_start", work_units = 2);
 ///         let _enter = root.enter();
 ///
 ///         let _ = dotenvy::dotenv();
-///         let op = Operator::from_env::&lt;services::S3&gt;()
-///             .expect("init operator must succeed")
+///         let op = Operator::new(services::Memory::default())?
 ///             .layer(TracingLayer)
 ///             .finish();
 ///
-///         op.object("test")
-///             .write("0".repeat(16 * 1024 * 1024).into_bytes())
-///             .await
-///             .expect("must succeed");
-///         op.stat("test").await.expect("must succeed");
-///         op.read("test").await.expect("must succeed");
-///     });
-///
-///     // Shut down the current tracer provider. This will invoke the shutdown
-///     // method on all span processors. span processors should export remaining
-///     // spans before return.
-///     global::shutdown_tracer_provider();
-///     Ok(())
+///         op.write("test", "0".repeat(16 * 1024 * 1024).into_bytes())
+///             .await?;
+///         op.stat("test").await?;
+///         op.read("test").await?;
+///         Ok::&lt;(), opendal::Error&gt;(())
+///     })?;
 /// }
+///
+/// // Shut down the current tracer provider.
+/// // This will invoke the shutdown method on all span processors.
+/// // span processors should export remaining spans before return.
+/// opentelemetry::global::shutdown_tracer_provider();
+///
+/// Ok(())
+/// # }
 /// ```
 ///
 /// # Output
@@ -486,21 +477,38 @@
 ///
 /// For example:
 ///
-/// ```ignore
-/// extern crate tracing;
+/// ```no_run
+/// # use tracing::dispatcher;
+/// # use tracing::Event;
+/// # use tracing::Metadata;
+/// # use tracing::span::Attributes;
+/// # use tracing::span::Id;
+/// # use tracing::span::Record;
+/// # use tracing::subscriber::Subscriber;
+///
+/// # pub struct FooSubscriber;
+/// # impl Subscriber for FooSubscriber {
+/// #   fn enabled(&amp;self, _: &amp;Metadata) -&gt; bool { false }
+/// #   fn new_span(&amp;self, _: &amp;Attributes) -&gt; Id { Id::from_u64(0) }
+/// #   fn record(&amp;self, _: &amp;Id, _: &amp;Record) {}
+/// #   fn record_follows_from(&amp;self, _: &amp;Id, _: &amp;Id) {}
+/// #   fn event(&amp;self, _: &amp;Event) {}
+/// #   fn enter(&amp;self, _: &amp;Id) {}
+/// #   fn exit(&amp;self, _: &amp;Id) {}
+/// # }
+/// # impl FooSubscriber { fn new() -&gt; Self { FooSubscriber } }
 ///
 /// let my_subscriber = FooSubscriber::new();
-/// tracing::subscriber::set_global_default(my_subscriber)
-///     .expect("setting tracing default failed");
+/// tracing::subscriber::set_global_default(my_subscriber).expect("setting tracing default failed");
 /// ```
 ///
 /// For real-world usage, please take a look at [`tracing-opentelemetry`](https://crates.io/crates/tracing-opentelemetry).
 </span><span class="kw">pub struct </span>TracingLayer;
 
-<span class="kw">impl</span>&lt;A: Accessor&gt; Layer&lt;A&gt; <span class="kw">for </span>TracingLayer {
-    <span class="kw">type </span>LayeredAccessor = TracingAccessor&lt;A&gt;;
+<span class="kw">impl</span>&lt;A: Access&gt; Layer&lt;A&gt; <span class="kw">for </span>TracingLayer {
+    <span class="kw">type </span>LayeredAccess = TracingAccessor&lt;A&gt;;
 
-    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccessor {
+    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: A) -&gt; <span class="self">Self</span>::LayeredAccess {
         TracingAccessor { inner }
     }
 }
@@ -510,9 +518,7 @@
     inner: A,
 }
 
-<span class="attr">#[cfg_attr(not(target_arch = <span class="string">"wasm32"</span>), async_trait)]
-#[cfg_attr(target_arch = <span class="string">"wasm32"</span>, async_trait(<span class="question-mark">?</span>Send))]
-</span><span class="kw">impl</span>&lt;A: Accessor&gt; LayeredAccessor <span class="kw">for </span>TracingAccessor&lt;A&gt; {
+<span class="kw">impl</span>&lt;A: Access&gt; LayeredAccess <span class="kw">for </span>TracingAccessor&lt;A&gt; {
     <span class="kw">type </span>Inner = A;
     <span class="kw">type </span>Reader = TracingWrapper&lt;A::Reader&gt;;
     <span class="kw">type </span>BlockingReader = TracingWrapper&lt;A::BlockingReader&gt;;
@@ -526,7 +532,7 @@
     }
 
     <span class="attr">#[tracing::instrument(level = <span class="string">"debug"</span>)]
-    </span><span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AccessorInfo {
+    </span><span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;AccessorInfo&gt; {
         <span class="self">self</span>.inner.info()
     }
 
@@ -652,25 +658,9 @@
         parent = <span class="kw-2">&amp;</span><span class="self">self</span>.span,
         level = <span class="string">"trace"</span>,
         skip_all)]
-    </span><span class="kw">fn </span>poll_read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="self">self</span>.inner.poll_read(cx, buf)
-    }
-
-    <span class="attr">#[tracing::instrument(
-        parent = <span class="kw-2">&amp;</span><span class="self">self</span>.span,
-        level = <span class="string">"trace"</span>,
-        skip_all)]
-    </span><span class="kw">fn </span>poll_seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, pos: io::SeekFrom) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;u64&gt;&gt; {
-        <span class="self">self</span>.inner.poll_seek(cx, pos)
-    }
-
-    <span class="attr">#[tracing::instrument(
-        parent = <span class="kw-2">&amp;</span><span class="self">self</span>.span,
-        level = <span class="string">"trace"</span>,
-        skip_all)]
-    </span><span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt;&gt; {
-        <span class="self">self</span>.inner.poll_next(cx)
-    }
+    </span><span class="kw">async fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="self">self</span>.inner.read().<span class="kw">await
+    </span>}
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingRead&gt; oio::BlockingRead <span class="kw">for </span>TracingWrapper&lt;R&gt; {
@@ -678,24 +668,8 @@
         parent = <span class="kw-2">&amp;</span><span class="self">self</span>.span,
         level = <span class="string">"trace"</span>,
         skip_all)]
-    </span><span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="self">self</span>.inner.read(buf)
-    }
-
-    <span class="attr">#[tracing::instrument(
-        parent = <span class="kw-2">&amp;</span><span class="self">self</span>.span,
-        level = <span class="string">"trace"</span>,
-        skip_all)]
-    </span><span class="kw">fn </span>seek(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
-        <span class="self">self</span>.inner.seek(pos)
-    }
-
-    <span class="attr">#[tracing::instrument(
-        parent = <span class="kw-2">&amp;</span><span class="self">self</span>.span,
-        level = <span class="string">"trace"</span>,
-        skip_all)]
-    </span><span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Bytes&gt;&gt; {
-        <span class="self">self</span>.inner.next()
+    </span><span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Buffer&gt; {
+        <span class="self">self</span>.inner.read()
     }
 }
 
@@ -704,24 +678,24 @@
         parent = <span class="kw-2">&amp;</span><span class="self">self</span>.span,
         level = <span class="string">"trace"</span>,
         skip_all)]
-    </span><span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize&gt;&gt; {
-        <span class="self">self</span>.inner.poll_write(cx, bs)
+    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend {
+        <span class="self">self</span>.inner.write(bs)
     }
 
     <span class="attr">#[tracing::instrument(
         parent = <span class="kw-2">&amp;</span><span class="self">self</span>.span,
         level = <span class="string">"trace"</span>,
         skip_all)]
-    </span><span class="kw">fn </span>poll_abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="self">self</span>.inner.poll_abort(cx)
+    </span><span class="kw">fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend {
+        <span class="self">self</span>.inner.abort()
     }
 
     <span class="attr">#[tracing::instrument(
         parent = <span class="kw-2">&amp;</span><span class="self">self</span>.span,
         level = <span class="string">"trace"</span>,
         skip_all)]
-    </span><span class="kw">fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;()&gt;&gt; {
-        <span class="self">self</span>.inner.poll_close(cx)
+    </span><span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;()&gt;&gt; + MaybeSend {
+        <span class="self">self</span>.inner.close()
     }
 }
 
@@ -730,7 +704,7 @@
         parent = <span class="kw-2">&amp;</span><span class="self">self</span>.span,
         level = <span class="string">"trace"</span>,
         skip_all)]
-    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>oio::WriteBuf) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bs: Buffer) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.inner.write(bs)
     }
 
@@ -745,9 +719,9 @@
 
 <span class="kw">impl</span>&lt;R: oio::List&gt; oio::List <span class="kw">for </span>TracingWrapper&lt;R&gt; {
     <span class="attr">#[tracing::instrument(parent = <span class="kw-2">&amp;</span><span class="self">self</span>.span, level = <span class="string">"debug"</span>, skip_all)]
-    </span><span class="kw">fn </span>poll_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt;&gt; {
-        <span class="self">self</span>.inner.poll_next(cx)
-    }
+    </span><span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;oio::Entry&gt;&gt; {
+        <span class="self">self</span>.inner.next().<span class="kw">await
+    </span>}
 }
 
 <span class="kw">impl</span>&lt;R: oio::BlockingList&gt; oio::BlockingList <span class="kw">for </span>TracingWrapper&lt;R&gt; {
