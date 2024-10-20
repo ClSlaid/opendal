@@ -587,9 +587,9 @@ checksum = "1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0"
 
 [[package]]
 name = "atomic_lib"
-version = "0.39.1"
+version = "0.40.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e00b300ec3db6984694cd41cd84a738feeb4f6f916a13aa2ab733074319daecc"
+checksum = "fa04a34a05c7720e00bafcd90de4468c1890f0cc8c320cf46c8bfb04ca1fbef5"
 dependencies = [
  "base64 0.21.7",
  "rand 0.8.5",
